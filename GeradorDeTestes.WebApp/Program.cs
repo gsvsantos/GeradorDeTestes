@@ -1,3 +1,5 @@
+using GeradorDeTestes.Dominio.ModuloDisciplina;
+using GeradorDeTestes.Infraestrutura.ORM.ModuloDisciplina;
 using GeradorDeTestes.WebApp.ActionFilters;
 using GeradorDeTestes.WebApp.DependencyInjection;
 using GeradorDeTestes.WebApp.ORM;
@@ -24,6 +26,7 @@ public class Program
         });
         // Exemplo builder.Services.AddScoped<IRepositorioTeste, RepositorioTesteORM>();
 
+        builder.Services.AddScoped<IRepositorioDisciplina, RepositorioDisciplinaORM>();
         builder.Services.AddEntityFrameworkConfig(builder.Configuration);
         builder.Services.AddSerilogConfig(builder.Logging);
 
