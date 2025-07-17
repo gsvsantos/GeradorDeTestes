@@ -1,0 +1,40 @@
+﻿<aside class="sidebar expand">
+    <div class="d-flex justify-content-between p-4">
+        <div class="sidebar-logo">
+            <a href="/">
+                <img src="~/assets/images/logo.png" style="border-radius: 20%;" alt="Gerador de Testes" width="100px">
+            </a>
+        </div>
+        <button class="toggle-btn border-0" type="button">
+            <i class="bi bi-chevron-double-left toggle-btn-icon"></i>
+        </button>
+    </div>
+    <ul class="nav flex-column sidebar-nav gap-2 ms-auto">
+        <li class="nav-item">
+            <a class="nav-link nav-title fw-semibold" href="/">
+            <i class="bi bi-house-fill"></i>
+            <span>Página Inicial</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link nav-title fw-semibold collapsed has-dropdown" href="#" data-bs-toggle="collapse" data-bs-target=".exemplos " aria-expanded="false">
+                <i class="bi bi-people-fill"></i>
+                <span>Exemplos</span>
+                <i class="bi bi-chevron-down ms-auto dropdown-arrow"></i>
+                <i class="bi bi-chevron-right ms-auto right-arrow"></i>
+            </a>
+            <ul class="nav-dropdown exemplos list-unstyled collapse" data-bs-parent=".sidebar-nav">
+                <li class="nav-item">
+                    <a class="nav-link nav-option fw-semibold my-1" href="#">
+                        <span>Menu Exemplo</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-option fw-semibold my-1" href="#">
+                        <span>Novo Exemplo</span>
+                    </a>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</aside>

@@ -1,0 +1,43 @@
+﻿@using GeradorDeTestes.WebApp.Extensions
+@using GeradorDeTestes.WebApp.Helpers
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <partial name="_Favicons">
+    <link rel="stylesheet" href="~/lib/bootstrap-dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/bootstrap-icons.css"/>
+    <link rel="stylesheet" href="~/css/app.css"/>
+    <title>@ViewBag.Titulo - Gerador de Testes</title>  
+</head>
+<body>
+    <div class="wrapper">
+        <partial name="_SideBar">
+        <div class="main">
+            <div class="breadcrumb-bg">
+                <nav class="breadcrumb">
+                    @Html.BuildBreadcrumbNavigation()
+                </nav>
+            </div>
+            <header class="main-title p-4">
+                <h2>@ViewBag.Titulo</h2>
+            </header>
+            <main role="main" class="main-content">
+                <div class="container">
+                        @RenderBody()
+                </div>
+            </main>
+            <footer class="footer">
+                <div class="container-fluid">
+                    <span>&copy; @DateTime.Now.Year | Gerador de Testes</span>
+                </div>
+            </footer>
+        </div>
+    </div>
+    <script src="~/lib/bootstrap-dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js"></script>
+    <script src="~/js/script.js"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

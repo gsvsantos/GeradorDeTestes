@@ -1,0 +1,49 @@
+﻿@model HomeViewModel
+
+@{
+    ViewBag.Titulo = "Página Inicial";
+}
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="d-flex flex-wrap gap-3">
+            <a href="/#" class="btn btn-outline-primary flex-fill me-2">Menu Testes</a>
+            <a href="/#" class="btn btn-outline-primary flex-fill me-2">Menu Disciplinas</a>
+            <a href="/#" class="btn btn-outline-primary flex-fill me-2">Menu Matérias</a>
+            <a href="/#" class="btn btn-outline-primary flex-fill me-2">Menu Questões</a>
+        </div>
+    </div>
+    <div class="col-md-6 d-flex align-items-center justify-content-center">
+        <a href="/#" class="btn btn-primary btn-lg">Criar Teste</a>
+    </div>
+</div>
+
+<div class="row">
+@*     @if (Model.UltimosTestes?.Any() == true)
+    {
+        @foreach (var teste in Model.UltimosTestes)
+        {
+            <div class="col-12 col-sm-6 col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">@teste.Nome</h5>
+                        <p class="card-text">
+                            <strong>Disciplina:</strong> @teste.Disciplina <br />
+                            <strong>Matéria:</strong> @teste.Materia <br />
+                            <strong>Qtd Questões:</strong> @teste.QuantidadeQuestoes
+                        </p>
+                        <a href="/Testes/Detalhes/@teste.Id" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-search"></i> Ver Detalhes
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="col-12">
+            <div class="alert alert-info">Nenhum teste cadastrado ainda.</div>
+        </div>
+    } *@
+</div>

@@ -1,0 +1,21 @@
+{
+  "name": "Prototype | e-Agenda",
+  "short_name": "Prototype",
+  "icons": [
+    {
+      "src": "/https://localhost:7194/assets/images/logo.ico/web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/https://localhost:7194/assets/images/logo.ico/web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "theme_color": "#FEEAD0",
+  "background_color": "#FEEAD0",
+  "display": "standalone"
+}
