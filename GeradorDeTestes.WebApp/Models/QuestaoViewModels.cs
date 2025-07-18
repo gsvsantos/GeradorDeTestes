@@ -1,0 +1,92 @@
+﻿using GeradorDeTestes.Dominio.ModuloQuestao;
+using GeradorDeTestes.Dominio.ModuloTeste;
+using GeradorDeTestes.WebApp.Extensions;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+
+namespace GeradorDeTestes.WebApp.Models;
+
+public class FormularioQuestaoViewModel
+{
+    public Guid Id { get; set; }
+
+    [Required(ErrorMessage = "Digite o Enunciado.")]
+    [DisplayName("Enunciado")]
+    public string Enunciado { get; set; }
+    public Guid? MateriaId { get; set; }
+
+    [Required(ErrorMessage = "Escolha uma matéria.")]
+    public List<SelectListItem> Materias { get; set; } = new List<SelectListItem>();
+}
+
+public class VisualizarQuestoesViewModel
+{
+    public List<DetalhesQuestaoViewModel> Registros { get; set; } = new List<DetalhesQuestaoViewModel>();
+
+    public VisualizarQuestoesViewModel(List<Questao> questoes)
+    {
+        foreach (Questao q in questoes)
+        {
+            Registros.Add(q.ParaDetalhesVM());
+        }
+    }
+}
+
+public class DetalhesQuestaoViewModel
+{
+    public Guid Id { get; set; }
+    public string Enunciado { get; set; }
+    public string NomeMateria { get; set; }
+    public List<AlternativaQuestaoViewModel> Alternativas { get; set; } = new List<AlternativaQuestaoViewModel>();
+    public List<TesteQuestaoViewModel> Testes { get; set; } = new List<TesteQuestaoViewModel>();
+
+    public DetalhesQuestaoViewModel(Guid id, string enunciado, string nomeMateria, List<Alternativa> alternativas, List<Teste> testes)
+    {
+        Id = id;
+        Enunciado = enunciado;
+        NomeMateria = nomeMateria;
+        foreach (Alternativa a in alternativas)
+        {
+            Alternativas.Add(new(
+                a.Id,
+                a.Texto,
+                a.EstaCorreta));
+        }
+        foreach (Teste t in testes)
+        {
+            Testes.Add(new(
+                t.Id,
+                t.Titulo,
+                t.Serie.GetDisplayName()));
+        }
+    }
+}
+
+public class AlternativaQuestaoViewModel
+{
+    public Guid QuestaoId { get; set; }
+    public string Texto { get; set; }
+    public bool EstaCorreta { get; set; }
+
+    public AlternativaQuestaoViewModel(Guid questaoId, string texto, bool estaCorreta)
+    {
+        Texto = texto;
+        QuestaoId = questaoId;
+        EstaCorreta = estaCorreta;
+    }
+}
+
+public class TesteQuestaoViewModel
+{
+    public Guid TesteId { get; set; }
+    public string Titulo { get; set; }
+    public string Serie { get; set; }
+
+    public TesteQuestaoViewModel(Guid testeId, string titulo, string serie)
+    {
+        TesteId = testeId;
+        Titulo = titulo;
+        Serie = serie;
+    }
+}
