@@ -1,0 +1,43 @@
+﻿@model CadastrarQuestaoViewModel
+
+@{
+    ViewBag.Titulo = "Cadastro de Questão";
+}
+
+<div class="card rounded-4 border-0">
+    <div class="card-body p-md-4">
+        <form asp-action="Cadastrar" method="post">
+            <h3>Formulário de Cadastro</h3>
+
+            @if (ViewData.ModelState["ConflitoHorario"]?.Errors.Count > 0)
+            {
+                <div class="alert alert-danger alert-dismissible fade show my-3" role="alert">
+                    @ViewData.ModelState["ConflitoHorario"]!.Errors.First().ErrorMessage
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <div class="form-group d-grid mt-2">
+            <label class="form-label fs-5" asp-for="MateriaId">Matéria:</label>
+            <select class="form-select" id="selectMateria" asp-for="MateriaId" asp-items="@Model.Materias">
+                <option value="" disabled selected>Selecione uma Matéria</option>
+            </select>
+                <span class="text-danger d-block mt-2" asp-validation-for="MateriaId"></span>
+            </div>
+
+            <div class="form-group d-grid mt-2">
+                <label class="form-label fs-5" asp-for="Enunciado">Enunciado:</label>
+                <input class="form-control" id="inputEnunciado" asp-for="Enunciado" />
+                <span class="text-danger d-block mt-2" asp-validation-for="Enunciado"></span>
+            </div>
+
+            <div class="form-group d-flex align-items-center justify-content-end gap-3 mt-3">
+                <a href="/compromissos" class="btn btn-outline-primary rounded-3 px-2">Cancelar</a>
+                <button type="submit" class="btn btn-primary rounded-4 px-5">Confirmar</button>
+            </div>
+        </form>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

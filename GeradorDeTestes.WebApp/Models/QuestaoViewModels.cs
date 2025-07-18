@@ -1,4 +1,5 @@
-﻿using GeradorDeTestes.Dominio.ModuloQuestao;
+﻿using GeradorDeTestes.Dominio.ModuloMateria;
+using GeradorDeTestes.Dominio.ModuloQuestao;
 using GeradorDeTestes.Dominio.ModuloTeste;
 using GeradorDeTestes.WebApp.Extensions;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -18,6 +19,22 @@ public class FormularioQuestaoViewModel
 
     [Required(ErrorMessage = "Escolha uma matéria.")]
     public List<SelectListItem> Materias { get; set; } = new List<SelectListItem>();
+}
+
+public class CadastrarQuestaoViewModel : FormularioQuestaoViewModel
+{
+    public CadastrarQuestaoViewModel() { }
+    public CadastrarQuestaoViewModel(List<Materia> materias) : this()
+    {
+        foreach (Materia m in materias)
+        {
+            Materias.Add(new()
+            {
+                Text = m.Nome,
+                Value = m.Id.ToString()
+            });
+        }
+    }
 }
 
 public class VisualizarQuestoesViewModel
