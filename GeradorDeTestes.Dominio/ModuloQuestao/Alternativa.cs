@@ -13,4 +13,5 @@ public class Alternativa
         Texto = texto;
         Questao = questao;
     }
+    protected Alternativa() { }
 }
