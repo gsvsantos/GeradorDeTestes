@@ -1,6 +1,7 @@
 using GeradorDeTestes.Dominio.ModuloDisciplina;
 using GeradorDeTestes.Dominio.ModuloMateria;
 using GeradorDeTestes.Infraestrutura.ORM.ModuloDisciplina;
+using GeradorDeTestes.Infraestrutura.ORM.ModuloMateria;
 using GeradorDeTestes.WebApp.ActionFilters;
 using GeradorDeTestes.WebApp.DependencyInjection;
 using GeradorDeTestes.WebApp.ORM;
@@ -25,7 +26,6 @@ public class Program
 
             return new SqlConnection(connectionString);
         });
-        // Exemplo builder.Services.AddScoped<IRepositorioTeste, RepositorioTesteORM>();
 
         builder.Services.AddScoped<IRepositorioDisciplina, RepositorioDisciplinaORM>();
         builder.Services.AddScoped<IRepositorioMateria, RepositorioMateriaORM>();
