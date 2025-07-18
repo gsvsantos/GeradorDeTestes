@@ -1,7 +1,11 @@
-﻿using GeradorDeTestes.Dominio.ModuloQuestao;
+﻿using GeradorDeTestes.Dominio.ModuloMateria;
+using GeradorDeTestes.Dominio.ModuloQuestao;
 using GeradorDeTestes.Infraestrutura.ORM.Compartilhado;
+using GeradorDeTestes.WebApp.Extensions;
 using GeradorDeTestes.WebApp.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace GeradorDeTestes.WebApp.Controllers;
 
@@ -26,5 +30,47 @@ public class QuestaoController : Controller
         VisualizarQuestoesViewModel visualizarVM = new(questoes);
 
         return View(visualizarVM);
+    }
+
+    [HttpGet("cadastrar")]
+    public IActionResult Cadastrar()
+    {
+        //List<Materia> materias = repositorioMateria.SelecionarRegistros();
+        List<Materia> materias = contexto.Materias.ToList();
+
+        CadastrarQuestaoViewModel cadastrarVM = new(materias);
+
+        return View(cadastrarVM);
+    }
+
+    [HttpPost("cadastrar")]
+    public IActionResult Cadastrar(CadastrarQuestaoViewModel cadastrarVM)
+    {
+        //List<Materia> materias = repositorioMateria.SelecionarRegistros();
+
+        Materia? materia = contexto.Materias
+            .Include(m => m.Disciplina)
+            .FirstOrDefault(m => m.Id == cadastrarVM.MateriaId);
+
+        Questao novaQuestao = cadastrarVM.ParaEntidade(materia!);
+
+        IDbContextTransaction transicao = contexto.Database.BeginTransaction();
+
+        try
+        {
+            repositorioQuestao.CadastrarRegistro(novaQuestao);
+
+            contexto.SaveChanges();
+
+            transicao.Commit();
+        }
+        catch (Exception)
+        {
+            transicao.Rollback();
+
+            throw;
+        }
+
+        return RedirectToAction(nameof(Index));
     }
 }
