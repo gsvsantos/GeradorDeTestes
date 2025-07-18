@@ -18,6 +18,15 @@ public class Materia : EntidadeBase<Materia>
     }
     protected Materia() { }
 
+    public void AderirQuestao(Questao questao)
+    {
+        Questoes.Add(questao);
+    }
+
+    public void RemoverQuestao(Questao questao)
+    {
+        Questoes.Remove(questao);
+    }
 
     public override void AtualizarRegistro(Materia registroEditado)
     {
