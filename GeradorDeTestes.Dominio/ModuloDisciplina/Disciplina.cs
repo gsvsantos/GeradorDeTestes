@@ -13,6 +13,7 @@ public class Disciplina : EntidadeBase<Disciplina>
     {
         Nome = nome;
     }
+    protected Disciplina() { }
 
     public void AderirMateria(Materia materia)
     {

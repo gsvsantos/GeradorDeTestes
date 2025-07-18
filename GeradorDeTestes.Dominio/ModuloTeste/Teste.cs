@@ -23,6 +23,7 @@ public class Teste : EntidadeBase<Teste>
         EhRecuperacao = ehRecuperacao;
         QuantidadeQuestoes = quantidadeQuestoes;
     }
+    protected Teste() { }
 
     public void AderirQuestao(Questao questao)
     {
