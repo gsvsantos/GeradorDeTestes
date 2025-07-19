@@ -69,6 +69,16 @@ public class EditarQuestaoViewModel : FormularioQuestaoViewModel
     }
 }
 
+public class ExcluirQuestaoViewModel : FormularioQuestaoViewModel
+{
+    public ExcluirQuestaoViewModel() { }
+    public ExcluirQuestaoViewModel(Guid id, string enunciado) : this()
+    {
+        Id = id;
+        Enunciado = enunciado;
+    }
+}
+
 public class DetalhesQuestaoViewModel
 {
     public Guid Id { get; set; }
