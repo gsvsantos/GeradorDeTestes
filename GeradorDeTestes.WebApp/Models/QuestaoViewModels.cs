@@ -50,6 +50,25 @@ public class VisualizarQuestoesViewModel
     }
 }
 
+public class EditarQuestaoViewModel : FormularioQuestaoViewModel
+{
+    public EditarQuestaoViewModel() { }
+    public EditarQuestaoViewModel(Questao questao, List<Materia> materias) : this()
+    {
+        Id = questao.Id;
+        Enunciado = questao.Enunciado;
+        MateriaId = questao.Materia != null ? questao.Materia.Id : Guid.Empty;
+        foreach (Materia m in materias)
+        {
+            Materias.Add(new()
+            {
+                Text = m.Nome,
+                Value = m.Id.ToString()
+            });
+        }
+    }
+}
+
 public class DetalhesQuestaoViewModel
 {
     public Guid Id { get; set; }
