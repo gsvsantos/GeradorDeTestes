@@ -1,10 +1,8 @@
-﻿using GeradorDeTestes.Dominio.ModuloMateria;
-using GeradorDeTestes.Dominio.ModuloQuestao;
+﻿using GeradorDeTestes.Dominio.ModuloQuestao;
 using GeradorDeTestes.Infraestrutura.ORM.Compartilhado;
 using GeradorDeTestes.WebApp.Extensions;
 using GeradorDeTestes.WebApp.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace GeradorDeTestes.WebApp.Controllers;
@@ -36,7 +34,6 @@ public class QuestaoController : Controller
     public IActionResult Cadastrar()
     {
         //List<Materia> materias = repositorioMateria.SelecionarRegistros();
-        List<Materia> materias = contexto.Materias.ToList();
 
         CadastrarQuestaoViewModel cadastrarVM = new(materias);
 
@@ -46,15 +43,11 @@ public class QuestaoController : Controller
     [HttpPost("cadastrar")]
     public IActionResult Cadastrar(CadastrarQuestaoViewModel cadastrarVM)
     {
-        //List<Materia> materias = repositorioMateria.SelecionarRegistros();
-
-        Materia? materia = contexto.Materias
-            .Include(m => m.Disciplina)
-            .FirstOrDefault(m => m.Id == cadastrarVM.MateriaId);
+        //Materia? materiaSelecionada = repositorioMateria.SelecionarRegistroPorId(cadastrarVM.MateriaId);
 
         Questao novaQuestao = cadastrarVM.ParaEntidade(materia!);
 
-        IDbContextTransaction transicao = contexto.Database.BeginTransaction();
+        IDbContextTransaction transacao = contexto.Database.BeginTransaction();
 
         try
         {
@@ -62,11 +55,49 @@ public class QuestaoController : Controller
 
             contexto.SaveChanges();
 
-            transicao.Commit();
+            transacao.Commit();
         }
         catch (Exception)
         {
-            transicao.Rollback();
+            transacao.Rollback();
+
+            throw;
+        }
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpGet("editar/{id:guid}")]
+    public IActionResult Editar(Guid id)
+    {
+        Questao? questaoSelecionada = repositorioQuestao.SelecionarRegistroPorId(id);
+        //List<Materia> materias = repositorioMateria.SelecionarRegistros();
+
+        EditarQuestaoViewModel editarVM = new(questaoSelecionada!, materias);
+
+        return View(editarVM);
+    }
+
+    [HttpPost("editar/{id:guid}")]
+    public IActionResult Editar(Guid id, EditarQuestaoViewModel editarVM)
+    {
+        //Materia? materiaSelecionada = repositorioMateria.SelecionarRegistroPorId(cadastrarVM.MateriaId);
+
+        Questao? questaoEditada = editarVM.ParaEntidade(materia!);
+
+        IDbContextTransaction transacao = contexto.Database.BeginTransaction();
+
+        try
+        {
+            repositorioQuestao.EditarRegistro(id, questaoEditada);
+
+            contexto.SaveChanges();
+
+            transacao.Commit();
+        }
+        catch (Exception)
+        {
+            transacao.Rollback();
 
             throw;
         }
