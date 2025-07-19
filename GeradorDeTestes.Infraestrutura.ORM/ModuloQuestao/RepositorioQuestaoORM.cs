@@ -9,6 +9,9 @@ public class RepositorioQuestaoORM : RepositorioBaseORM<Questao>, IRepositorioQu
 
     public override List<Questao> SelecionarRegistros()
     {
-        return registros.Include(q => q.Materia).ToList();
+        return registros.Include(q => q.Materia)
+            .OrderBy(q => q.Materia.Serie)
+            .ThenBy(q => q.Enunciado)
+            .ToList();
     }
 }
