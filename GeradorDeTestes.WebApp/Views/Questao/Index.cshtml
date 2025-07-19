@@ -21,17 +21,30 @@
 			<div class="col-12 col-md-5 col-lg-4 col-xl-3 mb-3">
 				<div class="card rounded-4 border-0">
 					<div class="card-body">
-						<span>@questao.Id.ToString().Substring(0, 13)...</span> <br />
-						<span>@questao.Enunciado</span> <br />
-						<span>@questao.NomeMateria</span> <br />
+						<div class="d-flex justify-content-between mb-4">
+							<p class="card-text mb-1">
+								<span class="fw-semibold">@questao.Id.ToString().Substring(0, 13)...</span>
+							</p>
+							<p class="card-text mb-1">
+								<span class="fw-semibold">@questao.NomeDisciplina</span>
+							</p>
+						</div>
+						<p class="card-text mb-1">
+							<span class="fw-semibold">Enunciado:</span> @questao.Enunciado
+						</p>
+
+						<p class="card-text mb-1">
+							<span class="fw-semibold">Matéria:</span> @questao.NomeMateria
+						</p>
 							@foreach (AlternativaQuestaoViewModel alternativa in questao.Alternativas)
 							{
 								@if (alternativa.EstaCorreta)
 								{
-									<span>@alternativa.Texto</span>
+									<p class="card-text mb-1">
+										<span class="fw-semibold">Alternativa Correta:</span> @alternativa.Texto
+									</p>
 								}
 							}
-						<span>placeholder alternativa correta</span>
 						<span class="d-flex gap-1 justify-content-end">
 							<a class="btn btn-primary rounded-circle" title="Detalhes Questão" asp-action="Detalhes" asp-route-id="@questao.Id">
 								<i class="bi bi-eye"></i>

@@ -19,6 +19,7 @@ public static class QuestaoExtensions
             questao.Id,
             questao.Enunciado,
             questao.Materia.Nome,
+            questao.Materia.Disciplina.Nome,
             questao.Alternativas,
             questao.Testes);
     }
