@@ -79,19 +79,46 @@ public class ExcluirQuestaoViewModel : FormularioQuestaoViewModel
     }
 }
 
+public class GerenciarAlternativasViewModel
+{
+    public DetalhesQuestaoViewModel Questao { get; set; }
+    public List<AlternativaQuestaoViewModel> Alternativas { get; set; } = new List<AlternativaQuestaoViewModel>();
+    public string TextoAlternativa { get; set; }
+
+    public GerenciarAlternativasViewModel() { }
+    public GerenciarAlternativasViewModel(Questao questao, List<Alternativa> alternativas) : this()
+    {
+        Questao = questao.ParaDetalhesVM();
+        foreach (Alternativa a in alternativas)
+        {
+            Alternativas.Add(new(
+                a.Id,
+                a.Texto,
+                a.EstaCorreta));
+        }
+    }
+}
+
+public class AdicionarAlternativaViewModel
+{
+    public string TextoAlternativa { get; set; }
+}
+
 public class DetalhesQuestaoViewModel
 {
     public Guid Id { get; set; }
     public string Enunciado { get; set; }
     public string NomeMateria { get; set; }
+    public string NomeDisciplina { get; set; }
     public List<AlternativaQuestaoViewModel> Alternativas { get; set; } = new List<AlternativaQuestaoViewModel>();
     public List<TesteQuestaoViewModel> Testes { get; set; } = new List<TesteQuestaoViewModel>();
 
-    public DetalhesQuestaoViewModel(Guid id, string enunciado, string nomeMateria, List<Alternativa> alternativas, List<Teste> testes)
+    public DetalhesQuestaoViewModel(Guid id, string enunciado, string nomeMateria, string nomeDisciplina, List<Alternativa> alternativas, List<Teste> testes)
     {
         Id = id;
         Enunciado = enunciado;
         NomeMateria = nomeMateria;
+        NomeDisciplina = nomeDisciplina;
         foreach (Alternativa a in alternativas)
         {
             Alternativas.Add(new(
@@ -111,27 +138,27 @@ public class DetalhesQuestaoViewModel
 
 public class AlternativaQuestaoViewModel
 {
-    public Guid QuestaoId { get; set; }
+    public Guid Id { get; set; }
     public string Texto { get; set; }
     public bool EstaCorreta { get; set; }
 
-    public AlternativaQuestaoViewModel(Guid questaoId, string texto, bool estaCorreta)
+    public AlternativaQuestaoViewModel(Guid id, string texto, bool estaCorreta)
     {
         Texto = texto;
-        QuestaoId = questaoId;
+        Id = id;
         EstaCorreta = estaCorreta;
     }
 }
 
 public class TesteQuestaoViewModel
 {
-    public Guid TesteId { get; set; }
+    public Guid Id { get; set; }
     public string Titulo { get; set; }
     public string Serie { get; set; }
 
-    public TesteQuestaoViewModel(Guid testeId, string titulo, string serie)
+    public TesteQuestaoViewModel(Guid id, string titulo, string serie)
     {
-        TesteId = testeId;
+        Id = id;
         Titulo = titulo;
         Serie = serie;
     }
