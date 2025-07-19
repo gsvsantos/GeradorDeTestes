@@ -152,6 +152,16 @@ public class QuestaoController : Controller
         return RedirectToAction("Index");
     }
 
+    [HttpGet, Route("/questoes/{id:guid}/detalhes")]
+    public IActionResult Detalhes(Guid id)
+    {
+        Questao questaoSelecionada = repositorioQuestao.SelecionarRegistroPorId(id)!;
+
+        DetalhesQuestaoViewModel detalhesQuestaoVM = questaoSelecionada.ParaDetalhesVM();
+
+        return View(detalhesQuestaoVM);
+    }
+
     [HttpGet, Route("/questoes/{id:guid}/alternativas")]
     public IActionResult GerenciarAlternativas(Guid id)
     {
