@@ -43,7 +43,6 @@ public class RepositorioBaseORM<T> where T : EntidadeBase<T>
 
     public virtual T? SelecionarRegistroPorId(Guid idRegistro)
     {
-
         return registros.FirstOrDefault(c => c.Id.Equals(idRegistro));
     }
 

@@ -7,6 +7,11 @@ public class RepositorioQuestaoORM : RepositorioBaseORM<Questao>, IRepositorioQu
 {
     public RepositorioQuestaoORM(GeradorDeTestesDbContext contexto) : base(contexto) { }
 
+    public override Questao? SelecionarRegistroPorId(Guid idRegistro)
+    {
+        return registros.Include(q => q.Materia).FirstOrDefault(c => c.Id.Equals(idRegistro));
+    }
+
     public override List<Questao> SelecionarRegistros()
     {
         return registros.Include(q => q.Materia)
