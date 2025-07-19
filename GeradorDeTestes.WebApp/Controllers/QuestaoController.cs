@@ -77,10 +77,13 @@ public class QuestaoController : Controller
     public IActionResult Editar(Guid id)
     {
         Questao questaoSelecionada = repositorioQuestao.SelecionarRegistroPorId(id)!;
+
         //List<Materia> materias = repositorioMateria.SelecionarRegistros();
         List<Materia> materias = contexto.Materias.ToList();
 
-        EditarQuestaoViewModel editarVM = new(questaoSelecionada, materias);
+        EditarQuestaoViewModel editarVM = new(
+            questaoSelecionada,
+            materias);
 
         return View(editarVM);
     }
@@ -118,11 +121,11 @@ public class QuestaoController : Controller
     [HttpGet("excluir/{id:guid}")]
     public IActionResult Excluir(Guid id)
     {
-        Questao questao = repositorioQuestao.SelecionarRegistroPorId(id)!;
+        Questao questaoSelecionada = repositorioQuestao.SelecionarRegistroPorId(id)!;
 
         ExcluirQuestaoViewModel excluirVM = new(
             id,
-            questao.Enunciado);
+            questaoSelecionada.Enunciado);
 
         return View(excluirVM);
     }
@@ -147,5 +150,89 @@ public class QuestaoController : Controller
             throw;
         }
         return RedirectToAction("Index");
+    }
+
+    [HttpGet, Route("/questoes/{id:guid}/alternativas")]
+    public IActionResult GerenciarAlternativas(Guid id)
+    {
+        Questao questaoSelecionada = repositorioQuestao.SelecionarRegistroPorId(id)!;
+
+        List<Alternativa> alternativas = questaoSelecionada.Alternativas.ToList();
+
+        GerenciarAlternativasViewModel gerenciarAlternativasVM = new(
+            questaoSelecionada,
+            alternativas);
+
+        return View(gerenciarAlternativasVM);
+    }
+
+    [HttpPost, Route("/questoes/{id:guid}/adicionar-alternativa")]
+    public IActionResult AdicionarAlternativa(Guid id, AdicionarAlternativaViewModel adicionarAlternativaVM)
+    {
+        Questao questaoSelecionada = repositorioQuestao.SelecionarRegistroPorId(id)!;
+
+        Alternativa novaAlternativa = new(
+            adicionarAlternativaVM.TextoAlternativa,
+            questaoSelecionada);
+
+        IDbContextTransaction transacao = contexto.Database.BeginTransaction();
+
+        try
+        {
+            questaoSelecionada.AderirAlternativa(novaAlternativa);
+            contexto.Alternativas.Add(novaAlternativa);
+
+            contexto.SaveChanges();
+
+            transacao.Commit();
+        }
+        catch (Exception)
+        {
+            transacao.Rollback();
+
+            throw;
+        }
+
+        return RedirectToAction(nameof(GerenciarAlternativas), new { id });
+    }
+
+    [HttpPost, Route("/questoes/{id:guid}/remover-alternativa/{idAlternativa:guid}")]
+    public IActionResult RemoverAlternativa(Guid id, Guid idAlternativa)
+    {
+        Questao questaoSelecionada = repositorioQuestao.SelecionarRegistroPorId(id)!;
+        Alternativa alternativaEscolhida = repositorioQuestao.SelecionarAlternativa(questaoSelecionada, idAlternativa)!;
+
+        IDbContextTransaction transacao = contexto.Database.BeginTransaction();
+
+        try
+        {
+            questaoSelecionada.RemoverAlternativa(alternativaEscolhida);
+            contexto.Alternativas.Remove(alternativaEscolhida);
+
+            contexto.SaveChanges();
+
+            transacao.Commit();
+        }
+        catch (Exception)
+        {
+            transacao.Rollback();
+
+            throw;
+        }
+
+        return RedirectToAction(nameof(GerenciarAlternativas), new { id });
+    }
+
+    [HttpPost("/questoes/{id:guid}/marcar-alternativa-correta")]
+    public IActionResult MarcarAlternativaCorreta(Guid id, Guid idAlternativaCorreta)
+    {
+        Questao questao = repositorioQuestao.SelecionarRegistroPorId(id)!;
+
+        foreach (Alternativa a in questao.Alternativas)
+            a.EstaCorreta = (a.Id == idAlternativaCorreta);
+
+        contexto.SaveChanges();
+
+        return RedirectToAction(nameof(GerenciarAlternativas), new { id });
     }
 }
