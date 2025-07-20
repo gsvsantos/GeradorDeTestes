@@ -4,7 +4,7 @@ using GeradorDeTestes.Dominio.ModuloDisciplina;
 using GeradorDeTestes.Dominio.ModuloMateria;
 using GeradorDeTestes.Dominio.ModuloQuestao;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System.Drawing;
+using GeradorDeTestes.WebApp.Extensions;
 
 namespace GeradorDeTestes.WebApp.Models;
 
@@ -33,14 +33,7 @@ public class VisualizarMateriaViewModel
     public VisualizarMateriaViewModel(List<Materia> materias)
     {
         foreach (Materia materia in materias)
-        {
-            Registros.Add(new DetalhesMateriaViewModel(
-                materia.Id,
-                materia.Nome,
-                materia.Disciplina,
-                materia.Serie,
-                materia.Questoes));
-        }
+            Registros.Add(materia.ParaDetalhesVM());
     }
 }
 

@@ -1,6 +1,7 @@
 ﻿using GeradorDeTestes.Dominio.ModuloDisciplina;
 using GeradorDeTestes.Dominio.ModuloMateria;
 using GeradorDeTestes.Infraestrutura.ORM.Compartilhado;
+using GeradorDeTestes.WebApp.Extensions;
 using GeradorDeTestes.WebApp.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -58,7 +59,7 @@ public class MateriaController : Controller
         if (!ModelState.IsValid)
             return View(cadastrarVM);
 
-        Materia materia = new Materia(cadastrarVM.Nome, disciplina, cadastrarVM.Serie);
+        Materia materia = cadastrarVM.ParaEntidade(disciplina!);
 
         IDbContextTransaction transacao = contexto.Database.BeginTransaction();
 
@@ -80,7 +81,7 @@ public class MateriaController : Controller
     [HttpGet("editar/{id:Guid}")]
     public IActionResult Editar(Guid id)
     {
-        Materia materia = repositorioMateria.SelecionarRegistroPorId(id);
+        Materia materia = repositorioMateria.SelecionarRegistroPorId(id)!;
 
         List<Disciplina> disciplinas = contexto.Disciplinas.ToList();
 
@@ -100,11 +101,7 @@ public class MateriaController : Controller
        .Include(disc => disc.Testes)
        .FirstOrDefault(disc => disc.Id.Equals(editarVM.DisciplinaId));
 
-        Materia materiaEditada = new Materia(
-            editarVM.Nome,
-            disciplina,
-            editarVM.Serie);
-
+        Materia materiaEditada = editarVM.ParaEntidade(disciplina!);
 
         IDbContextTransaction transacao = contexto.Database.BeginTransaction();
 
@@ -126,7 +123,7 @@ public class MateriaController : Controller
     [HttpGet("excluir/{id:Guid}")]
     public IActionResult Excluir(Guid id)
     {
-        Materia materia = repositorioMateria.SelecionarRegistroPorId(id);
+        Materia materia = repositorioMateria.SelecionarRegistroPorId(id)!;
 
         if (materia == null)
             return NotFound();
