@@ -64,6 +64,41 @@ public class CadastrarMateriaViewModel : FormularioMateriaViewModel
     }
 }
 
+public class EditarMateriaViewModel : FormularioMateriaViewModel
+{
+    public EditarMateriaViewModel() { }
+
+    public EditarMateriaViewModel(Materia materia, List<Disciplina> disciplinas)
+    {
+        Id = materia.Id;
+        Nome = materia.Nome;
+
+        foreach (Disciplina disciplina in disciplinas)
+        {
+            SelectListItem d = new SelectListItem()
+            {
+                Text = disciplina.Nome,
+                Value = disciplina.Id.ToString()
+            };
+
+            Disciplinas.Add(d);
+        }
+
+        Serie = materia.Serie;
+    }
+}
+
+public class ExcluirMateriaViewModel : FormularioMateriaViewModel
+{
+    public ExcluirMateriaViewModel() { }
+
+    public ExcluirMateriaViewModel(Guid id, string nome)
+    {
+        Id = id;
+        Nome = nome;
+    }
+}
+
 public class DetalhesMateriaViewModel
 {
     public Guid Id { get; set; }
