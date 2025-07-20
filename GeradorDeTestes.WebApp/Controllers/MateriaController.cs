@@ -77,5 +77,81 @@ public class MateriaController : Controller
         return RedirectToAction("index");
     }
 
+    [HttpGet("editar/{id:Guid}")]
+    public IActionResult Editar(Guid id)
+    {
+        Materia materia = repositorioMateria.SelecionarRegistroPorId(id);
 
+        List<Disciplina> disciplinas = contexto.Disciplinas.ToList();
+
+        if (materia == null)
+            return NotFound();
+
+        EditarMateriaViewModel editarVM = new EditarMateriaViewModel(materia, disciplinas);
+
+        return View(editarVM);
+    }
+
+    [HttpPost("editar/{id:Guid}")]
+    public IActionResult Editar(Guid id, EditarMateriaViewModel editarVM)
+    {
+        Disciplina? disciplina = contexto.Disciplinas
+       .Include(disc => disc.Materias)
+       .Include(disc => disc.Testes)
+       .FirstOrDefault(disc => disc.Id.Equals(editarVM.DisciplinaId));
+
+        Materia materiaEditada = new Materia(
+            editarVM.Nome,
+            disciplina,
+            editarVM.Serie);
+
+
+        IDbContextTransaction transacao = contexto.Database.BeginTransaction();
+
+        try
+        {
+            repositorioMateria.EditarRegistro(id, materiaEditada);
+            contexto.SaveChanges();
+            transacao.Commit();
+        }
+        catch
+        {
+            transacao.Rollback();
+            throw;
+        }
+        return RedirectToAction("Index");
+
+    }
+
+    [HttpGet("excluir/{id:Guid}")]
+    public IActionResult Excluir(Guid id)
+    {
+        Materia materia = repositorioMateria.SelecionarRegistroPorId(id);
+
+        if (materia == null)
+            return NotFound();
+
+        ExcluirMateriaViewModel excluirVM = new ExcluirMateriaViewModel(id, materia.Nome);
+
+        return View(excluirVM);
+    }
+
+    [HttpPost("excluir/{id:Guid}")]
+    public IActionResult ExcluirConfirmado(Guid id)
+    {
+        IDbContextTransaction transacao = contexto.Database.BeginTransaction();
+
+        try
+        {
+            repositorioMateria.ExcluirRegistro(id);
+            contexto.SaveChanges();
+            transacao.Commit();
+        }
+        catch
+        {
+            transacao.Rollback();
+            throw;
+        }
+        return RedirectToAction("Index");
+    }
 }
