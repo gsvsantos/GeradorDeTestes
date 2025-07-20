@@ -22,33 +22,49 @@
 <div class="row">
     <div class="col-md-8">
         <h5>Alternativas</h5>
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Enunciado</th>
-                    <th>Correta</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (AlternativaQuestaoViewModel alternativa in Model.Alternativas)
-                {
+
+        @if (!Model.Alternativas.Any())
+        {
+            <p class="fw-semibold mt-3">Ainda não há nenhuma alternativa para esta questão...</p>
+        }
+        else
+        {
+            <table class="table table-striped">
+                <thead>
                     <tr>
-                        <td>@alternativa.Texto</td>
-                        <td>
-                            <input type="radio" name="alternativaCorreta" @(alternativa.EstaCorreta ? "checked" : "") disabled />
-                        </td>
+                        <th>Enunciado</th>
+                        <th>Correta</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (AlternativaQuestaoViewModel alternativa in Model.Alternativas)
+                    {
+                        <tr>
+                            <td>@alternativa.Texto</td>
+                            <td>
+                                <input type="radio" name="alternativaCorreta" @(alternativa.EstaCorreta ? "checked" : "") disabled />
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
     </div>
 
     <div class="col-md-4">
         <h5>Testes</h5>
+
+        @if (!Model.Testes.Any())
+        {
+            <p class="fw-semibold mt-3">Ainda não há nenhum teste com essa questão...</p>
+        }
+        else
+        {
         <table class="table">
             <thead>
                 <tr>
                     <th>Título</th>
+                    <th>Série</th>
                 </tr>
             </thead>
             <tbody>
@@ -56,9 +72,11 @@
                 {
                     <tr>
                         <td>@teste.Titulo</td>
+                        <td>@teste.Serie</td>
                     </tr>
                 }
             </tbody>
-        </table>
+            </table>
+        }
     </div>
 </div>
