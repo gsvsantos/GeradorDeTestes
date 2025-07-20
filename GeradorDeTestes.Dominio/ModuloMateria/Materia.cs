@@ -1,6 +1,7 @@
 ﻿using GeradorDeTestes.Dominio.Compartilhado;
 using GeradorDeTestes.Dominio.ModuloDisciplina;
 using GeradorDeTestes.Dominio.ModuloQuestao;
+using GeradorDeTestes.Dominio.ModuloTeste;
 
 namespace GeradorDeTestes.Dominio.ModuloMateria;
 public class Materia : EntidadeBase<Materia>
@@ -9,6 +10,8 @@ public class Materia : EntidadeBase<Materia>
     public Disciplina Disciplina { get; set; }
     public EnumSerie Serie { get; set; }
     public List<Questao> Questoes { get; set; } = new List<Questao>();
+    public List<Teste> Testes { get; set; } = new List<Teste>();
+
 
     public Materia(string nome, Disciplina disciplina, EnumSerie serie)
     {

@@ -9,25 +9,29 @@ public class Teste : EntidadeBase<Teste>
     public string Titulo { get; set; }
     public Disciplina Disciplina { get; set; }
     public EnumSerie Serie { get; set; }
-    public Materia? Materia { get; set; }
-    public bool EhRecuperacao { get; set; }
+    public List<Materia> Materias { get; set; } = new List<Materia>();
+    public bool EhProvao { get; set; }
     public int QuantidadeQuestoes { get; set; }
     public List<Questao> Questoes { get; set; } = new List<Questao>();
+    public List<TesteMateriaQuantidade> QuantidadesPorMateria { get; set; } = new();
 
-    public Teste(string titulo, Disciplina disciplina, EnumSerie serie, Materia? materia, bool ehRecuperacao, int quantidadeQuestoes)
+
+    public Teste(string titulo, Disciplina disciplina, EnumSerie serie, bool ehProvao, int quantidadeQuestoes)
     {
         Titulo = titulo;
         Disciplina = disciplina;
         Serie = serie;
-        Materia = materia;
-        EhRecuperacao = ehRecuperacao;
+        EhProvao = ehProvao;
         QuantidadeQuestoes = quantidadeQuestoes;
     }
     protected Teste() { }
 
     public void AderirQuestao(Questao questao)
     {
-        Questoes.Add(questao);
+        if (!Questoes.Any(q => q.Id == questao.Id))
+        {
+            Questoes.Add(questao);
+        }
     }
 
     public void RemoverQuestao(Questao questao)
@@ -35,13 +39,22 @@ public class Teste : EntidadeBase<Teste>
         Questoes.Remove(questao);
     }
 
+    public void AderirMateria(Materia materia)
+    {
+        Materias.Add(materia);
+    }
+
+    public void RemoverMateria(Materia materia)
+    {
+        Materias.Remove(materia);
+    }
+
     public override void AtualizarRegistro(Teste registroEditado)
     {
         Titulo = registroEditado.Titulo;
         Disciplina = registroEditado.Disciplina;
         Serie = registroEditado.Serie;
-        Materia = registroEditado.Materia;
-        EhRecuperacao = registroEditado.EhRecuperacao;
+        EhProvao = registroEditado.EhProvao;
         QuantidadeQuestoes = registroEditado.QuantidadeQuestoes;
     }
 }

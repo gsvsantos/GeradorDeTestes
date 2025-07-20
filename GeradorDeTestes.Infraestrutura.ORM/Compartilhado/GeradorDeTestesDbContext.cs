@@ -12,6 +12,7 @@ public class GeradorDeTestesDbContext : DbContext
     public DbSet<Materia> Materias { get; set; }
     public DbSet<Questao> Questoes { get; set; }
     public DbSet<Teste> Testes { get; set; }
+    public DbSet<TesteMateriaQuantidade> QuantidadesPorMateria { get; set; }
 
     public GeradorDeTestesDbContext(DbContextOptions options) : base(options) { }
 
