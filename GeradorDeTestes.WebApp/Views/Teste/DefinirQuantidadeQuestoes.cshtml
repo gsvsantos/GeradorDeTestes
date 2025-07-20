@@ -1,0 +1,65 @@
+﻿@using GeradorDeTestes.WebApp.Extensions
+@model DefinirQuantidadeQuestoesViewModel
+
+@{
+    ViewBag.Titulo = "Definição de Quantidade de Questões";
+}
+
+<div class="card rounded-4 border-0">
+    <div class="card-body p-md-4">
+        <div class="d-flex justify-content-between mb-4">
+            <p class="card-text mb-1">
+                <span class="fw-semibold">@Model.Titulo</span>
+            </p>
+            <p class="card-text mb-1">
+                <span class="fw-semibold">@Model.NomeDisciplina</span>
+            </p>
+        </div>
+
+        <p class="card-text mb-1">
+            <span class="fw-semibold">@Model.Serie.GetDisplayName()</span>
+        </p>
+
+        <form action="/testes/@Model.Id/definir-quantidade-questoes/@Model.MateriaId" method="post">
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="MateriaId"/>
+            <div class="form-group d-grid mt-2">
+                <label class="form-label fs-5" asp-for="QuantidadeQuestoesMateria">Quantida de Questões:</label>
+                <input class="form-control" id="inputQuantidadeQuestoesMateria" asp-for="QuantidadeQuestoesMateria" name="quantidadeQuestoesMateria"/>
+                <span class="text-danger d-block mt-2" asp-validation-for="QuantidadeQuestoesMateria"></span>
+            </div>
+
+            <div class="form-group d-flex align-items-center justify-content-end gap-3 mt-3">
+                <a asp-action="GerarTeste" asp-route-id="@Model.Id" class="btn btn-outline-primary rounded-3 px-2">
+                    Voltar
+                </a>
+                <button type="submit" class="btn btn-primary rounded-4 px-5">Confirmar</button>
+            </div>
+        </form>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Questões</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Questoes.Any())
+                {
+                    <tr>
+                        <td class="fw-semibold mt-3">Não há questões definidas para esta matéria..</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (SelectListItem q in Model.Questoes)
+                    {
+                        <tr>
+                            <td>@q.Text</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
