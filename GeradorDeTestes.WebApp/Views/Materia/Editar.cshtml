@@ -1,0 +1,62 @@
+﻿@using GeradorDeTestes.Dominio.ModuloMateria
+@model EditarMateriaViewModel;
+
+@{
+    ViewBag.Titulo = "Edição de Máteria";
+}
+
+<hr class="border border-dark opacity-25" />
+<div class="d-flex flex-wrap justify-content-between my-5 gap-1">
+    <div class="col-12 col-md-6 align-self-center m-auto">
+        <div class="card rounded-4 border-0">
+            <div class="card-body p-md-4">
+                <form asp-action="Editar" asp-route-id="@Model.Id" method="post">
+                    <h3>Formulário de Edição</h3>
+
+                    @if (ViewData.ModelState["ConflitoCadastro"]?.Errors.Count > 0)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show my-3" role="alert">
+                            @ViewData.ModelState["ConflitoCadastro"]!.Errors.First().ErrorMessage
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <div class="form-group d-grid mt-2">
+                        <label asp-for="Nome" class="form-label fs-5">Nome:</label>
+                        <input asp-for="Nome" class="form-control" />
+                        <span asp-validation-for="Nome" class="text-danger d-block mt-2"></span>
+                    </div>
+
+                    <div class="form-group d-grid mt-2">
+                        <label asp-for="DisciplinaId" class="form-label fs-5">Disciplina:</label>
+                        <select asp-for="DisciplinaId" class="form-select">
+                            <option value="">(Nenhum)</option>
+                            @foreach (var disciplina in Model.Disciplinas)
+                            {
+                                <option value="@disciplina.Value">@disciplina.Text</option>
+                            }
+                        </select>
+                        <span asp-validation-for="DisciplinaId" class="text-danger d-block mt-2"></span>
+                    </div>
+
+                    <div class="form-group d-grid mt-2">
+                        <label asp-for="Serie" class="form-label">Série/Ano:</label>
+                        <select asp-for="Serie" class="form-control" asp-items="@Html.GetEnumSelectList<EnumSerie>()" class="form-control">
+                            <option value="" selected disabled>Selecione a Série/Ano</option>
+                        </select>
+                        <span asp-validation-for="Serie" class="text-danger d-block mt-2"></span>
+                    </div>
+
+                    <div class="form-group d-flex align-items-center justify-content-end gap-3 mt-3">
+                        <a href="/materias" class="btn btn-outline-primary rounded-3 px-2">Cancelar</a>
+                        <button type="submit" class="btn btn-primary rounded-4 px-5">Confirmar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
