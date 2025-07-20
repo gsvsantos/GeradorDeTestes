@@ -3,6 +3,8 @@ using System.ComponentModel;
 using GeradorDeTestes.Dominio.ModuloDisciplina;
 using GeradorDeTestes.Dominio.ModuloMateria;
 using GeradorDeTestes.Dominio.ModuloQuestao;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Drawing;
 
 namespace GeradorDeTestes.WebApp.Models;
 
@@ -15,19 +17,20 @@ public class FormularioMateriaViewModel
     public string Nome { get; set; }
 
     [Required(ErrorMessage = "Escolha uma Disciplina.")]
-    [DisplayName("Discplina")]
-    public Disciplina Disciplina { get; set; }
+    [DisplayName("Disciplina")]
+    public Guid DisciplinaId { get; set; }
+    public List<SelectListItem> Disciplinas { get; set; } = new List<SelectListItem>();
 
     [Required(ErrorMessage = "Escolha uma Série/Ano.")]
     [DisplayName("Série")]
     public EnumSerie Serie { get; set; }
 }
 
-public class VisulizarMateriaViewModel
+public class VisualizarMateriaViewModel
 {
-    public List<DetalhesMateriaViewModel> Registros { get; set; } 
+    public List<DetalhesMateriaViewModel> Registros { get; set; } = new List<DetalhesMateriaViewModel>();
 
-    public VisulizarMateriaViewModel(List<Materia> materias)
+    public VisualizarMateriaViewModel(List<Materia> materias)
     {
         foreach (Materia materia in materias)
         {
@@ -45,12 +48,19 @@ public class CadastrarMateriaViewModel : FormularioMateriaViewModel
 {
     public CadastrarMateriaViewModel() { }
 
-    public CadastrarMateriaViewModel(Guid id, string nome, Disciplina disciplina, EnumSerie serie)
+    public CadastrarMateriaViewModel(List<Disciplina> disciplinas)
     {
-        Id = id;
-        Nome = nome;
-        Disciplina = disciplina;
-        Serie = serie;
+        foreach(Disciplina disciplina in disciplinas)
+        {
+            SelectListItem d = new SelectListItem()
+            {
+                Text = disciplina.Nome,
+                Value = disciplina.Id.ToString()
+            };
+
+            Disciplinas.Add(d);
+        }
+
     }
 }
 
