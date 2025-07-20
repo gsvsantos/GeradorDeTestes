@@ -8,6 +8,7 @@ public class MapeadorAlternativaORM : IEntityTypeConfiguration<Alternativa>
     public void Configure(EntityTypeBuilder<Alternativa> builder)
     {
         builder.Property(a => a.Id)
+            .ValueGeneratedNever()
             .IsRequired();
 
         builder.Property(a => a.Texto)

@@ -7,6 +7,10 @@ public class MapeadorQuestaoORM : IEntityTypeConfiguration<Questao>
 {
     public void Configure(EntityTypeBuilder<Questao> builder)
     {
+        builder.Property(q => q.Id)
+            .ValueGeneratedNever()
+            .IsRequired();
+
         builder.Property(q => q.Enunciado)
             .IsRequired();
 
