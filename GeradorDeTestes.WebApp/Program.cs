@@ -1,7 +1,9 @@
 using GeradorDeTestes.Dominio.ModuloDisciplina;
 using GeradorDeTestes.Dominio.ModuloQuestao;
+using GeradorDeTestes.Dominio.ModuloTeste;
 using GeradorDeTestes.Infraestrutura.ORM.ModuloDisciplina;
 using GeradorDeTestes.Infraestrutura.ORM.ModuloQuestao;
+using GeradorDeTestes.Infraestrutura.ORM.ModuloTeste;
 using GeradorDeTestes.WebApp.ActionFilters;
 using GeradorDeTestes.WebApp.DependencyInjection;
 using GeradorDeTestes.WebApp.ORM;
@@ -30,6 +32,7 @@ public class Program
 
         builder.Services.AddScoped<IRepositorioDisciplina, RepositorioDisciplinaORM>();
         builder.Services.AddScoped<IRepositorioQuestao, RepositorioQuestaoORM>();
+        builder.Services.AddScoped<IRepositorioTeste, RepositorioTesteORM>();
         builder.Services.AddEntityFrameworkConfig(builder.Configuration);
         builder.Services.AddSerilogConfig(builder.Logging);
 
