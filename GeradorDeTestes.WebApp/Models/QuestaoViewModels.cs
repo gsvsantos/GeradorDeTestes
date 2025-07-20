@@ -28,9 +28,11 @@ public class CadastrarQuestaoViewModel : FormularioQuestaoViewModel
     {
         foreach (Materia m in materias)
         {
+            string serieFormatada = (int)m.Serie >= 10 ? m.Serie.GetDisplayName()[..8] : m.Serie.GetDisplayName()[..7];
+
             Materias.Add(new()
             {
-                Text = m.Nome,
+                Text = $"{m.Nome} - {serieFormatada}",
                 Value = m.Id.ToString()
             });
         }
