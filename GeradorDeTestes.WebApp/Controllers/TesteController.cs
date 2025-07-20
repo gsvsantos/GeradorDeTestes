@@ -160,8 +160,6 @@ public class TesteController : Controller
     [HttpPost("gerar-teste")]
     public IActionResult GerarTeste(Guid id, GerarTestePostViewModel gerarTestePostVM)
     {
-        Disciplina? disciplina = contexto.Disciplinas.FirstOrDefault(d => d.Id.Equals(gerarTestePostVM.DisciplinaId))!;
-
         Teste testeSelecionado = repositorioTeste.SelecionarRegistroPorId(id)!;
 
         IDbContextTransaction transacao = contexto.Database.BeginTransaction();
@@ -169,7 +167,6 @@ public class TesteController : Controller
         try
         {
             contexto.Update(testeSelecionado);
-
             contexto.SaveChanges();
 
             transacao.Commit();
@@ -177,9 +174,9 @@ public class TesteController : Controller
         catch (Exception)
         {
             transacao.Rollback();
-
             throw;
         }
+
         return RedirectToAction(nameof(Index));
     }
 
@@ -378,8 +375,18 @@ public class TesteController : Controller
         return View(gerarTesteVM);
     }
 
-    [HttpPost("excluir/{id:guid}")]
+    [HttpGet("excluir/{id:guid}")]
     public IActionResult Excluir(Guid id)
+    {
+        Teste testeSelecionado = repositorioTeste.SelecionarRegistroPorId(id)!;
+
+        ExcluirTesteViewModel excluirVM = new ExcluirTesteViewModel(id, testeSelecionado.Titulo);
+
+        return View(excluirVM);
+    }
+
+    [HttpPost("excluir/{id:guid}")]
+    public IActionResult ExcluirConfirmado(Guid id)
     {
         Teste testeSelecionado = repositorioTeste.SelecionarRegistroPorId(id)!;
 

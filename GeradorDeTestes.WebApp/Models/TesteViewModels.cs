@@ -33,6 +33,29 @@ public class CadastrarTesteViewModel : FormularioTesteViewModel
     }
 }
 
+public class VisualizarTestesViewModel
+{
+    public List<DetalhesTesteViewModel> Registros { get; set; } = new List<DetalhesTesteViewModel>();
+
+    public VisualizarTestesViewModel(List<Teste> testes)
+    {
+        foreach (Teste t in testes)
+        {
+            Registros.Add(t.ParaDetalhesVM());
+        }
+    }
+}
+
+public class ExcluirTesteViewModel : FormularioTesteViewModel
+{
+    public ExcluirTesteViewModel() { }
+    public ExcluirTesteViewModel(Guid id, string titulo) : this()
+    {
+        Id = id;
+        Titulo = titulo;
+    }
+}
+
 public class GerarTesteViewModel : FormularioTesteViewModel
 {
     public string NomeDisciplina { get; set; }
@@ -46,6 +69,7 @@ public class GerarTesteViewModel : FormularioTesteViewModel
 public class GerarTestePostViewModel
 {
     public Guid DisciplinaId { get; set; }
+    public List<Guid> QuestoesSelecionadasIds { get; set; } = new();
 }
 
 public class MateriaQuantidadeViewModel
@@ -69,19 +93,6 @@ public class DefinirQuantidadeQuestoesPostViewModel
     public Guid Id { get; set; }
     public Guid MateriaId { get; set; }
     public int QuantidadeQuestoesMateria { get; set; }
-}
-
-public class VisualizarTestesViewModel
-{
-    public List<DetalhesTesteViewModel> Registros { get; set; } = new List<DetalhesTesteViewModel>();
-
-    public VisualizarTestesViewModel(List<Teste> testes)
-    {
-        foreach (Teste t in testes)
-        {
-            Registros.Add(t.ParaDetalhesVM());
-        }
-    }
 }
 
 public class DetalhesTesteViewModel
