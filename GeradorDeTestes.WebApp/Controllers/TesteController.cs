@@ -124,35 +124,7 @@ public class TesteController : Controller
             testeSelecionado.Questoes.Shuffle();
         }
 
-        GerarTesteViewModel gerarTesteVM = new()
-        {
-            Id = testeSelecionado.Id,
-            Titulo = testeSelecionado.Titulo,
-            NomeDisciplina = testeSelecionado.Disciplina.Nome,
-            Serie = testeSelecionado.Serie,
-            QuantidadeQuestoes = testeSelecionado.QuantidadeQuestoes,
-            Materias = materias.Select(m => new SelectListItem()
-            {
-                Text = m.Nome,
-                Value = m.Id.ToString()
-            }).ToList(),
-            MateriasSelecionadas = materiasSelecionadas.Select(m => new SelectListItem()
-            {
-                Text = m.Nome,
-                Value = m.Id.ToString()
-            }).ToList(),
-            QuantidadesPorMateria = testeSelecionado.QuantidadesPorMateria.Select(qpm =>
-            new MateriaQuantidadeViewModel
-            {
-                MateriaId = qpm.Materia.Id,
-                QuantidadeQuestoes = qpm.QuantidadeQuestoes
-            }).ToList(),
-            Questoes = testeSelecionado.Questoes.Select(q => new SelectListItem
-            {
-                Text = q.Enunciado,
-                Value = q.Id.ToString()
-            }).ToList()
-        };
+        GerarTesteViewModel gerarTesteVM = testeSelecionado.ParaGerarTesteVM(materias, materiasSelecionadas);
 
         return View(gerarTesteVM);
     }
@@ -287,7 +259,12 @@ public class TesteController : Controller
 
         try
         {
-            if (objComQuantidade is not null)
+            if (vm.QuantidadeQuestoesMateria == 0 && objComQuantidade is not null)
+            {
+                testeSelecionado.QuantidadesPorMateria.Remove(objComQuantidade);
+                contexto.QuantidadesPorMateria.Remove(objComQuantidade!);
+            }
+            else if (objComQuantidade is not null)
             {
                 objComQuantidade.QuantidadeQuestoes = vm.QuantidadeQuestoesMateria;
             }
@@ -321,8 +298,13 @@ public class TesteController : Controller
     [HttpPost, Route("/testes/{id:guid}/aleatorizar-questoes")]
     public IActionResult AleatorizarQuestoes(Guid id)
     {
+        Teste testeSelecionado = repositorioTeste.SelecionarRegistroPorId(id)!;
+
         TempData["Embaralhar"] = true;
-        return RedirectToAction(nameof(GerarTeste), new { id });
+
+        string tipoGeracao = testeSelecionado.EhProvao ? nameof(GerarProvao) : nameof(GerarTeste);
+
+        return RedirectToAction(tipoGeracao, new { id });
     }
 
     [HttpGet("gerar-provao")]
@@ -332,47 +314,50 @@ public class TesteController : Controller
 
         List<Materia> materiasSelecionadas = testeSelecionado.Materias;
 
-        List<Questao> questoes = new List<Questao>();
-
-        foreach (Materia m in materiasSelecionadas)
-        {
-            foreach (Questao q in m.Questoes)
-                questoes.Add(q);
-        }
-
-        Disciplina disciplina = contexto.Disciplinas
-                        .Include(m => m.Materias)
-                        .Include(m => m.Testes)
-                        .FirstOrDefault(m => m.Id == testeSelecionado.Disciplina.Id)!;
-
-        List<Materia> materias = contexto.Materias.Where(m => m.Disciplina.Equals(disciplina))
+        List<Materia> materias = contexto.Materias.Where(m => m.Disciplina.Equals(testeSelecionado.Disciplina))
             .Where(m => m.Serie.Equals(testeSelecionado.Serie))
             .ToList();
 
-        GerarTesteViewModel gerarTesteVM = new()
+        foreach (TesteMateriaQuantidade q in testeSelecionado.QuantidadesPorMateria)
         {
-            Id = testeSelecionado.Id,
-            Titulo = testeSelecionado.Titulo,
-            NomeDisciplina = disciplina.Nome,
-            Serie = testeSelecionado.Serie,
-            Materias = materias.Select(m => new SelectListItem()
-            {
-                Text = m.Nome,
-                Value = m.Id.ToString()
-            }).ToList(),
-            MateriasSelecionadas = materiasSelecionadas.Select(m => new SelectListItem()
-            {
-                Text = m.Nome,
-                Value = m.Id.ToString()
-            }).ToList(),
-            Questoes = questoes.Select(q => new SelectListItem()
-            {
-                Text = q.Enunciado,
-                Value = q.Id.ToString()
-            }).ToList()
-        };
+            List<Questao>? questoesDaMateria = contexto.Questoes
+                .Where(questao => questao.Materia.Id.Equals(q.Materia.Id))
+                .Take(q.QuantidadeQuestoes)
+                .ToList();
 
-        return View(gerarTesteVM);
+            foreach (Questao questao in questoesDaMateria)
+            {
+                testeSelecionado.AderirQuestao(questao);
+            }
+        }
+
+        if (testeSelecionado.Questoes.Count == 0)
+        {
+            List<Questao> todasQuestoes = new List<Questao>();
+
+            foreach (Materia materia in materiasSelecionadas)
+            {
+                List<Questao> questoesDaMateria = contexto.Questoes
+                    .Where(q => q.Materia.Id == materia.Id)
+                    .ToList();
+
+                todasQuestoes.AddRange(questoesDaMateria);
+            }
+
+            todasQuestoes.Shuffle();
+
+            foreach (Questao questao in todasQuestoes.Take(testeSelecionado.QuantidadeQuestoes).ToList())
+            {
+                testeSelecionado.AderirQuestao(questao);
+                repositorioTeste.AtualizarQuantidadePorMateria(testeSelecionado, questao.Materia);
+            }
+        }
+
+        testeSelecionado.Questoes.Shuffle();
+
+        GerarProvaoViewModel gerarProvaoVM = testeSelecionado.ParaGerarProvaoVM(materias, materiasSelecionadas);
+
+        return View(gerarProvaoVM);
     }
 
     [HttpGet("excluir/{id:guid}")]
