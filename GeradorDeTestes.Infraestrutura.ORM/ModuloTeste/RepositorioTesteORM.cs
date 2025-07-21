@@ -29,6 +29,7 @@ public class RepositorioTesteORM : RepositorioBaseORM<Teste>, IRepositorioTeste
             teste.QuantidadesPorMateria.Add(objComQuantidade);
             contexto.QuantidadesPorMateria.Add(objComQuantidade);
         }
+        contexto.SaveChanges();
     }
 
     public override Teste? SelecionarRegistroPorId(Guid idRegistro)

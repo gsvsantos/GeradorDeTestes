@@ -35,7 +35,7 @@ public class CadastrarTesteViewModel : FormularioTesteViewModel
 
 public class VisualizarTestesViewModel
 {
-    public List<DetalhesTesteViewModel> Registros { get; set; } = new List<DetalhesTesteViewModel>();
+    public List<DetalhesTestesViewModel> Registros { get; set; } = new List<DetalhesTestesViewModel>();
 
     public VisualizarTestesViewModel(List<Teste> testes)
     {
@@ -117,7 +117,7 @@ public class DefinirQuantidadeQuestoesPostViewModel
     public int QuantidadeQuestoesMateria { get; set; }
 }
 
-public class DetalhesTesteViewModel
+public class DetalhesTestesViewModel
 {
     public Guid Id { get; set; }
     public string Titulo { get; set; }
@@ -126,7 +126,8 @@ public class DetalhesTesteViewModel
     public bool EhProvao { get; set; }
     public int QuantidadeQuestoes { get; set; }
 
-    public DetalhesTesteViewModel(Guid id, string titulo, string nomeDisciplina, List<Materia> materias, bool ehProvao, int quantidadeQuestoes)
+    public DetalhesTestesViewModel() { }
+    public DetalhesTestesViewModel(Guid id, string titulo, string nomeDisciplina, List<Materia> materias, bool ehProvao, int quantidadeQuestoes) : this()
     {
         Id = id;
         Titulo = titulo;
@@ -142,4 +143,16 @@ public class DetalhesTesteViewModel
         EhProvao = ehProvao;
         QuantidadeQuestoes = quantidadeQuestoes;
     }
+}
+
+public class DetalhesTesteViewModel : DetalhesTestesViewModel
+{
+    public EnumSerie Serie { get; set; }
+    public List<SelectListItem> Questoes { get; set; } = new List<SelectListItem>();
+}
+
+public class DetalhesProvaoViewModel : DetalhesTestesViewModel
+{
+    public List<SelectListItem> Questoes { get; set; } = new List<SelectListItem>();
+    public EnumSerie Serie { get; set; }
 }

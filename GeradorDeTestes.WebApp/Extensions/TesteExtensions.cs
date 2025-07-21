@@ -18,7 +18,7 @@ public static class TesteExtensions
             formularioVM.QuantidadeQuestoes);
     }
 
-    public static DetalhesTesteViewModel ParaDetalhesVM(this Teste teste)
+    public static DetalhesTestesViewModel ParaDetalhesVM(this Teste teste)
     {
         return new(
             teste.Id,
@@ -27,6 +27,29 @@ public static class TesteExtensions
             teste.Materias,
             teste.EhProvao,
             teste.QuantidadeQuestoes);
+    }
+
+    public static DetalhesTesteViewModel ParaDetalhesTesteVM(this Teste teste)
+    {
+        return new()
+        {
+            Id = teste.Id,
+            Titulo = teste.Titulo,
+            NomeDisciplina = teste.Disciplina.Nome,
+            Serie = teste.Serie,
+            QuantidadeQuestoes = teste.QuantidadeQuestoes,
+            EhProvao = teste.EhProvao,
+            Materias = teste.Materias.Select(m => new SelectListItem()
+            {
+                Text = m.Nome,
+                Value = m.Id.ToString()
+            }).ToList(),
+            Questoes = teste.Questoes.Select(q => new SelectListItem
+            {
+                Text = q.Enunciado,
+                Value = q.Id.ToString()
+            }).ToList()
+        };
     }
 
     public static GerarTesteViewModel ParaGerarTesteVM(this Teste teste, List<Materia> materias, List<Materia> materiasSelecionadas)

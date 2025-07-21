@@ -84,6 +84,8 @@ public class TesteController : Controller
             .Where(m => m.Serie.Equals(testeSelecionado.Serie))
             .ToList();
 
+        testeSelecionado.Questoes.Clear();
+
         foreach (TesteMateriaQuantidade q in testeSelecionado.QuantidadesPorMateria)
         {
             List<Questao>? questoesDaMateria = contexto.Questoes
@@ -97,9 +99,9 @@ public class TesteController : Controller
             }
         }
 
-        if (TempData["Embaralhar"] != null)
+        if (TempData["Embaralhar"] is not null)
         {
-            if (testeSelecionado.Questoes.Count == 0)
+            if (testeSelecionado.Questoes.Count < testeSelecionado.QuantidadeQuestoes)
             {
                 List<Questao> todasQuestoes = new List<Questao>();
 
@@ -107,6 +109,7 @@ public class TesteController : Controller
                 {
                     List<Questao> questoesDaMateria = contexto.Questoes
                         .Where(q => q.Materia.Id == materia.Id)
+                        .Take(testeSelecionado.QuantidadeQuestoes)
                         .ToList();
 
                     todasQuestoes.AddRange(questoesDaMateria);
@@ -114,7 +117,7 @@ public class TesteController : Controller
 
                 todasQuestoes.Shuffle();
 
-                foreach (Questao questao in todasQuestoes.Take(testeSelecionado.QuantidadeQuestoes).ToList())
+                foreach (Questao questao in todasQuestoes.Take(testeSelecionado.QuantidadeQuestoes - testeSelecionado.Questoes.Count).ToList())
                 {
                     testeSelecionado.AderirQuestao(questao);
                     repositorioTeste.AtualizarQuantidadePorMateria(testeSelecionado, questao.Materia);
@@ -312,11 +315,15 @@ public class TesteController : Controller
     {
         Teste testeSelecionado = repositorioTeste.SelecionarRegistroPorId(id)!;
 
-        List<Materia> materiasSelecionadas = testeSelecionado.Materias;
-
         List<Materia> materias = contexto.Materias.Where(m => m.Disciplina.Equals(testeSelecionado.Disciplina))
             .Where(m => m.Serie.Equals(testeSelecionado.Serie))
             .ToList();
+
+        materias.Shuffle();
+
+        List<Materia> materiasSelecionadas = materias;
+
+        testeSelecionado.Questoes.Clear();
 
         foreach (TesteMateriaQuantidade q in testeSelecionado.QuantidadesPorMateria)
         {
@@ -331,7 +338,7 @@ public class TesteController : Controller
             }
         }
 
-        if (testeSelecionado.Questoes.Count == 0)
+        if (testeSelecionado.Questoes.Count < testeSelecionado.QuantidadeQuestoes)
         {
             List<Questao> todasQuestoes = new List<Questao>();
 
@@ -339,6 +346,7 @@ public class TesteController : Controller
             {
                 List<Questao> questoesDaMateria = contexto.Questoes
                     .Where(q => q.Materia.Id == materia.Id)
+                    .Take(testeSelecionado.QuantidadeQuestoes)
                     .ToList();
 
                 todasQuestoes.AddRange(questoesDaMateria);
@@ -346,7 +354,7 @@ public class TesteController : Controller
 
             todasQuestoes.Shuffle();
 
-            foreach (Questao questao in todasQuestoes.Take(testeSelecionado.QuantidadeQuestoes).ToList())
+            foreach (Questao questao in todasQuestoes.Take(testeSelecionado.QuantidadeQuestoes - testeSelecionado.Questoes.Count).ToList())
             {
                 testeSelecionado.AderirQuestao(questao);
                 repositorioTeste.AtualizarQuantidadePorMateria(testeSelecionado, questao.Materia);
@@ -475,5 +483,15 @@ public class TesteController : Controller
         }
 
         return RedirectToAction(nameof(Index));
+    }
+
+    [HttpGet, Route("/testes/{id:guid}/detalhes-teste")]
+    public IActionResult DetalhesTeste(Guid id)
+    {
+        Teste testeSelecionado = repositorioTeste.SelecionarRegistroPorId(id)!;
+
+        DetalhesTesteViewModel detalhesTesteVM = testeSelecionado.ParaDetalhesTesteVM();
+
+        return View(detalhesTesteVM);
     }
 }

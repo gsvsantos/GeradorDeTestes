@@ -1,0 +1,54 @@
+﻿@using GeradorDeTestes.WebApp.Extensions
+@model DetalhesTesteViewModel
+
+@{
+    ViewBag.Titulo = "Detalhes de Teste";
+}
+
+<div class="card rounded-4 border-0">
+    <div class="card-body">
+        <p class="card-text mb-1">
+            <span class="fw-semibold">@Model.Id</span>
+        </p>
+        <div class="d-flex justify-content-between mb-4">
+            <h3>@Model.Titulo</h3>
+            <h3>@Model.NomeDisciplina</h3>
+        </div>
+        <p class="card-text mb-1">
+            <span class="fw-semibold">Série:</span> @Model.Serie.GetDisplayName();
+        </p>
+    </div>
+</div>
+
+<hr class="border border-dark opacity-25" />
+<div class="row g-2">
+	@foreach (SelectListItem materia in Model.Materias)
+	{
+        @foreach (SelectListItem questao in Model.Questoes)
+        {
+            <div class="col-12 col-md-5 col-lg-4 col-xl-3 mb-3">
+                <div class="card rounded-4 border-0">
+                    <div class="card-body">
+                        <h5>@materia.Text</h5>
+                        <div class="d-flex justify-content-between mb-4">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Questões</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>@questao.Text</td>
+                                        <td>placeholder</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
