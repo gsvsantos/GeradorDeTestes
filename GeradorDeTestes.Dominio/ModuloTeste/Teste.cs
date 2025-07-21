@@ -15,8 +15,8 @@ public class Teste : EntidadeBase<Teste>
     public List<Questao> Questoes { get; set; } = new List<Questao>();
     public List<TesteMateriaQuantidade> QuantidadesPorMateria { get; set; } = new();
 
-
-    public Teste(string titulo, Disciplina disciplina, EnumSerie serie, bool ehProvao, int quantidadeQuestoes)
+    public Teste() { }
+    public Teste(string titulo, Disciplina disciplina, EnumSerie serie, bool ehProvao, int quantidadeQuestoes) : this()
     {
         Titulo = titulo;
         Disciplina = disciplina;
@@ -24,7 +24,6 @@ public class Teste : EntidadeBase<Teste>
         EhProvao = ehProvao;
         QuantidadeQuestoes = quantidadeQuestoes;
     }
-    protected Teste() { }
 
     public void AderirQuestao(Questao questao)
     {

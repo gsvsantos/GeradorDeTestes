@@ -360,6 +360,87 @@ public class TesteController : Controller
         return View(gerarProvaoVM);
     }
 
+    [HttpPost("gerar-provao")]
+    public IActionResult GerarProvao(Guid id, GerarProvaoPostViewModel gerarProvaoPostVM)
+    {
+        Teste testeSelecionado = repositorioTeste.SelecionarRegistroPorId(id)!;
+
+        IDbContextTransaction transacao = contexto.Database.BeginTransaction();
+
+        try
+        {
+            contexto.Update(testeSelecionado);
+            contexto.SaveChanges();
+
+            transacao.Commit();
+        }
+        catch (Exception)
+        {
+            transacao.Rollback();
+            throw;
+        }
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpGet("duplicar/{id:guid}")]
+    public IActionResult Duplicar(Guid id)
+    {
+        DuplicarViewModel duplicarVM = new();
+
+        return View(duplicarVM);
+    }
+
+    [HttpPost("duplicar/{id:guid}")]
+    public IActionResult Duplicar(Guid id, DuplicarViewModel duplicarVM)
+    {
+        Teste testeOriginal = repositorioTeste.SelecionarRegistroPorId(id)!;
+
+        Teste novoTeste = new Teste()
+        {
+            Id = Guid.NewGuid(),
+            Titulo = duplicarVM.Titulo,
+            Disciplina = testeOriginal.Disciplina,
+            Serie = testeOriginal.Serie,
+            EhProvao = testeOriginal.EhProvao,
+            QuantidadeQuestoes = testeOriginal.QuantidadeQuestoes,
+            Materias = testeOriginal.Materias.ToList(),
+            Questoes = new List<Questao>(),
+            QuantidadesPorMateria = new List<TesteMateriaQuantidade>()
+        };
+
+        foreach (TesteMateriaQuantidade qpm in testeOriginal.QuantidadesPorMateria)
+        {
+            novoTeste.QuantidadesPorMateria.Add(new TesteMateriaQuantidade
+            {
+                Id = Guid.NewGuid(),
+                Materia = qpm.Materia,
+                QuantidadeQuestoes = qpm.QuantidadeQuestoes
+            });
+        }
+
+        IDbContextTransaction transacao = contexto.Database.BeginTransaction();
+
+        try
+        {
+            contexto.Testes.Add(novoTeste);
+
+            contexto.SaveChanges();
+
+            transacao.Commit();
+        }
+        catch
+        {
+            transacao.Rollback();
+
+            throw;
+        }
+
+        string tipoGeracao = novoTeste.EhProvao ? nameof(GerarProvao) : nameof(GerarTeste);
+
+        return RedirectToAction(tipoGeracao, new { id = novoTeste.Id });
+    }
+
     [HttpGet("excluir/{id:guid}")]
     public IActionResult Excluir(Guid id)
     {

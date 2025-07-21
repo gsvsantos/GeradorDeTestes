@@ -82,6 +82,18 @@ public class GerarProvaoViewModel : FormularioTesteViewModel
     public List<SelectListItem> Materias { get; set; } = new List<SelectListItem>();
 }
 
+public class GerarProvaoPostViewModel
+{
+    public Guid DisciplinaId { get; set; }
+    public List<Guid> QuestoesSelecionadasIds { get; set; } = new();
+}
+
+public class DuplicarViewModel
+{
+    public Guid Id { get; set; }
+    public string Titulo { get; set; }
+}
+
 public class MateriaQuantidadeViewModel
 {
     public Guid MateriaId { get; set; }
