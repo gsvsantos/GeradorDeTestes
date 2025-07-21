@@ -1,3 +1,11 @@
+using GeradorDeTestes.Dominio.ModuloDisciplina;
+using GeradorDeTestes.Dominio.ModuloQuestao;
+using GeradorDeTestes.Dominio.ModuloTeste;
+using GeradorDeTestes.Dominio.ModuloMateria;
+using GeradorDeTestes.Infraestrutura.ORM.ModuloDisciplina;
+using GeradorDeTestes.Infraestrutura.ORM.ModuloQuestao;
+using GeradorDeTestes.Infraestrutura.ORM.ModuloTeste;
+using GeradorDeTestes.Infraestrutura.ORM.ModuloMateria;
 using GeradorDeTestes.WebApp.ActionFilters;
 using GeradorDeTestes.WebApp.DependencyInjection;
 using GeradorDeTestes.WebApp.ORM;
@@ -22,8 +30,11 @@ public class Program
 
             return new SqlConnection(connectionString);
         });
-        // Exemplo builder.Services.AddScoped<IRepositorioTeste, RepositorioTesteORM>();
 
+        builder.Services.AddScoped<IRepositorioDisciplina, RepositorioDisciplinaORM>();
+        builder.Services.AddScoped<IRepositorioMateria, RepositorioMateriaORM>();
+        builder.Services.AddScoped<IRepositorioQuestao, RepositorioQuestaoORM>();
+        builder.Services.AddScoped<IRepositorioTeste, RepositorioTesteORM>();
         builder.Services.AddEntityFrameworkConfig(builder.Configuration);
         builder.Services.AddSerilogConfig(builder.Logging);
 

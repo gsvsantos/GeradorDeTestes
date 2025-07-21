@@ -1,0 +1,65 @@
+﻿@using GeradorDeTestes.WebApp.Extensions
+@model DetalhesMateriaViewModel
+
+@{
+    ViewBag.Titulo = "Detalhes de Matéria";
+}
+<div class="card rounded-4 border-0">
+    <div class="card-body">
+        <p class="card-text mb-1">
+            <span class="fw-semibold">@Model.Id</span>
+        </p>
+        <div class="d-flex justify-content-between mb-4">
+            <h3>@Model.Nome</h3>
+            <h3>@Model.Serie.GetDisplayName()</h3>
+        </div>
+        <p class="card-text mb-1">
+            <span class="fw-semibold">Disciplina:</span> @Model.NomeDisciplina
+        </p>
+    </div>
+</div>
+
+<hr class="border border-dark opacity-25" />
+<div class="row">
+    <div class="col-12 col-md-6 mb-3">
+        <div class="card rounded-4 border-0">
+            <div class="card-body">
+                <h5>Questões</h5>
+
+                @if (!Model.Questoes.Any())
+                {
+                    <p class="fw-semibold mt-3">Ainda não há nenhuma questão vinculada a está matéria...</p>
+                }
+                else
+                {
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Enunciado</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (QuestaoMateriaViewModel questao in Model.Questoes)
+                            {
+                                <tr>
+                                    <td>@questao.Enunciado</td>
+                                    <td>
+                                        <a class="btn btn-primary rounded-circle" title="Detalhes Questão" asp-action="Detalhes" asp-route-id="@questao.Id">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+
+
+                                        <a class="btn btn-outline-danger rounded-circle" title="Excluir Questão" asp-action="Excluir" asp-route-id="@questao.Id">
+                                            <i class="bi bi-bookmark-x-fill"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+</div> 

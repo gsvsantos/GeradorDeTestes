@@ -1,0 +1,140 @@
+﻿@using GeradorDeTestes.WebApp.Extensions
+@model GerarProvaoViewModel
+
+@{
+    ViewBag.Titulo = "Gerar Provão";
+    bool mostrarScrollQuestoes = Model.Questoes.Count > 6;
+    bool mostrarScrollMaterias = Model.MateriasSelecionadas.Count > 3;
+}
+
+<hr class="border border-dark opacity-25" />
+<div class="d-flex flex-wrap justify-content-between mt-5 gap-1">
+    <div class="col-12 col-md-10 col-lg-8 align-self-center m-auto">
+        <div class="card rounded-4 border-0">
+            <div class="card-body p-md-4">
+                <div class="d-flex justify-content-between mb-4">
+                    <p class="card-text mb-1">
+                        <span class="fw-semibold">@Model.Titulo</span>
+                    </p>
+                    <p class="card-text mb-1">
+                        <span class="fw-semibold">@Model.NomeDisciplina</span>
+                    </p>
+                </div>
+
+                <p class="card-text mb-1">
+                    <span class="fw-semibold">@Model.Serie.GetDisplayName()</span>
+                </p>
+
+                <p class="card-text mb-1">
+                    <span class="fw-semibold">Quantidade de Questões:</span> @Model.Questoes.Count / @Model.QuantidadeQuestoes
+                </p>
+
+                <div class="form-group mt-2">
+                    <form action="/testes/@Model.Id/selecionar-materia/@Model.MateriaId" method="post">
+                        <div class="form-group d-grid mt-2">
+                            <label class="form-label fs-5" asp-for="MateriaId">Matéria:</label>
+                            <select class="form-select" id="selectMateria" asp-for="MateriaId" asp-items="@Model.Materias">
+                                <option value="" disabled selected>Selecione uma Matéria</option>
+                            </select>
+                            <span class="text-danger d-block mt-2" asp-validation-for="MateriaId"></span>
+                        </div>
+                        <button type="submit" class="btn btn-primary align-self-end col">
+                            <i class="bi bi-journal-plus"></i>
+                            Selecionar Tarefa
+                        </button>
+                    </form>
+                    @if (!Model.MateriasSelecionadas.Any())
+                    {
+                        <p class="fw-semibold mt-3">Ainda não há nenhuma matéria selecionada...</p>
+                    }
+                    else
+{
+                        <div class="@(mostrarScrollMaterias ? "table-responsive" : "")" style="@(mostrarScrollMaterias ? "" : "overflow: visible; max-height: none;")">
+                            <table class="table table-wrapper table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Matérias Selecionadas</th>
+                                        <th>Quantidade Questões</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (SelectListItem materia in Model.MateriasSelecionadas)
+                                    {
+                                        int qtd = Model.QuantidadesPorMateria.FirstOrDefault(x => x.MateriaId.Equals(Guid.Parse(materia.Value))) ? .QuantidadeQuestoes ?? 0;
+
+                                        <tr>
+                                            <td>@materia.Text</td>
+                                            <td>@qtd questões</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    <div class="d-flex align-items-center justify-content-end gap-3 mt-3">
+                        <form class="d-inline" asp-action="Excluir" asp-route-id="@Model.Id" method="post">
+                            <button type="submit" class="btn btn-outline-danger rounded-3 px-2">Cancelar</button>
+                        </form>
+                        <form class="d-inline" asp-action="GerarProvao" asp-route-id="@Model.Id" method="post">
+                            <input type="hidden" asp-for="DisciplinaId" />
+                            <button type="submit" class="btn btn-primary rounded-4 px-5">Confirmar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-8 col-lg-3 mb-3 ">
+        <div class="card rounded-3">
+            <div class="card-body d-flex flex-column gap-2">
+                <div class="d-inline-flex justify-content-between mb-4">
+                    <p class="card-text mb-1">
+                        <span class="fw-semibold fs-3">Questões</span>
+                    </p>
+                    <p class="card-text mb-1">
+                        <form asp-action="AleatorizarQuestoes" asp-route-id="@Model.Id" method="post">
+                            <button type="submit" class="btn btn-primary rounded-3 px-3">
+                                <i class="bi bi-dice-3"></i>
+                            </button>
+                        </form>
+                    </p>
+                </div>
+                <div class="@(mostrarScrollQuestoes ? "table-responsive" : "")" style="@(mostrarScrollQuestoes ? "" : "overflow: visible; max-height: none;")">
+                    <table class="table table-wrapper table-hover">
+                    <thead>
+                        <tr>
+                            <th>Texto</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.MateriasSelecionadas.Any())
+                        {
+                            <tr>
+                                <td class ="fw-semibold mt-3">Ainda não há nenhuma matéria selecionada..</td>
+                            </tr>
+                        }
+                        else if (!Model.Questoes.Any())
+                        {
+                            <tr>
+                                <td class ="fw-semibold mt-3">Nenhuma questão foi selecionada..</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (SelectListItem q in Model.Questoes)
+                            {
+                                <tr>
+                                    <td>@q.Text</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

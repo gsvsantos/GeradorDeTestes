@@ -1,0 +1,70 @@
+﻿@using GeradorDeTestes.WebApp.Extensions
+@model DetalhesProvaoViewModel
+
+@{
+    ViewBag.Titulo = "Detalhes de Provão";
+}
+
+<div class="card rounded-4 border-0">
+    <div class="card-body">
+        <p class="card-text mb-1">
+            <span class="fw-semibold">@Model.Id</span>
+        </p>
+        <div class="d-flex justify-content-between mb-4">
+            <h3>@Model.Titulo</h3>
+            <h3>@Model.NomeDisciplina</h3>
+        </div>
+        <p class="card-text mb-1">
+            <span class="fw-semibold">Série:</span> @Model.Serie.GetDisplayName();
+        </p>
+    </div>
+</div>
+
+<hr class="border border-dark opacity-25" />
+<div class="row">
+    <div class="col-12 col-md-6 mb-3">
+        <div class="card rounded-4 border-0">
+            <div class="card-body">
+                <h5>Alternativas</h5>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (SelectListItem m in Model.Materias)
+                        {
+                            <tr>
+                                <td>@m.Text</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 mb-3">
+        <div class="card rounded-4 border-0">
+            <div class="card-body">
+                <h5>Qtd de Questões: @Model.QuantidadeQuestoes</h5>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (SelectListItem q in Model.Questoes)
+                        {
+                            <tr>
+                                <td>@q.Text</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,86 @@
+﻿@model DetalhesDisciplinaViewModel
+
+@{
+    ViewBag.Titulo = "Detalhes da Disciplina";
+}
+
+<div class="card rounded-4 border-0">
+    <div class="card-body">
+        <p class="card-text mb-1">
+            <span class="fw-semibold">@Model.Id</span>
+        </p>
+        <p class="card-text mb-1">
+            <span class="fw-semibold"> @Model.Nome</span>
+        </p>
+    </div>
+</div>
+
+<hr class="border border-dark opacity-25" />
+<div class="row">
+    <div class="col-12 col-md-6 mb-3">
+        <div class="card rounded-4 border-0">
+            <div class="card-body">
+                <h5>Matérias</h5>
+
+                @if (!Model.Materias.Any())
+                {
+                    <p class="fw-semibold mt-3">Ainda não há nenhuma matéria relacionada a esta disciplina...</p>
+                }
+                else
+                {
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Série</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (MateriaResumoViewModel materia in Model.Materias)
+                            {
+                                <tr>
+                                    <td>@materia.Nome</td>
+                                    <td>@materia.Serie</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 mb-3">
+        <div class="card rounded-4 border-0">
+            <div class="card-body">
+                <h5>Testes</h5>
+
+                @if (!Model.Testes.Any())
+                {
+                    <p class="fw-semibold mt-3">Ainda não há nenhum teste relacionada a esta disciplina...</p>
+                }
+                else
+                {
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Título</th>
+                            <th>Materia</th>
+                            <th>Quantidade de Questões</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (TesteResumoViewModel teste in Model.Testes)
+                        {
+                            <tr>
+                                <td>@teste.Titulo</td>
+                                <td>@teste.NomeMateria</td>
+                                <td>@teste.QuantidadeQuestoes</td>
+                            </tr>
+                        }
+                    </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div

@@ -1,0 +1,60 @@
+﻿@using GeradorDeTestes.WebApp.Extensions
+@model VisualizarMateriaViewModel
+
+@{
+	ViewBag.Titulo = "Visualização de Máterias";
+	bool mostrarScroll = Model.Registros.Count > 12;
+}
+
+<div class="d-grid d-lg-flex flex-wrap gap-2 w-50 align-items-center">
+	<a class="btn btn-primary px-5 "title="Nova Máteria" asp-action="Cadastrar"> 
+		<i class="bi bi-person-fill-add"></i>
+		Cadastrar Nova
+	</a>
+</div>
+<hr class="border border-dark opacity-25" />
+<div class="@(mostrarScroll ? "table-responsive" : "")" style="@(mostrarScroll ? "" : "overflow: visible; max-height: none;")">
+    <div class="row g-2">
+        @if (!Model.Registros.Any())
+        {
+            <p class="fw-semibold mt-3">Ainda não há nenhuma matéria cadastrada...</p>
+        }
+        else
+        {
+            @foreach (DetalhesMateriaViewModel materia in Model.Registros)
+            {
+                <div class="col-12 col-md-5 col-lg-4 col-xl-3 mb-3">
+                    <div class="card rounded-4 border-0">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <h4 class="card-title mb-1 fw-semibold text-truncate overflow-hidden text-nowrap" style="max-width: 70%;" title="@materia.Nome">
+                                    @materia.Id.ToString().Substring(0, 13)..
+                                </h4>
+                                <h4 class="card-title mb-1 fw-semibold text-truncate overflow-hidden text-nowrap" style="max-width: 70%;" title="@materia.Nome">
+                                    @materia.Nome
+                                </h4>
+                            </div>
+                            <p class="card-text mb-1">
+                                <span class="fw-semibold">Disciplina:</span> @materia.NomeDisciplina
+                            </p>
+                            <p class="card-text mb-1">
+                                <span class="fw-semibold">Série/Ano:</span> @materia.Serie.GetDisplayName()
+                            </p>
+                            <span class="d-flex gap-1 justify-content-end">
+                                <a class="btn btn-primary rounded-circle" title="Deatlhes Máterias" asp-action="Detalhes" asp-route-id="@materia.Id">
+                                    <i class="bi bi-list-check"></i>
+                                </a>
+                                <a class="btn btn-primary rounded-circle" title="Editar Máteria" asp-action="Editar" asp-route-id="@materia.Id">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <a class="btn btn-outline-danger rounded-circle" title="Excluir Máteria" asp-action="Excluir" asp-route-id="@materia.Id">
+                                    <i class="bi bi-trash3"></i>
+                                </a>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>

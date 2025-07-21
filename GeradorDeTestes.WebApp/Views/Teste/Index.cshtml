@@ -1,0 +1,60 @@
+﻿@model VisualizarTestesViewModel
+
+@{
+    ViewBag.Titulo = "Visualização de Testes";
+}
+
+<a class="btn btn-primary px-5" title="Novo Teste" asp-action="Cadastrar">
+	<i class="bi bi-bookmark-plus-fill"></i>
+	Novo Teste
+</a>
+
+<hr class="border border-dark opacity-25" />
+<div class="row g-2">
+    @if (!Model.Registros.Any())
+    {
+        <p class="fw-semibold mt-3">Ainda não há nenhum teste cadastrado...</p>
+    }
+    else{
+		@foreach (DetalhesTestesViewModel t in Model.Registros)
+		{
+			<div class="col-12 col-md-5 col-lg-4 col-xl-3 mb-3">
+				<div class="card rounded-4 border-0">
+					<div class="card-body">
+						<div class="d-flex justify-content-between mb-4">
+							<p class="card-text mb-1">
+								<span class="fw-semibold">@t.Id.ToString().Substring(0, 13)...</span>
+							</p>
+							<p class="card-text mb-1">
+								<span class="fw-semibold">@t.NomeDisciplina</span>
+							</p>
+						</div>
+						<p class="card-text mb-1">
+							<span class="fw-semibold">Título:</span> @t.Titulo
+						</p>
+						<p class="card-text mb-1">
+							<span class="fw-semibold">Matérias:</span> @t.Materias.Count
+						</p>
+						<p class="card-text mb-1">
+							<span class="fw-semibold">Tipo Teste:</span> @(t.EhProvao ? "Provão" : "Individual")
+						</p>
+						<span class="d-flex gap-1 justify-content-end">
+							<a class="btn btn-primary rounded-circle" title="Detalhes Teste" asp-action="@(t.EhProvao ? "DetalhesProvao" : "DetalhesTeste")" asp-route-id="@t.Id">
+								<i class="bi bi-eye"></i>
+							</a>
+							<a class="btn btn-primary rounded-circle" title="Duplicar Teste" asp-action="Duplicar" asp-route-id="@t.Id">
+								<i class="bi bi-list-check"></i>
+							</a>
+							<a class="btn btn-primary rounded-circle" title="Editar Teste" asp-action="Editar" asp-route-id="@t.Id" asp-route-contexto="Index">
+								<i class="bi bi-pencil-square"></i>
+							</a>
+							<a class="btn btn-outline-danger rounded-circle" title="Excluir Teste" asp-action="Excluir" asp-route-id="@t.Id">
+								<i class="bi bi-bookmark-x-fill"></i>
+							</a>
+						</span>
+					</div>
+				</div>
+			</div>
+		}
+    }
+</div>
