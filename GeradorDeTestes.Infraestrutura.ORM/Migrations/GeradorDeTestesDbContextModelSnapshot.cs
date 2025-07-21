@@ -39,7 +39,6 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
             modelBuilder.Entity("GeradorDeTestes.Dominio.ModuloMateria.Materia", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("DisciplinaId")
@@ -62,7 +61,6 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
             modelBuilder.Entity("GeradorDeTestes.Dominio.ModuloQuestao.Alternativa", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("EstaCorreta")
@@ -85,7 +83,6 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
             modelBuilder.Entity("GeradorDeTestes.Dominio.ModuloQuestao.Questao", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("DataCriacao")
@@ -111,7 +108,6 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
             modelBuilder.Entity("GeradorDeTestes.Dominio.ModuloTeste.Teste", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("DataCriacao")
@@ -201,7 +197,9 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
                 {
                     b.HasOne("GeradorDeTestes.Dominio.ModuloDisciplina.Disciplina", "Disciplina")
                         .WithMany("Materias")
-                        .HasForeignKey("DisciplinaId");
+                        .HasForeignKey("DisciplinaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Disciplina");
                 });
@@ -211,7 +209,7 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
                     b.HasOne("GeradorDeTestes.Dominio.ModuloQuestao.Questao", "Questao")
                         .WithMany("Alternativas")
                         .HasForeignKey("QuestaoId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Questao");
@@ -222,7 +220,7 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
                     b.HasOne("GeradorDeTestes.Dominio.ModuloMateria.Materia", "Materia")
                         .WithMany("Questoes")
                         .HasForeignKey("MateriaId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Materia");
@@ -233,7 +231,7 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
                     b.HasOne("GeradorDeTestes.Dominio.ModuloDisciplina.Disciplina", "Disciplina")
                         .WithMany("Testes")
                         .HasForeignKey("DisciplinaId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Disciplina");
@@ -244,13 +242,13 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
                     b.HasOne("GeradorDeTestes.Dominio.ModuloMateria.Materia", "Materia")
                         .WithMany()
                         .HasForeignKey("MateriaId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("GeradorDeTestes.Dominio.ModuloTeste.Teste", null)
                         .WithMany("QuantidadesPorMateria")
                         .HasForeignKey("TesteId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Materia");
                 });
@@ -260,13 +258,13 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
                     b.HasOne("GeradorDeTestes.Dominio.ModuloMateria.Materia", null)
                         .WithMany()
                         .HasForeignKey("MateriasId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("GeradorDeTestes.Dominio.ModuloTeste.Teste", null)
                         .WithMany()
                         .HasForeignKey("TestesId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
@@ -275,13 +273,13 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
                     b.HasOne("GeradorDeTestes.Dominio.ModuloQuestao.Questao", null)
                         .WithMany()
                         .HasForeignKey("QuestoesId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("GeradorDeTestes.Dominio.ModuloTeste.Teste", null)
                         .WithMany()
                         .HasForeignKey("TestesId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 

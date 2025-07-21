@@ -4,38 +4,35 @@ using GeradorDeTestes.Infraestrutura.ORM.Compartilhado;
 using GeradorDeTestes.WebApp.Extensions;
 using GeradorDeTestes.WebApp.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace GeradorDeTestes.WebApp.Controllers;
 
-[Microsoft.AspNetCore.Components.Route("materias")]
+[Route("materias")]
 public class MateriaController : Controller
 {
     private readonly GeradorDeTestesDbContext contexto;
     private readonly IRepositorioMateria repositorioMateria;
-    //private readonly IRepositorioDisciplina repositorioDisciplina;
+    private readonly IRepositorioDisciplina repositorioDisciplina;
     public MateriaController(GeradorDeTestesDbContext contexto, IRepositorioMateria repoitorioMateria, IRepositorioDisciplina repositorioDisciplina)
     {
         this.contexto = contexto;
         this.repositorioMateria = repoitorioMateria;
-        //this.repositorioDisciplina = repositorioDisciplina;
+        this.repositorioDisciplina = repositorioDisciplina;
     }
 
     [HttpGet("")]
     public IActionResult Index()
     {
-        var registros = repositorioMateria.SelecionarRegistros();
-        var visualizarVM = new VisualizarMateriaViewModel(registros);
+        List<Materia> registros = repositorioMateria.SelecionarRegistros();
+        VisualizarMateriaViewModel visualizarVM = new VisualizarMateriaViewModel(registros);
         return View(visualizarVM);
     }
 
     [HttpGet("cadastrar")]
     public IActionResult Cadastrar()
     {
-        //List<Disciplina> disciplinas = repositorioDisciplina.SelecionarRegistros();
-
-        List <Disciplina> disciplinas = contexto.Disciplinas.ToList();
+        List<Disciplina> disciplinas = repositorioDisciplina.SelecionarRegistros();
 
         CadastrarMateriaViewModel cadastrarVM = new CadastrarMateriaViewModel(disciplinas);
         return View(cadastrarVM);
@@ -44,12 +41,7 @@ public class MateriaController : Controller
     [HttpPost("cadastrar")]
     public IActionResult Cadastrar(CadastrarMateriaViewModel cadastrarVM)
     {
-        //Disciplina? disciplinaSelecionada = repositorioDisciplina.SelecionarRegistroPorId(cadastrarVM.DisciplinaId);
-
-        Disciplina? disciplina = contexto.Disciplinas
-            .Include(disc => disc.Materias)
-            .Include(disc => disc.Testes)
-            .FirstOrDefault(disc => disc.Id.Equals(cadastrarVM.DisciplinaId));
+        Disciplina disciplinaSelecionada = repositorioDisciplina.SelecionarRegistroPorId(cadastrarVM.DisciplinaId)!;
 
         if (repositorioMateria.SelecionarRegistros().Any(m => m.Nome == cadastrarVM.Nome))
         {
@@ -59,7 +51,7 @@ public class MateriaController : Controller
         if (!ModelState.IsValid)
             return View(cadastrarVM);
 
-        Materia materia = cadastrarVM.ParaEntidade(disciplina!);
+        Materia materia = cadastrarVM.ParaEntidade(disciplinaSelecionada!);
 
         IDbContextTransaction transacao = contexto.Database.BeginTransaction();
 
@@ -96,12 +88,9 @@ public class MateriaController : Controller
     [HttpPost("editar/{id:Guid}")]
     public IActionResult Editar(Guid id, EditarMateriaViewModel editarVM)
     {
-        Disciplina? disciplina = contexto.Disciplinas
-       .Include(disc => disc.Materias)
-       .Include(disc => disc.Testes)
-       .FirstOrDefault(disc => disc.Id.Equals(editarVM.DisciplinaId));
+        Disciplina disciplinaSelecionada = repositorioDisciplina.SelecionarRegistroPorId(editarVM.DisciplinaId)!;
 
-        Materia materiaEditada = editarVM.ParaEntidade(disciplina!);
+        Materia materiaEditada = editarVM.ParaEntidade(disciplinaSelecionada!);
 
         IDbContextTransaction transacao = contexto.Database.BeginTransaction();
 

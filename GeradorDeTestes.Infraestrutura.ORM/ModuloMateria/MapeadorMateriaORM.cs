@@ -17,9 +17,13 @@ public class MapeadorMateriaORM : IEntityTypeConfiguration<Materia>
 
         builder.HasOne(mate => mate.Disciplina)
             .WithMany(disc => disc.Materias)
+            .OnDelete(DeleteBehavior.Restrict)
             .IsRequired();
 
         builder.Property(mate => mate.Serie)
             .IsRequired();
+
+        builder.HasMany(m => m.Questoes)
+            .WithOne(q => q.Materia);
     }
 }

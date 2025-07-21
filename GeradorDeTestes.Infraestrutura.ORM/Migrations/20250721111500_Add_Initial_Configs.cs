@@ -39,7 +39,8 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
                         name: "FK_Materias_Disciplinas_DisciplinaId",
                         column: x => x.DisciplinaId,
                         principalTable: "Disciplinas",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -63,7 +64,7 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
                         column: x => x.DisciplinaId,
                         principalTable: "Disciplinas",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -84,7 +85,7 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
                         column: x => x.MateriaId,
                         principalTable: "Materias",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -102,13 +103,13 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
                         column: x => x.MateriasId,
                         principalTable: "Materias",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_MateriaTeste_Testes_TestesId",
                         column: x => x.TestesId,
                         principalTable: "Testes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -128,13 +129,13 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
                         column: x => x.MateriaId,
                         principalTable: "Materias",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_QuantidadesPorMateria_Testes_TesteId",
                         column: x => x.TesteId,
                         principalTable: "Testes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -154,7 +155,7 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
                         column: x => x.QuestaoId,
                         principalTable: "Questoes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -172,13 +173,13 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
                         column: x => x.QuestoesId,
                         principalTable: "Questoes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_QuestaoTeste_Testes_TestesId",
                         column: x => x.TestesId,
                         principalTable: "Testes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(

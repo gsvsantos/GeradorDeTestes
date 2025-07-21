@@ -16,7 +16,8 @@ public class MapeadorQuestaoORM : IEntityTypeConfiguration<Questao>
 
         builder.HasOne(q => q.Materia)
             .WithMany(m => m.Questoes)
-            .IsRequired();
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.Property(q => q.Finalizado)
             .IsRequired();

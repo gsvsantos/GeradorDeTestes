@@ -47,6 +47,7 @@ public class RepositorioTesteORM : RepositorioBaseORM<Teste>, IRepositorioTeste
     public void RemoverRegistros(List<Teste> testes)
     {
         contexto.Testes.RemoveRange(testes);
+
         contexto.SaveChanges();
     }
 

@@ -11,6 +11,7 @@ public class MapeadorTesteMateriaQuantidadeORM : IEntityTypeConfiguration<TesteM
 
         builder.HasOne(x => x.Materia)
                .WithMany()
+               .OnDelete(DeleteBehavior.Restrict)
                .IsRequired();
 
         builder.Property(x => x.QuantidadeQuestoes)

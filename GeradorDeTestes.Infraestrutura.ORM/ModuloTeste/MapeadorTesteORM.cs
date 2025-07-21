@@ -1,4 +1,6 @@
-﻿using GeradorDeTestes.Dominio.ModuloTeste;
+﻿using GeradorDeTestes.Dominio.ModuloMateria;
+using GeradorDeTestes.Dominio.ModuloQuestao;
+using GeradorDeTestes.Dominio.ModuloTeste;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -23,7 +25,15 @@ public class MapeadorTesteORM : IEntityTypeConfiguration<Teste>
             .IsRequired();
 
         builder.HasMany(t => t.Materias)
-            .WithMany(m => m.Testes);
+            .WithMany(m => m.Testes)
+            .UsingEntity<Dictionary<string, object>>(
+            "MateriaTeste", j => j
+            .HasOne<Materia>()
+            .WithMany().HasForeignKey("MateriasId")
+            .OnDelete(DeleteBehavior.Restrict), j => j
+            .HasOne<Teste>()
+            .WithMany().HasForeignKey("TestesId")
+            .OnDelete(DeleteBehavior.Restrict));
 
         builder.Property(t => t.EhProvao)
             .IsRequired();
@@ -38,10 +48,22 @@ public class MapeadorTesteORM : IEntityTypeConfiguration<Teste>
             .IsRequired();
 
         builder.HasMany(t => t.Questoes)
-            .WithMany(d => d.Testes);
+            .WithMany(d => d.Testes)
+            .UsingEntity<Dictionary<string, object>>(
+            "QuestaoTeste",
+            j => j
+            .HasOne<Questao>()
+            .WithMany()
+            .HasForeignKey("QuestoesId")
+            .OnDelete(DeleteBehavior.Restrict),
+            j => j
+            .HasOne<Teste>()
+            .WithMany()
+            .HasForeignKey("TestesId")
+            .OnDelete(DeleteBehavior.Restrict));
 
         builder.HasMany(t => t.QuantidadesPorMateria)
-           .WithOne()
-           .OnDelete(DeleteBehavior.Cascade);
+            .WithOne()
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

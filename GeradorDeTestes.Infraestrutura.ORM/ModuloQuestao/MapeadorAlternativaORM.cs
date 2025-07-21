@@ -16,6 +16,7 @@ public class MapeadorAlternativaORM : IEntityTypeConfiguration<Alternativa>
 
         builder.HasOne(a => a.Questao)
             .WithMany(q => q.Alternativas)
+            .OnDelete(DeleteBehavior.Restrict)
             .IsRequired();
 
         builder.Property(a => a.EstaCorreta)
