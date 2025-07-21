@@ -17,10 +17,11 @@ public class MapeadorDisciplinaORM : IEntityTypeConfiguration<Disciplina>
 
         builder.HasMany(disc => disc.Materias)
             .WithOne(mate => mate.Disciplina)
-            .IsRequired(false);
+            .IsRequired();
 
         builder.HasMany(disc => disc.Testes)
             .WithOne(test => test.Disciplina)
-            .IsRequired(false);
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

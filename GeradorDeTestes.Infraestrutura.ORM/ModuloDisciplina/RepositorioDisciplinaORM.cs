@@ -1,12 +1,27 @@
 ﻿using GeradorDeTestes.Dominio.ModuloDisciplina;
 using GeradorDeTestes.Infraestrutura.ORM.Compartilhado;
+using Microsoft.EntityFrameworkCore;
 
-namespace GeradorDeTestes.Infraestrutura.ORM.ModuloDisciplina
+namespace GeradorDeTestes.Infraestrutura.ORM.ModuloDisciplina;
+
+public class RepositorioDisciplinaORM : RepositorioBaseORM<Disciplina>, IRepositorioDisciplina
 {
-    public class RepositorioDisciplinaORM : RepositorioBaseORM<Disciplina>, IRepositorioDisciplina
+    public RepositorioDisciplinaORM(GeradorDeTestesDbContext contexto) : base(contexto)
     {
-        public RepositorioDisciplinaORM(GeradorDeTestesDbContext contexto) : base(contexto)
-        {
-        }
+    }
+    public override List<Disciplina> SelecionarRegistros()
+    {
+        return contexto.Disciplinas
+            .Include(d => d.Materias)
+            .Include(d => d.Testes)
+            .ToList();
+    }
+
+    public override Disciplina? SelecionarRegistroPorId(Guid idRegistro)
+    {
+        return contexto.Disciplinas
+            .Include(d => d.Materias)
+            .Include(d => d.Testes)
+            .FirstOrDefault(d => d.Id == idRegistro);
     }
 }
