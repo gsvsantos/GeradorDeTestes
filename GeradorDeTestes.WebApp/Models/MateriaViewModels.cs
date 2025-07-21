@@ -96,15 +96,15 @@ public class DetalhesMateriaViewModel
 {
     public Guid Id { get; set; }
     public string Nome { get; set; }
-    public Disciplina Disciplina { get; set; }
+    public string NomeDisciplina { get; set; }
     public EnumSerie Serie { get; set; }
     public List<QuestaoMateriaViewModel> Questoes { get; set; } = new List<QuestaoMateriaViewModel>();
 
-    public DetalhesMateriaViewModel(Guid id, string nome, Disciplina disciplina, EnumSerie serie, List<Questao> questoes)
+    public DetalhesMateriaViewModel(Guid id, string nome, string nomeDisciplina, EnumSerie serie, List<Questao> questoes)
     {
         Id = id;
         Nome = nome;
-        Disciplina = disciplina;
+        NomeDisciplina = nomeDisciplina;
         Serie = serie;
 
         foreach (Questao questao in questoes)

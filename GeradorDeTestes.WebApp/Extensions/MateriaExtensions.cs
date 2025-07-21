@@ -16,7 +16,7 @@ public static class MateriaExtensions
         return new DetalhesMateriaViewModel(
             materia.Id,
             materia.Nome,
-            materia.Disciplina,
+            materia.Disciplina.Nome,
             materia.Serie,
             materia.Questoes);
     }

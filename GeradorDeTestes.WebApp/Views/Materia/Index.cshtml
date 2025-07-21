@@ -35,13 +35,13 @@
                                 </h4>
                             </div>
                             <p class="card-text mb-1">
-                                <span class="fw-semibold">Disciplina:</span> @materia.Disciplina.Nome
+                                <span class="fw-semibold">Disciplina:</span> @materia.NomeDisciplina
                             </p>
                             <p class="card-text mb-1">
                                 <span class="fw-semibold">Série/Ano:</span> @materia.Serie.GetDisplayName()
                             </p>
                             <span class="d-flex gap-1 justify-content-end">
-                                <a class="btn btn-primary rounded-circle" title="Gerenciar Máterias" asp-action="GerenciarMaterias" asp-route-id="@materia.Id">
+                                <a class="btn btn-primary rounded-circle" title="Deatlhes Máterias" asp-action="Detalhes" asp-route-id="@materia.Id">
                                     <i class="bi bi-list-check"></i>
                                 </a>
                                 <a class="btn btn-primary rounded-circle" title="Editar Máteria" asp-action="Editar" asp-route-id="@materia.Id">
