@@ -7,6 +7,8 @@ public class Questao : EntidadeBase<Questao>
 {
     public string Enunciado { get; set; }
     public Materia Materia { get; set; }
+    public bool Finalizado { get; set; }
+    public DateTime DataCriacao { get; set; } = DateTime.UtcNow;
     public List<Alternativa> Alternativas { get; set; } = new List<Alternativa>();
     public List<Teste> Testes { get; set; } = new List<Teste>();
 
@@ -36,6 +38,15 @@ public class Questao : EntidadeBase<Questao>
     {
         Testes.Remove(teste);
     }
+
+    public bool EstaCompleta()
+    {
+        bool temMinimoDuas = Alternativas.Count >= 2;
+        bool temUmaCorreta = Alternativas.Count(a => a.EstaCorreta) == 1;
+
+        return temMinimoDuas && temUmaCorreta;
+    }
+
     public override void AtualizarRegistro(Questao registroEditado)
     {
         Materia = registroEditado.Materia;

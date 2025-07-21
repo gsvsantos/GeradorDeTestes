@@ -44,10 +44,13 @@ public static class TesteExtensions
                 Text = m.Nome,
                 Value = m.Id.ToString()
             }).ToList(),
-            Questoes = teste.Questoes.Select(q => new SelectListItem
+            MateriasComQuestoes = teste.Materias.Select(m => new MateriaComQuestoesViewModel
             {
-                Text = q.Enunciado,
-                Value = q.Id.ToString()
+                NomeMateria = m.Nome,
+                Questoes = teste.Questoes
+                    .Where(q => q.Materia.Id == m.Id)
+                    .Select(q => q.Enunciado)
+                    .ToList()
             }).ToList()
         };
     }

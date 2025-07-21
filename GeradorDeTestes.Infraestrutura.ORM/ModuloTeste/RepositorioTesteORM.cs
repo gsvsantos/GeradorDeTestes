@@ -32,6 +32,24 @@ public class RepositorioTesteORM : RepositorioBaseORM<Teste>, IRepositorioTeste
         contexto.SaveChanges();
     }
 
+    public List<Teste> SelecionarNaoFinalizadosAntigos(TimeSpan tempoMaximo)
+    {
+        DateTime limite = DateTime.Now.Subtract(tempoMaximo);
+
+        return registros.Where(t => !t.Finalizado && t.DataCriacao < limite).ToList();
+    }
+
+    public List<Teste> SelecionarNaoFinalizados()
+    {
+        return registros.Where(t => !t.Finalizado).ToList();
+    }
+
+    public void RemoverRegistros(List<Teste> testes)
+    {
+        contexto.Testes.RemoveRange(testes);
+        contexto.SaveChanges();
+    }
+
     public override Teste? SelecionarRegistroPorId(Guid idRegistro)
     {
         return registros.Include(t => t.Disciplina)

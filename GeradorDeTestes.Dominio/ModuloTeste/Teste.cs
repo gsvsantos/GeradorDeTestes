@@ -12,6 +12,8 @@ public class Teste : EntidadeBase<Teste>
     public List<Materia> Materias { get; set; } = new List<Materia>();
     public bool EhProvao { get; set; }
     public int QuantidadeQuestoes { get; set; }
+    public bool Finalizado { get; set; }
+    public DateTime DataCriacao { get; set; } = DateTime.UtcNow;
     public List<Questao> Questoes { get; set; } = new List<Questao>();
     public List<TesteMateriaQuantidade> QuantidadesPorMateria { get; set; } = new();
 

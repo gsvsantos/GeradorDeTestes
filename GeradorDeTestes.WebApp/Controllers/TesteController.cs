@@ -26,7 +26,12 @@ public class TesteController : Controller
 
     public IActionResult Index()
     {
-        List<Teste> testes = repositorioTeste.SelecionarRegistros();
+        List<Teste> testesNaoFinalizados = repositorioTeste.SelecionarNaoFinalizados();
+        repositorioTeste.RemoverRegistros(testesNaoFinalizados);
+
+        List<Teste> testes = repositorioTeste.SelecionarRegistros()
+                                             .Where(t => t.Finalizado)
+                                             .ToList();
 
         VisualizarTestesViewModel visualizarVM = new(testes);
 
@@ -55,6 +60,7 @@ public class TesteController : Controller
         try
         {
             repositorioTeste.CadastrarRegistro(novoTeste);
+
             contexto.Testes.Add(novoTeste);
 
             contexto.SaveChanges();
@@ -90,6 +96,7 @@ public class TesteController : Controller
         {
             List<Questao>? questoesDaMateria = contexto.Questoes
                 .Where(questao => questao.Materia.Id.Equals(q.Materia.Id))
+                .Where(q => q.Finalizado)
                 .Take(q.QuantidadeQuestoes)
                 .ToList();
 
@@ -109,6 +116,7 @@ public class TesteController : Controller
                 {
                     List<Questao> questoesDaMateria = contexto.Questoes
                         .Where(q => q.Materia.Id == materia.Id)
+                        .Where(q => q.Finalizado)
                         .Take(testeSelecionado.QuantidadeQuestoes)
                         .ToList();
 
@@ -117,8 +125,11 @@ public class TesteController : Controller
 
                 todasQuestoes.Shuffle();
 
-                foreach (Questao questao in todasQuestoes.Take(testeSelecionado.QuantidadeQuestoes - testeSelecionado.Questoes.Count).ToList())
+                foreach (Questao questao in todasQuestoes.Take(testeSelecionado.QuantidadeQuestoes).ToList())
                 {
+                    if (testeSelecionado.Questoes.Any(q => q.Equals(questao)))
+                        continue;
+
                     testeSelecionado.AderirQuestao(questao);
                     repositorioTeste.AtualizarQuantidadePorMateria(testeSelecionado, questao.Materia);
                 }
@@ -141,6 +152,7 @@ public class TesteController : Controller
 
         try
         {
+            testeSelecionado.Finalizado = true;
             contexto.Update(testeSelecionado);
             contexto.SaveChanges();
 
@@ -265,6 +277,7 @@ public class TesteController : Controller
             if (vm.QuantidadeQuestoesMateria == 0 && objComQuantidade is not null)
             {
                 testeSelecionado.QuantidadesPorMateria.Remove(objComQuantidade);
+
                 contexto.QuantidadesPorMateria.Remove(objComQuantidade!);
             }
             else if (objComQuantidade is not null)
@@ -281,6 +294,7 @@ public class TesteController : Controller
                 };
 
                 testeSelecionado.QuantidadesPorMateria.Add(objComQuantidade);
+
                 contexto.QuantidadesPorMateria.Add(objComQuantidade!);
             }
 
@@ -324,6 +338,7 @@ public class TesteController : Controller
         List<Materia> materiasSelecionadas = materias;
 
         testeSelecionado.Questoes.Clear();
+
         testeSelecionado.QuantidadesPorMateria.Clear();
 
         if (testeSelecionado.Questoes.Count < testeSelecionado.QuantidadeQuestoes)
@@ -334,10 +349,12 @@ public class TesteController : Controller
             {
                 List<Questao> questoesDaMateria = contexto.Questoes
                     .Where(q => q.Materia.Id == materia.Id)
+                    .Where(q => q.Finalizado)
                     .Take(testeSelecionado.QuantidadeQuestoes)
                     .ToList();
 
                 todasQuestoes.AddRange(questoesDaMateria);
+
                 testeSelecionado.AderirMateria(materia);
             }
 
@@ -366,6 +383,8 @@ public class TesteController : Controller
 
         try
         {
+            testeSelecionado.Finalizado = true;
+
             contexto.Update(testeSelecionado);
 
             contexto.SaveChanges();
@@ -460,6 +479,7 @@ public class TesteController : Controller
         try
         {
             repositorioTeste.ExcluirRegistro(id);
+
             contexto.Testes.Remove(testeSelecionado);
 
             contexto.SaveChanges();

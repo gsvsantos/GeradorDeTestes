@@ -18,6 +18,12 @@ public class MapeadorQuestaoORM : IEntityTypeConfiguration<Questao>
             .WithMany(m => m.Questoes)
             .IsRequired();
 
+        builder.Property(q => q.Finalizado)
+            .IsRequired();
+
+        builder.Property(q => q.DataCriacao)
+            .IsRequired();
+
         builder.HasMany(q => q.Alternativas)
             .WithOne(a => a.Questao)
             .IsRequired();

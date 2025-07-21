@@ -148,7 +148,13 @@ public class DetalhesTestesViewModel
 public class DetalhesTesteViewModel : DetalhesTestesViewModel
 {
     public EnumSerie Serie { get; set; }
-    public List<SelectListItem> Questoes { get; set; } = new List<SelectListItem>();
+    public List<MateriaComQuestoesViewModel> MateriasComQuestoes { get; set; } = new List<MateriaComQuestoesViewModel>();
+}
+
+public class MateriaComQuestoesViewModel
+{
+    public string NomeMateria { get; set; }
+    public List<string> Questoes { get; set; }
 }
 
 public class DetalhesProvaoViewModel : DetalhesTestesViewModel

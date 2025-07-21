@@ -31,6 +31,12 @@ public class MapeadorTesteORM : IEntityTypeConfiguration<Teste>
         builder.Property(t => t.QuantidadeQuestoes)
             .IsRequired();
 
+        builder.Property(t => t.Finalizado)
+            .IsRequired();
+
+        builder.Property(t => t.DataCriacao)
+            .IsRequired();
+
         builder.HasMany(t => t.Questoes)
             .WithMany(d => d.Testes);
 

@@ -25,7 +25,13 @@ public class QuestaoController : Controller
 
     public IActionResult Index()
     {
-        List<Questao> questoes = repositorioQuestao.SelecionarRegistros();
+        List<Questao> questoesNaoFinalizadas = repositorioQuestao.SelecionarNaoFinalizados();
+
+        repositorioQuestao.RemoverRegistros(questoesNaoFinalizadas);
+
+        List<Questao> questoes = repositorioQuestao.SelecionarRegistros()
+                                                   .Where(q => q.Finalizado)
+                                                   .ToList();
 
         VisualizarQuestoesViewModel visualizarVM = new(questoes);
 
@@ -70,7 +76,7 @@ public class QuestaoController : Controller
             throw;
         }
 
-        return RedirectToAction(nameof(Index));
+        return RedirectToAction(nameof(GerenciarAlternativas), new { id = novaQuestao.Id });
     }
 
     [HttpGet("editar/{id:guid}")]
@@ -190,6 +196,7 @@ public class QuestaoController : Controller
         try
         {
             questaoSelecionada.AderirAlternativa(novaAlternativa);
+
             contexto.Alternativas.Add(novaAlternativa);
 
             contexto.SaveChanges();
@@ -210,6 +217,7 @@ public class QuestaoController : Controller
     public IActionResult RemoverAlternativa(Guid id, Guid idAlternativa)
     {
         Questao questaoSelecionada = repositorioQuestao.SelecionarRegistroPorId(id)!;
+
         Alternativa alternativaEscolhida = repositorioQuestao.SelecionarAlternativa(questaoSelecionada, idAlternativa)!;
 
         IDbContextTransaction transacao = contexto.Database.BeginTransaction();
@@ -217,6 +225,7 @@ public class QuestaoController : Controller
         try
         {
             questaoSelecionada.RemoverAlternativa(alternativaEscolhida);
+
             contexto.Alternativas.Remove(alternativaEscolhida);
 
             contexto.SaveChanges();
@@ -244,5 +253,17 @@ public class QuestaoController : Controller
         contexto.SaveChanges();
 
         return RedirectToAction(nameof(GerenciarAlternativas), new { id });
+    }
+
+    [HttpPost, Route("/questoes/{id:guid}/finalizar")]
+    public IActionResult FinalizarQuestao(Guid id)
+    {
+        Questao questao = repositorioQuestao.SelecionarRegistroPorId(id)!;
+
+        questao.Finalizado = true;
+
+        contexto.SaveChanges();
+
+        return RedirectToAction(nameof(Index));
     }
 }
