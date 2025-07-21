@@ -151,4 +151,17 @@ public class MateriaController : Controller
         }
         return RedirectToAction("Index");
     }
+
+    [HttpGet("detalhes/{id:Guid}")]
+    public IActionResult Detalhes(Guid id)
+    {
+        Materia materia = repositorioMateria.SelecionarRegistroPorId(id)!;
+
+        if (materia == null)
+            return NotFound();
+
+        DetalhesMateriaViewModel detalhesVM = materia.ParaDetalhesVM();
+
+        return View(detalhesVM);
+    }
 }
