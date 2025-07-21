@@ -338,8 +338,8 @@ public class TesteController : Controller
         List<Materia> materiasSelecionadas = materias;
 
         testeSelecionado.Questoes.Clear();
-
-        testeSelecionado.QuantidadesPorMateria.Clear();
+        contexto.QuantidadesPorMateria.RemoveRange(testeSelecionado.QuantidadesPorMateria);
+        contexto.SaveChanges();
 
         if (testeSelecionado.Questoes.Count < testeSelecionado.QuantidadeQuestoes)
         {
@@ -354,14 +354,15 @@ public class TesteController : Controller
                     .ToList();
 
                 todasQuestoes.AddRange(questoesDaMateria);
-
-                testeSelecionado.AderirMateria(materia);
             }
 
             todasQuestoes.Shuffle();
 
-            foreach (Questao questao in todasQuestoes.Take(testeSelecionado.QuantidadeQuestoes - testeSelecionado.Questoes.Count).ToList())
+            foreach (Questao questao in todasQuestoes.Take(testeSelecionado.QuantidadeQuestoes).ToList())
             {
+                if (testeSelecionado.Questoes.Any(q => q.Equals(questao)))
+                    continue;
+
                 testeSelecionado.AderirQuestao(questao);
                 repositorioTeste.AtualizarQuantidadePorMateria(testeSelecionado, questao.Materia);
             }
