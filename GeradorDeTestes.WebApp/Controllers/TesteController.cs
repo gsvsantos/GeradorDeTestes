@@ -324,19 +324,7 @@ public class TesteController : Controller
         List<Materia> materiasSelecionadas = materias;
 
         testeSelecionado.Questoes.Clear();
-
-        foreach (TesteMateriaQuantidade q in testeSelecionado.QuantidadesPorMateria)
-        {
-            List<Questao>? questoesDaMateria = contexto.Questoes
-                .Where(questao => questao.Materia.Id.Equals(q.Materia.Id))
-                .Take(q.QuantidadeQuestoes)
-                .ToList();
-
-            foreach (Questao questao in questoesDaMateria)
-            {
-                testeSelecionado.AderirQuestao(questao);
-            }
-        }
+        testeSelecionado.QuantidadesPorMateria.Clear();
 
         if (testeSelecionado.Questoes.Count < testeSelecionado.QuantidadeQuestoes)
         {
@@ -350,6 +338,7 @@ public class TesteController : Controller
                     .ToList();
 
                 todasQuestoes.AddRange(questoesDaMateria);
+                testeSelecionado.AderirMateria(materia);
             }
 
             todasQuestoes.Shuffle();
@@ -378,6 +367,7 @@ public class TesteController : Controller
         try
         {
             contexto.Update(testeSelecionado);
+
             contexto.SaveChanges();
 
             transacao.Commit();
@@ -385,6 +375,7 @@ public class TesteController : Controller
         catch (Exception)
         {
             transacao.Rollback();
+
             throw;
         }
 
@@ -493,5 +484,15 @@ public class TesteController : Controller
         DetalhesTesteViewModel detalhesTesteVM = testeSelecionado.ParaDetalhesTesteVM();
 
         return View(detalhesTesteVM);
+    }
+
+    [HttpGet, Route("/testes/{id:guid}/detalhes-provao")]
+    public IActionResult DetalhesProvao(Guid id)
+    {
+        Teste testeSelecionado = repositorioTeste.SelecionarRegistroPorId(id)!;
+
+        DetalhesProvaoViewModel detalhesProvaoVM = testeSelecionado.ParaDetalhesProvaoVM();
+
+        return View(detalhesProvaoVM);
     }
 }

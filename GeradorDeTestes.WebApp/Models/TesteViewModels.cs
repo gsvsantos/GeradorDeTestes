@@ -69,7 +69,7 @@ public class GerarTesteViewModel : FormularioTesteViewModel
 public class GerarTestePostViewModel
 {
     public Guid DisciplinaId { get; set; }
-    public List<Guid> QuestoesSelecionadasIds { get; set; } = new();
+    public List<Guid> QuestoesSelecionadasIds { get; set; } = new List<Guid>();
 }
 
 public class GerarProvaoViewModel : FormularioTesteViewModel
@@ -85,7 +85,7 @@ public class GerarProvaoViewModel : FormularioTesteViewModel
 public class GerarProvaoPostViewModel
 {
     public Guid DisciplinaId { get; set; }
-    public List<Guid> QuestoesSelecionadasIds { get; set; } = new();
+    public List<Guid> QuestoesSelecionadasIds { get; set; } = new List<Guid>();
 }
 
 public class DuplicarViewModel
@@ -153,6 +153,6 @@ public class DetalhesTesteViewModel : DetalhesTestesViewModel
 
 public class DetalhesProvaoViewModel : DetalhesTestesViewModel
 {
-    public List<SelectListItem> Questoes { get; set; } = new List<SelectListItem>();
     public EnumSerie Serie { get; set; }
+    public List<SelectListItem> Questoes { get; set; } = new List<SelectListItem>();
 }
