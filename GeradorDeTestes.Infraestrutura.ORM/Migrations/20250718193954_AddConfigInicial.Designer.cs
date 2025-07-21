@@ -4,6 +4,7 @@ using GeradorDeTestes.Infraestrutura.ORM.Compartilhado;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
 {
     [DbContext(typeof(GeradorDeTestesDbContext))]
-    partial class GeradorDeTestesDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250718193954_AddConfigInicial")]
+    partial class AddConfigInicial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -39,7 +42,6 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
             modelBuilder.Entity("GeradorDeTestes.Dominio.ModuloMateria.Materia", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("DisciplinaId")
@@ -88,15 +90,9 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Enunciado")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("Finalizado")
-                        .HasColumnType("bit");
 
                     b.Property<Guid>("MateriaId")
                         .HasColumnType("uniqueidentifier");
@@ -114,17 +110,14 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("datetime2");
-
                     b.Property<Guid>("DisciplinaId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("EhProvao")
+                    b.Property<bool>("EhRecuperacao")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("Finalizado")
-                        .HasColumnType("bit");
+                    b.Property<Guid?>("MateriaId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("QuantidadeQuestoes")
                         .HasColumnType("int");
@@ -140,46 +133,9 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
 
                     b.HasIndex("DisciplinaId");
 
-                    b.ToTable("Testes");
-                });
-
-            modelBuilder.Entity("GeradorDeTestes.Dominio.ModuloTeste.TesteMateriaQuantidade", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("MateriaId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("QuantidadeQuestoes")
-                        .HasColumnType("int");
-
-                    b.Property<Guid?>("TesteId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
                     b.HasIndex("MateriaId");
 
-                    b.HasIndex("TesteId");
-
-                    b.ToTable("QuantidadesPorMateria");
-                });
-
-            modelBuilder.Entity("MateriaTeste", b =>
-                {
-                    b.Property<Guid>("MateriasId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("TestesId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("MateriasId", "TestesId");
-
-                    b.HasIndex("TestesId");
-
-                    b.ToTable("MateriaTeste");
+                    b.ToTable("Testes");
                 });
 
             modelBuilder.Entity("QuestaoTeste", b =>
@@ -201,7 +157,9 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
                 {
                     b.HasOne("GeradorDeTestes.Dominio.ModuloDisciplina.Disciplina", "Disciplina")
                         .WithMany("Materias")
-                        .HasForeignKey("DisciplinaId");
+                        .HasForeignKey("DisciplinaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Disciplina");
                 });
@@ -232,42 +190,15 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
                 {
                     b.HasOne("GeradorDeTestes.Dominio.ModuloDisciplina.Disciplina", "Disciplina")
                         .WithMany("Testes")
-                        .HasForeignKey("DisciplinaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("DisciplinaId");
 
-                    b.Navigation("Disciplina");
-                });
-
-            modelBuilder.Entity("GeradorDeTestes.Dominio.ModuloTeste.TesteMateriaQuantidade", b =>
-                {
                     b.HasOne("GeradorDeTestes.Dominio.ModuloMateria.Materia", "Materia")
                         .WithMany()
-                        .HasForeignKey("MateriaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("MateriaId");
 
-                    b.HasOne("GeradorDeTestes.Dominio.ModuloTeste.Teste", null)
-                        .WithMany("QuantidadesPorMateria")
-                        .HasForeignKey("TesteId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                    b.Navigation("Disciplina");
 
                     b.Navigation("Materia");
-                });
-
-            modelBuilder.Entity("MateriaTeste", b =>
-                {
-                    b.HasOne("GeradorDeTestes.Dominio.ModuloMateria.Materia", null)
-                        .WithMany()
-                        .HasForeignKey("MateriasId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("GeradorDeTestes.Dominio.ModuloTeste.Teste", null)
-                        .WithMany()
-                        .HasForeignKey("TestesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("QuestaoTeste", b =>
@@ -300,11 +231,6 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
             modelBuilder.Entity("GeradorDeTestes.Dominio.ModuloQuestao.Questao", b =>
                 {
                     b.Navigation("Alternativas");
-                });
-
-            modelBuilder.Entity("GeradorDeTestes.Dominio.ModuloTeste.Teste", b =>
-                {
-                    b.Navigation("QuantidadesPorMateria");
                 });
 #pragma warning restore 612, 618
         }
