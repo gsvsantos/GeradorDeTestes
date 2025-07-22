@@ -16,12 +16,14 @@ namespace GeradorDeTestes.WebApp.Controllers;
 public class TesteController : Controller
 {
     private readonly GeradorDeTestesDbContext contexto;
+    private readonly GeradorPdfService geradorPdfService;
     private readonly IRepositorioTeste repositorioTeste;
 
-    public TesteController(GeradorDeTestesDbContext contexto, IRepositorioTeste repositorioTeste)
+    public TesteController(GeradorDeTestesDbContext contexto, GeradorPdfService geradorPdfService, IRepositorioTeste repositorioTeste)
     {
         this.contexto = contexto;
         this.repositorioTeste = repositorioTeste;
+        this.geradorPdfService = geradorPdfService;
     }
 
     public IActionResult Index()
@@ -603,5 +605,25 @@ public class TesteController : Controller
         DetalhesProvaoViewModel detalhesProvaoVM = testeSelecionado.ParaDetalhesProvaoVM();
 
         return View(detalhesProvaoVM);
+    }
+
+    [HttpGet, Route("/testes/{id:guid}/gerar-pdf")]
+    public IActionResult GerarPdf(Guid id)
+    {
+        Teste teste = repositorioTeste.SelecionarRegistroPorId(id)!;
+
+        byte[] pdfBytes = geradorPdfService.GerarPdfTeste(teste);
+
+        return File(pdfBytes, "application/pdf", $"Teste_{teste.Titulo}.pdf");
+    }
+
+    [HttpGet, Route("/testes/{id:guid}/gerar-gabarito")]
+    public IActionResult GerarGabaritoPdf(Guid id)
+    {
+        Teste teste = repositorioTeste.SelecionarRegistroPorId(id)!;
+
+        byte[] pdfBytes = geradorPdfService.GerarPdfGabarito(teste);
+
+        return File(pdfBytes, "application/pdf", $"Gabarito_{teste.Titulo}.pdf");
     }
 }

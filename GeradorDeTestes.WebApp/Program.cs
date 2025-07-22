@@ -1,11 +1,11 @@
 using GeradorDeTestes.Dominio.ModuloDisciplina;
+using GeradorDeTestes.Dominio.ModuloMateria;
 using GeradorDeTestes.Dominio.ModuloQuestao;
 using GeradorDeTestes.Dominio.ModuloTeste;
-using GeradorDeTestes.Dominio.ModuloMateria;
 using GeradorDeTestes.Infraestrutura.ORM.ModuloDisciplina;
+using GeradorDeTestes.Infraestrutura.ORM.ModuloMateria;
 using GeradorDeTestes.Infraestrutura.ORM.ModuloQuestao;
 using GeradorDeTestes.Infraestrutura.ORM.ModuloTeste;
-using GeradorDeTestes.Infraestrutura.ORM.ModuloMateria;
 using GeradorDeTestes.WebApp.ActionFilters;
 using GeradorDeTestes.WebApp.DependencyInjection;
 using GeradorDeTestes.WebApp.ORM;
@@ -19,6 +19,7 @@ public class Program
     public static void Main(string[] args)
     {
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+        QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
         builder.Services.AddControllersWithViews((options) =>
         {
             options.Filters.Add<ValidarModeloAttribute>();
@@ -35,6 +36,7 @@ public class Program
         builder.Services.AddScoped<IRepositorioMateria, RepositorioMateriaORM>();
         builder.Services.AddScoped<IRepositorioQuestao, RepositorioQuestaoORM>();
         builder.Services.AddScoped<IRepositorioTeste, RepositorioTesteORM>();
+        builder.Services.AddScoped<GeradorPdfService>();
         builder.Services.AddEntityFrameworkConfig(builder.Configuration);
         builder.Services.AddSerilogConfig(builder.Logging);
 
