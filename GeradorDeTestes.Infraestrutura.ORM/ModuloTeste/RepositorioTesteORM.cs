@@ -1,4 +1,5 @@
 ﻿using GeradorDeTestes.Dominio.ModuloMateria;
+using GeradorDeTestes.Dominio.ModuloQuestao;
 using GeradorDeTestes.Dominio.ModuloTeste;
 using GeradorDeTestes.Infraestrutura.ORM.Compartilhado;
 using Microsoft.EntityFrameworkCore;
@@ -29,7 +30,6 @@ public class RepositorioTesteORM : RepositorioBaseORM<Teste>, IRepositorioTeste
             teste.QuantidadesPorMateria.Add(objComQuantidade);
             contexto.QuantidadesPorMateria.Add(objComQuantidade);
         }
-        contexto.SaveChanges();
     }
 
     public List<Teste> SelecionarNaoFinalizadosAntigos(TimeSpan tempoMaximo)
@@ -43,12 +43,21 @@ public class RepositorioTesteORM : RepositorioBaseORM<Teste>, IRepositorioTeste
     {
         return registros.Where(t => !t.Finalizado).ToList();
     }
+    public List<Questao> SelecionarQuestoesParaProvao(Guid disciplinaId, int quantidade)
+    {
+        return contexto.Questoes
+            .Include(q => q.Materia)
+            .Where(q => q.Materia.Disciplina.Id == disciplinaId)
+            .OrderBy(q => Guid.NewGuid())
+            .Take(quantidade)
+            .ToList();
+    }
 
-    public void RemoverRegistros(List<Teste> testes)
+    public int RemoverRegistros(List<Teste> testes)
     {
         contexto.Testes.RemoveRange(testes);
 
-        contexto.SaveChanges();
+        return contexto.SaveChanges();
     }
 
     public override Teste? SelecionarRegistroPorId(Guid idRegistro)
@@ -58,8 +67,12 @@ public class RepositorioTesteORM : RepositorioBaseORM<Teste>, IRepositorioTeste
             .ThenInclude(m => m.Questoes)
             .Include(t => t.Questoes)
             .ThenInclude(q => q.Alternativas)
+            .Include(t => t.Questoes)
+            .ThenInclude(q => q.Materia)
             .Include(t => t.QuantidadesPorMateria)
             .ThenInclude(qpm => qpm.Materia)
+            .Include(t => t.Materias)
+            .ThenInclude(m => m.Disciplina)
             .FirstOrDefault(t => t.Id.Equals(idRegistro));
     }
 

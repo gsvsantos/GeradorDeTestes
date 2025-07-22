@@ -24,6 +24,8 @@ public class MapeadorMateriaORM : IEntityTypeConfiguration<Materia>
             .IsRequired();
 
         builder.HasMany(m => m.Questoes)
-            .WithOne(q => q.Materia);
+            .WithOne(q => q.Materia)
+            .OnDelete(DeleteBehavior.Restrict)
+            .IsRequired();
     }
 }

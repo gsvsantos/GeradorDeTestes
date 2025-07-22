@@ -4,7 +4,7 @@ using GeradorDeTestes.Infraestrutura.ORM.Compartilhado;
 using GeradorDeTestes.WebApp.Extensions;
 using GeradorDeTestes.WebApp.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace GeradorDeTestes.WebApp.Controllers;
@@ -13,13 +13,13 @@ namespace GeradorDeTestes.WebApp.Controllers;
 public class QuestaoController : Controller
 {
     private readonly GeradorDeTestesDbContext contexto;
-    //private readonly IRepositorioMateria repositorioMateria;
+    private readonly IRepositorioMateria repositorioMateria;
     private readonly IRepositorioQuestao repositorioQuestao;
 
-    public QuestaoController(GeradorDeTestesDbContext contexto, /*IRepositorioMateria repositorioMateria,*/ IRepositorioQuestao repositorioQuestao)
+    public QuestaoController(GeradorDeTestesDbContext contexto, IRepositorioMateria repositorioMateria, IRepositorioQuestao repositorioQuestao)
     {
         this.contexto = contexto;
-        //this.repositorioMateria = repositorioMateria;
+        this.repositorioMateria = repositorioMateria;
         this.repositorioQuestao = repositorioQuestao;
     }
 
@@ -41,8 +41,7 @@ public class QuestaoController : Controller
     [HttpGet("cadastrar")]
     public IActionResult Cadastrar()
     {
-        //List<Materia> materias = repositorioMateria.SelecionarRegistros();
-        List<Materia> materias = contexto.Materias.ToList();
+        List<Materia> materias = repositorioMateria.SelecionarRegistros();
 
         CadastrarQuestaoViewModel cadastrarVM = new(materias);
 
@@ -52,12 +51,22 @@ public class QuestaoController : Controller
     [HttpPost("cadastrar")]
     public IActionResult Cadastrar(CadastrarQuestaoViewModel cadastrarVM)
     {
-        //Materia materiaSelecionada = repositorioMateria.SelecionarRegistroPorId(cadastrarVM.MateriaId)!;
-        Materia? materia = contexto.Materias
-                                .Include(m => m.Disciplina)
-                                .FirstOrDefault(m => m.Id == cadastrarVM.MateriaId);
+        if (repositorioQuestao.SelecionarRegistros()
+            .Any(q => q.Enunciado == cadastrarVM.Enunciado && q.Materia.Id == cadastrarVM.MateriaId))
+            ModelState.AddModelError("ConflitoCadastro", "Já existe uma questão com este enunciado para a mesma matéria.");
 
-        Questao novaQuestao = cadastrarVM.ParaEntidade(materia!);
+        if (!ModelState.IsValid)
+        {
+            cadastrarVM.Materias = repositorioMateria.SelecionarRegistros()
+                .Select(m => new SelectListItem { Text = m.Nome, Value = m.Id.ToString() })
+                .ToList();
+
+            return View(cadastrarVM);
+        }
+
+        Materia materiaSelecionada = repositorioMateria.SelecionarRegistroPorId(cadastrarVM.MateriaId)!;
+
+        Questao novaQuestao = cadastrarVM.ParaEntidade(materiaSelecionada);
 
         IDbContextTransaction transacao = contexto.Database.BeginTransaction();
 
@@ -84,8 +93,7 @@ public class QuestaoController : Controller
     {
         Questao questaoSelecionada = repositorioQuestao.SelecionarRegistroPorId(id)!;
 
-        //List<Materia> materias = repositorioMateria.SelecionarRegistros();
-        List<Materia> materias = contexto.Materias.ToList();
+        List<Materia> materias = repositorioMateria.SelecionarRegistros();
 
         EditarQuestaoViewModel editarVM = new(
             questaoSelecionada,
@@ -97,12 +105,22 @@ public class QuestaoController : Controller
     [HttpPost("editar/{id:guid}")]
     public IActionResult Editar(Guid id, EditarQuestaoViewModel editarVM)
     {
-        //Materia materiaSelecionada = repositorioMateria.SelecionarRegistroPorId(cadastrarVM.MateriaId)!;
-        Materia materia = contexto.Materias
-                                .Include(m => m.Disciplina)
-                                .FirstOrDefault(m => m.Id == editarVM.MateriaId)!;
+        if (repositorioQuestao.SelecionarRegistros()
+            .Any(q => q.Enunciado == editarVM.Enunciado && q.Materia.Id == editarVM.MateriaId && q.Id != id))
+            ModelState.AddModelError("ConflitoEdicao", "Já existe uma questão com este enunciado para a mesma matéria.");
 
-        Questao questaoEditada = editarVM.ParaEntidade(materia);
+        if (!ModelState.IsValid)
+        {
+            editarVM.Materias = repositorioMateria.SelecionarRegistros()
+                .Select(m => new SelectListItem { Text = m.Nome, Value = m.Id.ToString() })
+                .ToList();
+
+            return View(editarVM);
+        }
+
+        Materia materiaSelecionada = repositorioMateria.SelecionarRegistroPorId(editarVM.MateriaId)!;
+
+        Questao questaoEditada = editarVM.ParaEntidade(materiaSelecionada);
 
         IDbContextTransaction transacao = contexto.Database.BeginTransaction();
 
@@ -139,6 +157,21 @@ public class QuestaoController : Controller
     [HttpPost("excluir/{id:guid}")]
     public IActionResult ExcluirConfirmado(Guid id)
     {
+        Questao questaoSelecionada = repositorioQuestao.SelecionarRegistroPorId(id)!;
+
+        if (contexto.Testes.Any(t => t.Questoes.Any(q => q.Id == id)))
+        {
+            ModelState.AddModelError("ConflitoExclusao", "Não é possível excluir a questão pois ela está vinculada a testes.");
+
+            ExcluirQuestaoViewModel excluirVM = new()
+            {
+                Id = questaoSelecionada.Id,
+                Enunciado = questaoSelecionada.Enunciado
+            };
+
+            return View("Excluir", excluirVM);
+        }
+
         IDbContextTransaction transacao = contexto.Database.BeginTransaction();
 
         try
@@ -179,6 +212,15 @@ public class QuestaoController : Controller
             questaoSelecionada,
             alternativas);
 
+        if (alternativas.Count < 2 || alternativas.Count > 4)
+            ModelState.AddModelError("ConflitoAlternativas", "A questão deve ter entre 2 e 4 alternativas.");
+
+        if (alternativas.Count(a => a.EstaCorreta) != 1)
+            ModelState.AddModelError("ConflitoAlternativas", "A questão deve ter exatamente uma alternativa correta.");
+
+        if (!ModelState.IsValid)
+            return View(gerenciarAlternativasVM);
+
         return View(gerenciarAlternativasVM);
     }
 
@@ -186,6 +228,21 @@ public class QuestaoController : Controller
     public IActionResult AdicionarAlternativa(Guid id, AdicionarAlternativaViewModel adicionarAlternativaVM)
     {
         Questao questaoSelecionada = repositorioQuestao.SelecionarRegistroPorId(id)!;
+
+        if (string.IsNullOrWhiteSpace(adicionarAlternativaVM.TextoAlternativa))
+            ModelState.AddModelError("ConflitoAlternativas", "O texto da alternativa é obrigatório.");
+
+        if (questaoSelecionada.Alternativas.Count >= 4)
+            ModelState.AddModelError("ConflitoAlternativas", "A questão já possui o máximo de 4 alternativas.");
+
+        if (!ModelState.IsValid)
+        {
+            GerenciarAlternativasViewModel gerenciarAlternativasVM = new(
+                questaoSelecionada,
+                questaoSelecionada.Alternativas.ToList());
+
+            return View(nameof(GerenciarAlternativas), gerenciarAlternativasVM);
+        }
 
         Alternativa novaAlternativa = new(
             adicionarAlternativaVM.TextoAlternativa,
@@ -259,6 +316,21 @@ public class QuestaoController : Controller
     public IActionResult FinalizarQuestao(Guid id)
     {
         Questao questao = repositorioQuestao.SelecionarRegistroPorId(id)!;
+
+        if (questao.Alternativas.Count < 2 || questao.Alternativas.Count > 4)
+            ModelState.AddModelError("ConflitoAlternativas", "A questão deve ter entre 2 e 4 alternativas.");
+
+        if (questao.Alternativas.Count(a => a.EstaCorreta) != 1)
+            ModelState.AddModelError("ConflitoAlternativas", "A questão deve ter exatamente uma alternativa correta.");
+
+        if (!ModelState.IsValid)
+        {
+            GerenciarAlternativasViewModel gerenciarAlternativasVM = new(
+                questao,
+                questao.Alternativas.ToList());
+
+            return View("GerenciarAlternativas", gerenciarAlternativasVM);
+        }
 
         questao.Finalizado = true;
 

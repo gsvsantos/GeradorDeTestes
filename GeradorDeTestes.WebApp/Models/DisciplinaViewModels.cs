@@ -1,8 +1,12 @@
 ﻿using GeradorDeTestes.Dominio.ModuloMateria;
+using System.ComponentModel.DataAnnotations;
 
 public class FormularioDisciplinaViewModel
 {
     public Guid Id { get; set; }
+
+    [Required(ErrorMessage = "O nome é obrigatório.")]
+    [StringLength(100, ErrorMessage = "O nome deve ter no máximo 100 caracteres.")]
     public string Nome { get; set; }
 }
 

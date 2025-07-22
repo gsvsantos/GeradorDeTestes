@@ -27,6 +27,7 @@ public class TesteController : Controller
     public IActionResult Index()
     {
         List<Teste> testesNaoFinalizados = repositorioTeste.SelecionarNaoFinalizados();
+
         repositorioTeste.RemoverRegistros(testesNaoFinalizados);
 
         List<Teste> testes = repositorioTeste.SelecionarRegistros()
@@ -51,7 +52,21 @@ public class TesteController : Controller
     [HttpPost("cadastrar")]
     public IActionResult Cadastrar(CadastrarTesteViewModel cadastrarVM)
     {
-        Disciplina? disciplina = contexto.Disciplinas.FirstOrDefault(d => d.Id.Equals(cadastrarVM.DisciplinaId))!;
+        if (repositorioTeste.SelecionarRegistros().Any(t => t.Titulo.Equals(cadastrarVM.Titulo)))
+            ModelState.AddModelError("ConflitoCadastro", "Já existe um teste com este título.");
+
+        if (!ModelState.IsValid)
+        {
+            cadastrarVM.Disciplinas = contexto.Disciplinas.Select(d => new SelectListItem
+            {
+                Text = d.Nome,
+                Value = d.Id.ToString()
+            }).ToList();
+
+            return View(cadastrarVM);
+        }
+
+        Disciplina disciplina = contexto.Disciplinas.FirstOrDefault(d => d.Id.Equals(cadastrarVM.DisciplinaId))!;
 
         Teste novoTeste = cadastrarVM.ParaEntidade(disciplina);
 
@@ -108,6 +123,10 @@ public class TesteController : Controller
 
         if (TempData["Embaralhar"] is not null)
         {
+            testeSelecionado.Questoes.Clear();
+            contexto.QuantidadesPorMateria.RemoveRange(testeSelecionado.QuantidadesPorMateria);
+            contexto.SaveChanges();
+
             if (testeSelecionado.Questoes.Count < testeSelecionado.QuantidadeQuestoes)
             {
                 List<Questao> todasQuestoes = new List<Questao>();
@@ -134,26 +153,41 @@ public class TesteController : Controller
                     repositorioTeste.AtualizarQuantidadePorMateria(testeSelecionado, questao.Materia);
                 }
             }
-
+            contexto.SaveChanges();
             testeSelecionado.Questoes.Shuffle();
         }
 
-        GerarTesteViewModel gerarTesteVM = testeSelecionado.ParaGerarTesteVM(materias, materiasSelecionadas);
+        FormGerarPostViewModel gerarTestePostVM = testeSelecionado.ParaGerarTestePostVM(materias, materiasSelecionadas);
 
-        return View(gerarTesteVM);
+        return View(gerarTestePostVM);
     }
 
     [HttpPost("gerar-teste")]
-    public IActionResult GerarTeste(Guid id, GerarTestePostViewModel gerarTestePostVM)
+    public IActionResult GerarTeste(Guid id, FormGerarPostViewModel gerarTestePostVM)
     {
         Teste testeSelecionado = repositorioTeste.SelecionarRegistroPorId(id)!;
+
+        if (gerarTestePostVM.QuestoesSelecionadasIds.Count < testeSelecionado.QuantidadeQuestoes)
+            ModelState.AddModelError("ConflitoGeracao", "O número de questões selecionadas é menor do que o esperado.");
+
+        if (!ModelState.IsValid)
+        {
+            List<Materia> materias = contexto.Materias.Where(m => m.Disciplina.Id.Equals(testeSelecionado.Disciplina.Id)
+            && m.Serie.Equals(testeSelecionado.Serie)).ToList();
+
+            FormGerarViewModel formGerarVM = testeSelecionado.ParaGerarTestePostVM(materias, testeSelecionado.Materias);
+
+            return View(nameof(GerarTeste), formGerarVM);
+        }
 
         IDbContextTransaction transacao = contexto.Database.BeginTransaction();
 
         try
         {
             testeSelecionado.Finalizado = true;
+
             contexto.Update(testeSelecionado);
+
             contexto.SaveChanges();
 
             transacao.Commit();
@@ -161,6 +195,7 @@ public class TesteController : Controller
         catch (Exception)
         {
             transacao.Rollback();
+
             throw;
         }
 
@@ -263,17 +298,46 @@ public class TesteController : Controller
     [HttpPost, Route("/testes/{id:guid}/definir-quantidade-questoes/{materiaId:guid}")]
     public IActionResult DefinirQuantidadeQuestoes(Guid id, Guid materiaId, DefinirQuantidadeQuestoesPostViewModel vm)
     {
-        Teste testeSelecionado = repositorioTeste.SelecionarRegistroPorId(id)!;
+        if (vm.QuantidadeQuestoesMateria < 0 || vm.QuantidadeQuestoesMateria > 100)
+            ModelState.AddModelError("ConflitoQuantidadeQuestoesMateria", "A quantidade deve ser entre 0 e 100.");
 
-        Materia materiaSelecionada = testeSelecionado.Materias.FirstOrDefault(m => m.Id.Equals(materiaId))!;
+        if (!ModelState.IsValid)
+        {
+            Teste testeSelecionado = repositorioTeste.SelecionarRegistroPorId(id)!;
 
-        TesteMateriaQuantidade? objComQuantidade = testeSelecionado.QuantidadesPorMateria
-            .FirstOrDefault(x => x.Materia.Id == materiaId);
+            Materia materiaSelecionada = contexto.Materias.First(m => m.Id == materiaId);
+
+            List<Questao> questoes = materiaSelecionada.Questoes.ToList();
+
+            Disciplina disciplina = contexto.Disciplinas.Include(d => d.Materias).First(d => d.Id == testeSelecionado.Disciplina.Id);
+
+            List<Materia> materias = contexto.Materias.Where(m => m.Disciplina.Id == disciplina.Id && m.Serie == testeSelecionado.Serie).ToList();
+
+            DefinirQuantidadeQuestoesViewModel definirVM = new DefinirQuantidadeQuestoesViewModel
+            {
+                Id = testeSelecionado.Id,
+                Titulo = testeSelecionado.Titulo,
+                NomeDisciplina = disciplina.Nome,
+                Serie = testeSelecionado.Serie,
+                MateriaId = materiaId,
+                Questoes = questoes.Select(q => new SelectListItem { Text = q.Enunciado, Value = q.Id.ToString() }).ToList()
+            };
+
+            return View(definirVM);
+        }
 
         IDbContextTransaction transacao = contexto.Database.BeginTransaction();
 
         try
         {
+
+            Teste testeSelecionado = repositorioTeste.SelecionarRegistroPorId(id)!;
+
+            Materia materiaSelecionada = testeSelecionado.Materias.FirstOrDefault(m => m.Id.Equals(materiaId))!;
+
+            TesteMateriaQuantidade? objComQuantidade = testeSelecionado.QuantidadesPorMateria
+                .FirstOrDefault(x => x.Materia.Id == materiaId);
+
             if (vm.QuantidadeQuestoesMateria == 0 && objComQuantidade is not null)
             {
                 testeSelecionado.QuantidadesPorMateria.Remove(objComQuantidade);
@@ -341,6 +405,11 @@ public class TesteController : Controller
         contexto.QuantidadesPorMateria.RemoveRange(testeSelecionado.QuantidadesPorMateria);
         contexto.SaveChanges();
 
+        foreach (Materia materia in materiasSelecionadas)
+        {
+            testeSelecionado.AderirMateria(materia);
+        }
+
         if (testeSelecionado.Questoes.Count < testeSelecionado.QuantidadeQuestoes)
         {
             List<Questao> todasQuestoes = new List<Questao>();
@@ -367,18 +436,31 @@ public class TesteController : Controller
                 repositorioTeste.AtualizarQuantidadePorMateria(testeSelecionado, questao.Materia);
             }
         }
-
+        contexto.SaveChanges();
         testeSelecionado.Questoes.Shuffle();
 
-        GerarProvaoViewModel gerarProvaoVM = testeSelecionado.ParaGerarProvaoVM(materias, materiasSelecionadas);
+        FormGerarPostViewModel formGerarPostVM = testeSelecionado.ParaGerarTestePostVM(materias, materiasSelecionadas);
 
-        return View(gerarProvaoVM);
+        return View(formGerarPostVM);
     }
 
     [HttpPost("gerar-provao")]
-    public IActionResult GerarProvao(Guid id, GerarProvaoPostViewModel gerarProvaoPostVM)
+    public IActionResult GerarProvao(Guid id, FormGerarPostViewModel formGerarPostVM)
     {
         Teste testeSelecionado = repositorioTeste.SelecionarRegistroPorId(id)!;
+
+        if (formGerarPostVM.QuestoesSelecionadasIds.Count < testeSelecionado.QuantidadeQuestoes)
+            ModelState.AddModelError("ConflitoGeracao", "O número de questões selecionadas é menor do que o esperado.");
+
+        if (!ModelState.IsValid)
+        {
+            List<Materia> materias = contexto.Materias.Where(m => m.Disciplina.Id.Equals(testeSelecionado.Disciplina.Id)
+            && m.Serie.Equals(testeSelecionado.Serie)).ToList();
+
+            FormGerarViewModel formGerarVM = testeSelecionado.ParaGerarTestePostVM(materias, testeSelecionado.Materias);
+
+            return View(nameof(GerarProvao), formGerarVM);
+        }
 
         IDbContextTransaction transacao = contexto.Database.BeginTransaction();
 
@@ -392,7 +474,7 @@ public class TesteController : Controller
 
             transacao.Commit();
         }
-        catch (Exception)
+        catch
         {
             transacao.Rollback();
 
@@ -413,6 +495,12 @@ public class TesteController : Controller
     [HttpPost("duplicar/{id:guid}")]
     public IActionResult Duplicar(Guid id, DuplicarViewModel duplicarVM)
     {
+        if (repositorioTeste.SelecionarRegistros().Any(t => t.Titulo == duplicarVM.Titulo))
+            ModelState.AddModelError("ConflitoCadastro", "Já existe um teste com este título.");
+
+        if (!ModelState.IsValid)
+            return View(duplicarVM);
+
         Teste testeOriginal = repositorioTeste.SelecionarRegistroPorId(id)!;
 
         Teste novoTeste = new Teste()

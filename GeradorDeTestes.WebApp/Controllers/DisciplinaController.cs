@@ -39,6 +39,12 @@ public class DisciplinaController : Controller
     [HttpPost("cadastrar")]
     public IActionResult Cadastrar(CadastrarDisciplinaViewModel cadastrarVM)
     {
+        if (repositorio.SelecionarRegistros().Any(d => d.Nome == cadastrarVM.Nome))
+            ModelState.AddModelError("ConflitoCadastro", "Já existe uma disciplina com este nome.");
+
+        if (!ModelState.IsValid)
+            return View(cadastrarVM);
+
         Disciplina disciplina = cadastrarVM.ParaEntidade();
 
         IDbContextTransaction transacao = contexto.Database.BeginTransaction();
@@ -78,6 +84,12 @@ public class DisciplinaController : Controller
     [HttpPost("editar/{id}")]
     public IActionResult Editar(Guid id, EditarDisciplinaViewModel editarVM)
     {
+        if (repositorio.SelecionarRegistros().Any(d => d.Nome == editarVM.Nome && d.Id != id))
+            ModelState.AddModelError("ConflitoEdicao", "Já existe uma disciplina com este nome.");
+
+        if (!ModelState.IsValid)
+            return View(editarVM);
+
         Disciplina existente = repositorio.SelecionarRegistros()
                                    .FirstOrDefault(d => d.Nome == editarVM.Nome && d.Id != id)!;
 
@@ -121,6 +133,19 @@ public class DisciplinaController : Controller
     public IActionResult ExcluirConfirmado(Guid id)
     {
         Disciplina disciplina = repositorio.SelecionarRegistroPorId(id)!;
+
+        if (contexto.Materias.Any(m => m.Disciplina.Id == id) || contexto.Testes.Any(t => t.Disciplina.Id == id))
+        {
+            ModelState.AddModelError("ConflitoExclusao", "Não é possível excluir: há matérias ou testes vinculados.");
+
+            ExcluirDisciplinaViewModel excluirVM = new()
+            {
+                Id = disciplina.Id,
+                Nome = disciplina.Nome
+            };
+
+            return View("Excluir", excluirVM);
+        }
 
         IDbContextTransaction transacao = contexto.Database.BeginTransaction();
 

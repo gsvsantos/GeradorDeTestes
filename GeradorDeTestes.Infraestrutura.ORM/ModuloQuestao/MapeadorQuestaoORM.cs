@@ -16,8 +16,8 @@ public class MapeadorQuestaoORM : IEntityTypeConfiguration<Questao>
 
         builder.HasOne(q => q.Materia)
             .WithMany(m => m.Questoes)
-            .IsRequired()
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Restrict)
+            .IsRequired();
 
         builder.Property(q => q.Finalizado)
             .IsRequired();
@@ -27,9 +27,7 @@ public class MapeadorQuestaoORM : IEntityTypeConfiguration<Questao>
 
         builder.HasMany(q => q.Alternativas)
             .WithOne(a => a.Questao)
+            .OnDelete(DeleteBehavior.Cascade)
             .IsRequired();
-
-        builder.HasMany(q => q.Testes)
-            .WithMany(t => t.Questoes);
     }
 }
