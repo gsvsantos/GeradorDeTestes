@@ -19,21 +19,22 @@
 </div>
 
 <div class="row">
-@*     @if (Model.UltimosTestes?.Any() == true)
+    @if (Model.UltimosTestes?.Any() == true)
     {
-        @foreach (var teste in Model.UltimosTestes)
+        @foreach (var t in Model.UltimosTestes)
         {
             <div class="col-12 col-sm-6 col-md-4 mb-3">
                 <div class="card h-100">
                     <div class="card-body">
-                        <h5 class="card-title">@teste.Nome</h5>
+                        <h5 class="card-title">@t.Titulo</h5>
                         <p class="card-text">
-                            <strong>Disciplina:</strong> @teste.Disciplina <br />
-                            <strong>Matéria:</strong> @teste.Materia <br />
-                            <strong>Qtd Questões:</strong> @teste.QuantidadeQuestoes
+                            <strong>Disciplina:</strong> @t.NomeDisciplina <br />
+                            <strong>Data:</strong> @t.DataCriacao.ToShortDateString() <br />
+                            <strong>Matérias:</strong> @t.Materias.Count <br />
+                            <strong>Qtd Questões:</strong> @t.QuantidadeQuestoes
                         </p>
-                        <a href="/Testes/Detalhes/@teste.Id" class="btn btn-sm btn-outline-secondary">
-                            <i class="bi bi-search"></i> Ver Detalhes
+                        <a class="btn btn-primary rounded-circle" title="Detalhes Teste" asp-controller="Teste" asp-action="@(t.EhProvao ? "DetalhesProvao" : "DetalhesTeste")" asp-route-id="@t.Id">
+                            <i class="bi bi-eye"></i>
                         </a>
                     </div>
                 </div>
@@ -45,5 +46,5 @@
         <div class="col-12">
             <div class="alert alert-info">Nenhum teste cadastrado ainda.</div>
         </div>
-    } *@
+    }
 </div>

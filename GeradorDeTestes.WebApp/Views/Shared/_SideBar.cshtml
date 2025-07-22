@@ -12,26 +12,86 @@
     <ul class="nav flex-column sidebar-nav gap-2 ms-auto">
         <li class="nav-item">
             <a class="nav-link nav-title fw-semibold" href="/">
-            <i class="bi bi-house-fill"></i>
-            <span>Página Inicial</span>
+                <i class="bi bi-house"></i>
+                <span>Página Inicial</span>
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link nav-title fw-semibold collapsed has-dropdown" href="#" data-bs-toggle="collapse" data-bs-target=".exemplos " aria-expanded="false">
-                <i class="bi bi-people-fill"></i>
-                <span>Exemplos</span>
+            <a class="nav-link nav-title fw-semibold collapsed has-dropdown" href="#" data-bs-toggle="collapse" data-bs-target=".disciplinas" aria-expanded="false">
+                <i class="bi bi-journal-bookmark"></i>
+                <span>Disciplinas</span>
                 <i class="bi bi-chevron-down ms-auto dropdown-arrow"></i>
                 <i class="bi bi-chevron-right ms-auto right-arrow"></i>
             </a>
-            <ul class="nav-dropdown exemplos list-unstyled collapse" data-bs-parent=".sidebar-nav">
+            <ul class="nav-dropdown disciplinas list-unstyled collapse" data-bs-parent=".sidebar-nav">
                 <li class="nav-item">
-                    <a class="nav-link nav-option fw-semibold my-1" href="#">
-                        <span>Menu Exemplo</span>
+                    <a class="nav-link nav-option fw-semibold my-1" href="/disciplinas">
+                        <span>Listar Disciplinas</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link nav-option fw-semibold my-1" href="#">
-                        <span>Novo Exemplo</span>
+                    <a class="nav-link nav-option fw-semibold my-1" href="/disciplinas/cadastrar">
+                        <span>Nova Disciplina</span>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link nav-title fw-semibold collapsed has-dropdown" href="#" data-bs-toggle="collapse" data-bs-target=".materias" aria-expanded="false">
+                <i class="bi bi-book"></i>
+                <span>Matérias</span>
+                <i class="bi bi-chevron-down ms-auto dropdown-arrow"></i>
+                <i class="bi bi-chevron-right ms-auto right-arrow"></i>
+            </a>
+            <ul class="nav-dropdown materias list-unstyled collapse" data-bs-parent=".sidebar-nav">
+                <li class="nav-item">
+                    <a class="nav-link nav-option fw-semibold my-1" href="/materias">
+                        <span>Listar Matérias</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-option fw-semibold my-1" href="/materias/cadastrar">
+                        <span>Nova Matéria</span>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link nav-title fw-semibold collapsed has-dropdown" href="#" data-bs-toggle="collapse" data-bs-target=".questoes" aria-expanded="false">
+                <i class="bi bi-question-circle"></i>
+                <span>Questões</span>
+                <i class="bi bi-chevron-down ms-auto dropdown-arrow"></i>
+                <i class="bi bi-chevron-right ms-auto right-arrow"></i>
+            </a>
+            <ul class="nav-dropdown questoes list-unstyled collapse" data-bs-parent=".sidebar-nav">
+                <li class="nav-item">
+                    <a class="nav-link nav-option fw-semibold my-1" href="/questoes">
+                        <span>Listar Questões</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-option fw-semibold my-1" href="/questoes/cadastrar">
+                        <span>Nova Questão</span>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link nav-title fw-semibold collapsed has-dropdown" href="#" data-bs-toggle="collapse" data-bs-target=".testes" aria-expanded="false">
+                <i class="bi bi-file-earmark-text"></i>
+                <span>Testes</span>
+                <i class="bi bi-chevron-down ms-auto dropdown-arrow"></i>
+                <i class="bi bi-chevron-right ms-auto right-arrow"></i>
+            </a>
+            <ul class="nav-dropdown testes list-unstyled collapse" data-bs-parent=".sidebar-nav">
+                <li class="nav-item">
+                    <a class="nav-link nav-option fw-semibold my-1" href="/testes">
+                        <span>Listar Testes</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-option fw-semibold my-1" href="/testes/cadastrar">
+                        <span>Novo Teste</span>
                     </a>
                 </li>
             </ul>

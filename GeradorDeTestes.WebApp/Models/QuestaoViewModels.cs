@@ -15,9 +15,10 @@ public class FormularioQuestaoViewModel
     [Required(ErrorMessage = "Digite o Enunciado.")]
     [DisplayName("Enunciado")]
     public string Enunciado { get; set; }
-    public Guid? MateriaId { get; set; }
 
-    [Required(ErrorMessage = "Escolha uma matéria.")]
+    [Required(ErrorMessage = "Escolha uma Matéria.")]
+    [DisplayName("Matéria")]
+    public Guid MateriaId { get; set; }
     public List<SelectListItem> Materias { get; set; } = new List<SelectListItem>();
 }
 
@@ -103,6 +104,8 @@ public class GerenciarAlternativasViewModel
 
 public class AdicionarAlternativaViewModel
 {
+    [Required(ErrorMessage = "Digite o texto da alternativa.")]
+    [StringLength(200, ErrorMessage = "A alternativa deve ter no máximo 200 caracteres.")]
     public string TextoAlternativa { get; set; }
 }
 

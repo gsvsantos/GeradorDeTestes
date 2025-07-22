@@ -18,7 +18,6 @@ public class ValidarModeloAttribute : ActionFilterAttribute
             x => x?.GetType().Name.EndsWith("ViewModel") == true);
 
         if (!modelState.IsValid && viewModel != null)
-            context.Result = controller.View(viewModel);
+            context.HttpContext.Items["ModelStateInvalid"] = true;
     }
 }
-

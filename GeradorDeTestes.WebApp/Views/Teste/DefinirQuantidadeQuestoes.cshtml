@@ -20,6 +20,14 @@
             <span class="fw-semibold">@Model.Serie.GetDisplayName()</span>
         </p>
 
+        @if (ViewData.ModelState["ConflitoQuantidadeQuestoesMateria"]?.Errors.Count > 0)
+        {
+            <div class="alert alert-danger alert-dismissible fade show my-3" role="alert">
+                @ViewData.ModelState["ConflitoQuantidadeQuestoesMateria"]!.Errors.First().ErrorMessage
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
         <form action="/testes/@Model.Id/definir-quantidade-questoes/@Model.MateriaId" method="post">
             <input type="hidden" asp-for="Id" />
             <input type="hidden" asp-for="MateriaId"/>

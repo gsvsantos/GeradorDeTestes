@@ -13,6 +13,14 @@
 
         <h3>@Model.Questao.Enunciado</h3>
 
+        @if (ViewData.ModelState["ConflitoAlternativas"]?.Errors.Count > 0)
+        {
+            <div class="alert alert-danger alert-dismissible fade show my-3" role="alert">
+                @ViewData.ModelState["ConflitoAlternativas"]!.Errors.First().ErrorMessage
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+            </div>
+        }
+
         <div class="form-group d-flex mt-2">
             <form action="/questoes/@Model.Questao.Id/adicionar-alternativa" method="post">
                 <div class="mt-3">

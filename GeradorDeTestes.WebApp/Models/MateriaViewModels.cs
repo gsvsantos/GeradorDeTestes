@@ -1,10 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel;
-using GeradorDeTestes.Dominio.ModuloDisciplina;
+﻿using GeradorDeTestes.Dominio.ModuloDisciplina;
 using GeradorDeTestes.Dominio.ModuloMateria;
 using GeradorDeTestes.Dominio.ModuloQuestao;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using GeradorDeTestes.WebApp.Extensions;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace GeradorDeTestes.WebApp.Models;
 
@@ -13,6 +13,7 @@ public class FormularioMateriaViewModel
     public Guid Id { get; set; }
 
     [Required(ErrorMessage = "Escreva um Nome.")]
+    [StringLength(100, ErrorMessage = "O nome deve ter no máximo 100 caracteres.")]
     [DisplayName("Nome")]
     public string Nome { get; set; }
 
@@ -43,7 +44,7 @@ public class CadastrarMateriaViewModel : FormularioMateriaViewModel
 
     public CadastrarMateriaViewModel(List<Disciplina> disciplinas)
     {
-        foreach(Disciplina disciplina in disciplinas)
+        foreach (Disciplina disciplina in disciplinas)
         {
             SelectListItem d = new SelectListItem()
             {
@@ -76,7 +77,7 @@ public class EditarMateriaViewModel : FormularioMateriaViewModel
 
             Disciplinas.Add(d);
         }
-
+        DisciplinaId = materia.Disciplina.Id;
         Serie = materia.Serie;
     }
 }
@@ -120,7 +121,7 @@ public class DetalhesMateriaViewModel
 
 public class QuestaoMateriaViewModel
 {
-    public Guid Id { get; set;}
+    public Guid Id { get; set; }
     public string Enunciado { get; set; }
 
     public QuestaoMateriaViewModel(Guid id, string enunciado)

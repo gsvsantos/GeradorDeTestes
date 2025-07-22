@@ -19,6 +19,7 @@ public class MapeadorTesteORM : IEntityTypeConfiguration<Teste>
 
         builder.HasOne(t => t.Disciplina)
             .WithMany(d => d.Testes)
+            .OnDelete(DeleteBehavior.Restrict)
             .IsRequired();
 
         builder.Property(t => t.Serie)
@@ -30,10 +31,10 @@ public class MapeadorTesteORM : IEntityTypeConfiguration<Teste>
             "MateriaTeste", j => j
             .HasOne<Materia>()
             .WithMany().HasForeignKey("MateriasId")
-            .OnDelete(DeleteBehavior.Restrict), j => j
+            .OnDelete(DeleteBehavior.Cascade), j => j
             .HasOne<Teste>()
             .WithMany().HasForeignKey("TestesId")
-            .OnDelete(DeleteBehavior.Restrict));
+            .OnDelete(DeleteBehavior.Cascade));
 
         builder.Property(t => t.EhProvao)
             .IsRequired();
@@ -55,15 +56,15 @@ public class MapeadorTesteORM : IEntityTypeConfiguration<Teste>
             .HasOne<Questao>()
             .WithMany()
             .HasForeignKey("QuestoesId")
-            .OnDelete(DeleteBehavior.Restrict),
+            .OnDelete(DeleteBehavior.Cascade),
             j => j
             .HasOne<Teste>()
             .WithMany()
             .HasForeignKey("TestesId")
-            .OnDelete(DeleteBehavior.Restrict));
+            .OnDelete(DeleteBehavior.Cascade));
 
         builder.HasMany(t => t.QuantidadesPorMateria)
             .WithOne()
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -1,5 +1,5 @@
 ﻿@using GeradorDeTestes.WebApp.Extensions
-@model GerarTesteViewModel
+@model FormGerarPostViewModel
 
 @{
     ViewBag.Titulo = "Gerar Teste";
@@ -28,6 +28,14 @@
                 <p class="card-text mb-1">
                     <span class="fw-semibold">Quantidade de Questões:</span> @Model.Questoes.Count / @Model.QuantidadeQuestoes
                 </p>
+
+                @if (ViewData.ModelState["ConflitoGeracao"]?.Errors.Count > 0)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show my-3" role="alert">
+                        @ViewData.ModelState["ConflitoGeracao"]!.Errors.First().ErrorMessage
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
 
                 <div class="form-group mt-2">
                     <form action="/testes/@Model.Id/selecionar-materia/@Model.MateriaId" method="post">
@@ -91,7 +99,14 @@
                             <button type="submit" class="btn btn-outline-danger rounded-3 px-2">Cancelar</button>
                         </form>
                         <form class="d-inline" asp-action="GerarTeste" asp-route-id="@Model.Id" method="post">
+                            <input type="hidden" asp-for="Titulo" />
                             <input type="hidden" asp-for="DisciplinaId" />
+                            <input type="hidden" asp-for="NomeDisciplina" />
+                            <input type="hidden" asp-for="QuantidadeQuestoes" />
+                            @foreach (var questao in Model.Questoes)
+                            {
+                                <input type="hidden" name="QuestoesSelecionadasIds" value="@questao.Value" />
+                            }
                             <button type="submit" class="btn btn-primary rounded-4 px-5">Confirmar</button>
                         </form>
                     </div>

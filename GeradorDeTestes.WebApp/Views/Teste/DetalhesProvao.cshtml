@@ -18,6 +18,10 @@
             <span class="fw-semibold">Série:</span> @Model.Serie.GetDisplayName();
         </p>
     </div>
+    <div class="ms-auto p-3">
+        <a class="btn btn-primary" asp-action="GerarPdf" asp-route-id="@Model.Id">Baixar PDF</a>
+        <a class="btn btn-secondary" asp-action="GerarGabaritoPdf" asp-route-id="@Model.Id">Baixar Gabarito</a>
+    </div>
 </div>
 
 <hr class="border border-dark opacity-25" />
@@ -25,7 +29,7 @@
     <div class="col-12 col-md-6 mb-3">
         <div class="card rounded-4 border-0">
             <div class="card-body">
-                <h5>Alternativas</h5>
+                <h5>Materias</h5>
                 <table class="table table-striped">
                     <thead>
                         <tr>
@@ -33,10 +37,10 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (SelectListItem m in Model.Materias)
+                        @foreach (MateriaComQuestoesViewModel m in Model.MateriasComQuestoes)
                         {
                             <tr>
-                                <td>@m.Text</td>
+                                <td>@m.NomeMateria</td>
                             </tr>
                         }
                     </tbody>
@@ -56,11 +60,14 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (SelectListItem q in Model.Questoes)
+                        @foreach (MateriaComQuestoesViewModel m in Model.MateriasComQuestoes)
                         {
-                            <tr>
-                                <td>@q.Text</td>
-                            </tr>
+                            foreach (string q in m.Questoes)
+                            {
+                                <tr>
+                                    <td>@q</td>
+                                </tr>
+                            }
                         }
                     </tbody>
                 </table>
