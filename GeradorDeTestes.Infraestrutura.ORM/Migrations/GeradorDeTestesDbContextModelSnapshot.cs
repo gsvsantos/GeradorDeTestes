@@ -209,7 +209,7 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
                     b.HasOne("GeradorDeTestes.Dominio.ModuloQuestao.Questao", "Questao")
                         .WithMany("Alternativas")
                         .HasForeignKey("QuestaoId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Questao");
@@ -248,7 +248,7 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
                     b.HasOne("GeradorDeTestes.Dominio.ModuloTeste.Teste", null)
                         .WithMany("QuantidadesPorMateria")
                         .HasForeignKey("TesteId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Materia");
                 });
@@ -258,13 +258,13 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
                     b.HasOne("GeradorDeTestes.Dominio.ModuloMateria.Materia", null)
                         .WithMany()
                         .HasForeignKey("MateriasId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("GeradorDeTestes.Dominio.ModuloTeste.Teste", null)
                         .WithMany()
                         .HasForeignKey("TestesId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
@@ -273,13 +273,13 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
                     b.HasOne("GeradorDeTestes.Dominio.ModuloQuestao.Questao", null)
                         .WithMany()
                         .HasForeignKey("QuestoesId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("GeradorDeTestes.Dominio.ModuloTeste.Teste", null)
                         .WithMany()
                         .HasForeignKey("TestesId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 

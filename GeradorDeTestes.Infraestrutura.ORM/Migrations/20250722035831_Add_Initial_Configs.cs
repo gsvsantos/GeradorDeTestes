@@ -103,13 +103,13 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
                         column: x => x.MateriasId,
                         principalTable: "Materias",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_MateriaTeste_Testes_TestesId",
                         column: x => x.TestesId,
                         principalTable: "Testes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -135,7 +135,7 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
                         column: x => x.TesteId,
                         principalTable: "Testes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -155,7 +155,7 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
                         column: x => x.QuestaoId,
                         principalTable: "Questoes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -173,13 +173,13 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
                         column: x => x.QuestoesId,
                         principalTable: "Questoes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_QuestaoTeste_Testes_TestesId",
                         column: x => x.TestesId,
                         principalTable: "Testes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
