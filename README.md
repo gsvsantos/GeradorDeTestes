@@ -48,15 +48,13 @@ ou equivalente no seu Program.cs ou appsettings.json.
 
 ### Diagrama Lucidchart
 
-![Diagrama do Gerador de Testes](/docs/Trabalho%20-%20Gerador%20de%20Testes%20-%20Lucid.App.svg)
+![Diagrama do Gerador de Testes](/docs/Trabalho%20-%20Gerador%20de%20Testes%20-%20Lucid.App.svg)  
+Após abrir, vá em "raw", ou abra a imagem em uma nova guia!
 
-### Diagrama Excalidraw (editável)
+### Diagrama Excalidraw
 
-📁 [Abrir diagrama editável no Excalidraw](/docs/Trabalho%20-%20Gerador%20de%20Testes%20-%20Excalidraw.svg)
-
-### Requisitos Detalhados
-
-📄 [Visualizar PDF com requisitos detalhados](/docs/Trabalho%20-%20Gerador%20de%20Testes%20-%20Lucid.App.pdf)
+📁 [Diagrama no Excalidraw](/docs/Trabalho%20-%20Gerador%20de%20Testes%20-%20Excalidraw.svg)  
+Após abrir, vá em "raw", ou abra a imagem em uma nova guia!
 
 ---
 
