@@ -4,11 +4,12 @@
     ViewBag.Titulo = "Duplicar Teste/Provão";
 }
 
-<hr class="border border-dark opacity-25" />
+<hr class="border border-white opacity-25" />
+
 <div class="d-flex flex-wrap justify-content-between mt-5 gap-1">
     <div class="col-12 col-md-10 col-lg-8 align-self-center m-auto">
         <div class="card rounded-4 border-0">
-            <div class="card-body p-md-4">
+            <div class="card-body cor-padrao p-md-4">
                 <h3>Formulário de Duplicação</h3>
 
                 @if (ViewData.ModelState["ConflitoCadastro"]?.Errors.Count > 0)
@@ -28,8 +29,8 @@
                     </div>
 
                     <div class="form-group d-flex align-items-center justify-content-end gap-3 mt-3">
-                        <a href="/testes" class="btn btn-outline-primary rounded-3 px-2">Cancelar</a>
-                        <button type="submit" class="btn btn-primary rounded-4 px-5">Continuar</button>
+                        <a href="/testes" class="botao-excluir botao-excluir-outline rounded-3 px-2">Cancelar</a>
+                        <button type="submit" class="botao rounded-4 px-5">Continuar</button>
                     </div>
                 </form>
             </div>

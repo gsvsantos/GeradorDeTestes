@@ -5,28 +5,40 @@
     ViewBag.Titulo = "Detalhes de Teste";
 }
 
+<div class="d-grid d-lg-flex flex-wrap gap-2 w-50 align-items-center mb-3">
+    <a class="botao botao-outline px-5" title="Voltar para Listagem" asp-action="Index">
+        <i class="bi bi-bookmark-plus-fill"></i>
+        Voltar
+    </a>
+</div>
+
 <div class="card rounded-4 border-0">
-    <div class="card-body">
+    <div class="card-body cor-padrao">
         <p class="card-text mb-1">
             <span class="fw-semibold">@Model.Id</span>
         </p>
         <div class="d-flex justify-content-between mb-4">
             <h3>@Model.Titulo</h3>
-            <h3>@Model.NomeDisciplina</h3>
+            <h3>@Model.Serie.GetDisplayName()</h3>
         </div>
         <p class="card-text mb-1">
-            <span class="fw-semibold">Série:</span> @Model.Serie.GetDisplayName()
+            <span class="fw-semibold">Disciplina:</span> @Model.NomeDisciplina
         </p>
+    </div>
+    <div class="ms-auto p-3">
+        <a class="botao" asp-action="GerarPdf" asp-route-id="@Model.Id" target="_blank">Baixar PDF</a>
+        <a class="botao botao-outline" asp-action="GerarGabaritoPdf" asp-route-id="@Model.Id" target="_blank">Baixar Gabarito</a>
     </div>
 </div>
 
-<hr class="border border-dark opacity-25" />
+<hr class="border border-white opacity-25" />
+
 <div class="row g-2">
-    @foreach (var materia in Model.MateriasComQuestoes)
+    @foreach (MateriaComQuestoesViewModel materia in Model.MateriasComQuestoes)
     {
         <div class="col-12 col-md-5 col-lg-4 col-xl-3 mb-3">
             <div class="card rounded-4 border-0">
-                <div class="card-body">
+                <div class="card-body cor-padrao">
                     <h5>@materia.NomeMateria</h5>
                     <table class="table">
                         <thead>
@@ -36,11 +48,15 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var questao in materia.Questoes)
+                            @foreach (SelectListItem questao in materia.Questoes)
                             {
                                 <tr>
-                                    <td>@questao</td>
-                                    <td>placeholder</td>
+                                    <td>@questao.Text</td>
+                                    <td>
+                                        <a class="botao rounded-circle" title="Detalhes Questão" asp-controller="Questao" asp-action="Detalhes" asp-route-id="@questao.Value">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
                                 </tr>
                             }
                         </tbody>

@@ -4,8 +4,10 @@
     ViewBag.Titulo = "Edição de Questão";
 }
 
+<hr class="border border-white opacity-25" />
+
 <div class="card rounded-4 border-0">
-    <div class="card-body p-md-4">
+    <div class="card-body cor-padrao p-md-4">
         <form asp-action="Editar" method="post">
             <h3>Formulário de Edição</h3>
 
@@ -37,8 +39,8 @@
             </div>
 
             <div class="form-group d-flex align-items-center justify-content-end gap-3 mt-3">
-                <a href="/questoes" class="btn btn-outline-primary rounded-3 px-2">Cancelar</a>
-                <button type="submit" class="btn btn-primary rounded-4 px-5">Confirmar</button>
+                <a href="/questoes" class="botao botao-outline rounded-3 px-2">Cancelar</a>
+                <button type="submit" class="botao rounded-4 px-5">Confirmar</button>
             </div>
         </form>
     </div>

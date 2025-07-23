@@ -1,25 +1,34 @@
-﻿@model DetalhesDisciplinaViewModel
+﻿@using GeradorDeTestes.WebApp.Extensions
+@model DetalhesDisciplinaViewModel
 
 @{
     ViewBag.Titulo = "Detalhes da Disciplina";
 }
 
+<div class="d-grid d-lg-flex flex-wrap gap-2 w-50 align-items-center mb-3">
+    <a class="botao botao-outline px-5" title="Voltar para Listagem" asp-action="Index">
+        <i class="bi bi-bookmark-plus-fill"></i>
+        Voltar
+    </a>
+</div>
+
 <div class="card rounded-4 border-0">
-    <div class="card-body">
+    <div class="card-body cor-padrao">
         <p class="card-text mb-1">
             <span class="fw-semibold">@Model.Id</span>
         </p>
         <p class="card-text mb-1">
-            <span class="fw-semibold"> @Model.Nome</span>
+            <h3>@Model.Nome</h3>
         </p>
     </div>
 </div>
 
-<hr class="border border-dark opacity-25" />
+<hr class="border border-white opacity-25" />
+
 <div class="row">
     <div class="col-12 col-md-6 mb-3">
         <div class="card rounded-4 border-0">
-            <div class="card-body">
+            <div class="card-body cor-padrao">
                 <h5>Matérias</h5>
 
                 @if (!Model.Materias.Any())
@@ -40,7 +49,7 @@
                             {
                                 <tr>
                                     <td>@materia.Nome</td>
-                                    <td>@materia.Serie</td>
+                                    <td>@materia.Serie.GetDisplayName()</td>
                                 </tr>
                             }
                         </tbody>
@@ -52,7 +61,7 @@
 
     <div class="col-12 col-md-6 mb-3">
         <div class="card rounded-4 border-0">
-            <div class="card-body">
+            <div class="card-body cor-padrao">
                 <h5>Testes</h5>
 
                 @if (!Model.Testes.Any())
@@ -65,7 +74,7 @@
                     <thead>
                         <tr>
                             <th>Título</th>
-                            <th>Materia</th>
+                            <th>Matéria</th>
                             <th>Quantidade de Questões</th>
                         </tr>
                     </thead>
@@ -74,13 +83,14 @@
                         {
                             <tr>
                                 <td>@teste.Titulo</td>
-                                <td>@teste.NomeMateria</td>
+                                <td>@teste.QtdMaterias</td>
                                 <td>@teste.QuantidadeQuestoes</td>
                             </tr>
                         }
                     </tbody>
-                    </table>
+                </table>
                 }
             </div>
         </div>
-    </div
+    </div>
+</div>

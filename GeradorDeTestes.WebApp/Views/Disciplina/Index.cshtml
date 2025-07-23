@@ -4,12 +4,19 @@
 	ViewBag.Titulo = "Visualização de Disciplinas";
 }
 
-<a class="btn btn-primary px-5" title="Nova Disciplina" asp-action="Cadastrar">
-	<i class="bi bi-bookmark-plus-fill"></i>
-	Nova Disciplina
-</a>
+<div class="d-grid d-lg-flex flex-wrap gap-2 w-50 align-items-center">
+	<a class="botao px-5" title="Nova Disciplina" asp-action="Cadastrar">
+		<i class="bi bi-bookmark-plus-fill"></i>
+		Nova Disciplina
+	</a>
+	<a class="botao botao-outline px-5" title="Voltar para Listagem" asp-controller="Home" asp-action="Index">
+		<i class="bi bi-bookmark-plus-fill"></i>
+		Voltar
+	</a>
+</div>
 
-<hr class="border border-dark opacity-25" />
+<hr class="border border-white opacity-25" />
+
 <div class="row g-2">
 	@if (!Model.Registros.Any())
 	{
@@ -21,24 +28,24 @@
 		{
 			<div class="col-12 col-md-5 col-lg-4 col-xl-3 mb-3">
 				<div class="card rounded-4 border-0">
-					<div class="card-body">
+					<div class="card-body cor-padrao cor-padrao">
 						<div class="d-flex justify-content-between mb-4">
-							<p class="card-text mb-1">
-								<span class="fw-semibold">@disciplina.Id.ToString().Substring(0, 13)...</span>
-							</p>
 							<p class="card-text mb-1">
 								<span class="fw-semibold">@disciplina.Nome</span>
 							</p>
+							<p class="card-text mb-1">
+								<span class="fw-semibold">@disciplina.Id.ToString().Substring(0, 8)</span>
+							</p>
 						</div>
 						<span class="d-flex gap-1 justify-content-end">
-							<a class="btn btn-primary rounded-circle" title="Detalhes Disciplina" asp-action="Detalhes" asp-route-id="@disciplina.Id">
+							<a class="botao rounded-circle" title="Detalhes Disciplina" asp-action="Detalhes" asp-route-id="@disciplina.Id">
 								<i class="bi bi-eye"></i>
 							</a>
-							<a class="btn btn-primary rounded-circle" title="Editar Disciplina" asp-action="Editar" asp-route-id="@disciplina.Id" asp-route-contexto="Index">
+							<a class="botao rounded-circle" title="Editar Disciplina" asp-action="Editar" asp-route-id="@disciplina.Id" asp-route-contexto="Index">
 								<i class="bi bi-pencil-square"></i>
 							</a>
-							<a class="btn btn-outline-danger rounded-circle" title="Excluir Disciplina" asp-action="Excluir" asp-route-id="@disciplina.Id">
-								<i class="bi bi-bookmark-x-fill"></i>
+							<a class="botao-excluir botao-excluir-outline rounded-circle" title="Excluir Disciplina" asp-action="Excluir" asp-route-id="@disciplina.Id">
+								<i class="bi bi-trash3"></i>
 							</a>
 						</span>
 					</div>

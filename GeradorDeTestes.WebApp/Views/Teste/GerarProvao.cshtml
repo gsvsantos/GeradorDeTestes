@@ -7,11 +7,12 @@
     bool mostrarScrollMaterias = Model.MateriasSelecionadas.Count > 3;
 }
 
-<hr class="border border-dark opacity-25" />
+<hr class="border border-white opacity-25" />
+
 <div class="d-flex flex-wrap justify-content-between mt-5 gap-1">
     <div class="col-12 col-md-10 col-lg-8 align-self-center m-auto">
         <div class="card rounded-4 border-0">
-            <div class="card-body p-md-4">
+            <div class="card-body cor-padrao p-md-4">
                 <div class="d-flex justify-content-between mb-4">
                     <p class="card-text mb-1">
                         <span class="fw-semibold">@Model.Titulo</span>
@@ -46,9 +47,9 @@
                             </select>
                             <span class="text-danger d-block mt-2" asp-validation-for="MateriaId"></span>
                         </div>
-                        <button type="submit" class="btn btn-primary align-self-end col">
+                        <button type="submit" class="botao align-self-end col">
                             <i class="bi bi-journal-plus"></i>
-                            Selecionar Tarefa
+                            Selecionar Matéria
                         </button>
                     </form>
                     @if (!Model.MateriasSelecionadas.Any())
@@ -81,18 +82,18 @@
                     }
                     <div class="d-flex align-items-center justify-content-end gap-3 mt-3">
                         <form class="d-inline" asp-action="Excluir" asp-route-id="@Model.Id" method="post">
-                            <button type="submit" class="btn btn-outline-danger rounded-3 px-2">Cancelar</button>
+                            <button type="submit" class="botao-excluir botao-excluir-outline rounded-3 px-2">Cancelar</button>
                         </form>
                         <form class="d-inline" asp-action="GerarProvao" asp-route-id="@Model.Id" method="post">
                             <input type="hidden" asp-for="Titulo" />
                             <input type="hidden" asp-for="DisciplinaId" />
                             <input type="hidden" asp-for="NomeDisciplina" />
                             <input type="hidden" asp-for="QuantidadeQuestoes" />
-                            @foreach (var questao in Model.Questoes)
+                            @foreach (SelectListItem questao in Model.Questoes)
                             {
                                 <input type="hidden" name="QuestoesSelecionadasIds" value="@questao.Value" />
                             }
-                            <button type="submit" class="btn btn-primary rounded-4 px-5">Confirmar</button>
+                            <button type="submit" class="botao rounded-4 px-5">Confirmar</button>
                         </form>
                     </div>
                 </div>
@@ -101,14 +102,14 @@
     </div>
     <div class="col-12 col-md-8 col-lg-3 mb-3 ">
         <div class="card rounded-3">
-            <div class="card-body d-flex flex-column gap-2">
+            <div class="card-body cor-padrao d-flex flex-column gap-2">
                 <div class="d-inline-flex justify-content-between mb-4">
                     <p class="card-text mb-1">
                         <span class="fw-semibold fs-3">Questões</span>
                     </p>
                     <p class="card-text mb-1">
                         <form asp-action="AleatorizarQuestoes" asp-route-id="@Model.Id" method="post">
-                            <button type="submit" class="btn btn-primary rounded-3 px-3">
+                            <button type="submit" class="botao rounded-3 px-3">
                                 <i class="bi bi-dice-3"></i>
                             </button>
                         </form>

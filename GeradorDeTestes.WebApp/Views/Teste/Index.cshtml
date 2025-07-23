@@ -4,12 +4,19 @@
     ViewBag.Titulo = "Visualização de Testes";
 }
 
-<a class="btn btn-primary px-5" title="Novo Teste" asp-action="Cadastrar">
-	<i class="bi bi-bookmark-plus-fill"></i>
-	Novo Teste
-</a>
+<div class="d-grid d-lg-flex flex-wrap gap-2 w-50 align-items-center">
+	<a class="botao px-5" title="Novo Teste" asp-action="Cadastrar">
+		<i class="bi bi-bookmark-plus-fill"></i>
+		Novo Teste
+	</a>
+	<a class="botao botao-outline px-5" title="Voltar para Listagem" asp-controller="Home" asp-action="Index">
+		<i class="bi bi-bookmark-plus-fill"></i>
+		Voltar
+	</a>
+</div>
 
-<hr class="border border-dark opacity-25" />
+<hr class="border border-white opacity-25" />
+
 <div class="row g-2">
     @if (!Model.Registros.Any())
     {
@@ -20,13 +27,13 @@
 		{
 			<div class="col-12 col-md-5 col-lg-4 col-xl-3 mb-3">
 				<div class="card rounded-4 border-0">
-					<div class="card-body">
+					<div class="card-body cor-padrao">
 						<div class="d-flex justify-content-between mb-4">
 							<p class="card-text mb-1">
-								<span class="fw-semibold">@t.Id.ToString().Substring(0, 13)...</span>
+								<span class="fw-semibold">@t.NomeDisciplina</span>
 							</p>
 							<p class="card-text mb-1">
-								<span class="fw-semibold">@t.NomeDisciplina</span>
+								<span class="fw-semibold">@t.Id.ToString().Substring(0, 8)</span>
 							</p>
 						</div>
 						<p class="card-text mb-1">
@@ -39,14 +46,14 @@
 							<span class="fw-semibold">Tipo Teste:</span> @(t.EhProvao ? "Provão" : "Individual")
 						</p>
 						<span class="d-flex gap-1 justify-content-end">
-							<a class="btn btn-primary rounded-circle" title="Detalhes Teste" asp-action="@(t.EhProvao ? "DetalhesProvao" : "DetalhesTeste")" asp-route-id="@t.Id">
+							<a class="botao rounded-circle" title="Detalhes Teste" asp-action="@(t.EhProvao ? "DetalhesProvao" : "DetalhesTeste")" asp-route-id="@t.Id">
 								<i class="bi bi-eye"></i>
-							</a>
-							<a class="btn btn-primary rounded-circle" title="Duplicar Teste" asp-action="Duplicar" asp-route-id="@t.Id">
+							</a> 
+							<a class="botao rounded-circle" title="Duplicar Teste" asp-action="Duplicar" asp-route-id="@t.Id">
 								<i class="bi bi-list-check"></i>
 							</a>
-							<a class="btn btn-outline-danger rounded-circle" title="Excluir Teste" asp-action="Excluir" asp-route-id="@t.Id">
-								<i class="bi bi-bookmark-x-fill"></i>
+							<a class="botao-excluir botao-excluir-outline rounded-circle" title="Excluir Teste" asp-action="Excluir" asp-route-id="@t.Id">
+								<i class="bi bi-trash3"></i>
 							</a>
 						</span>
 					</div>

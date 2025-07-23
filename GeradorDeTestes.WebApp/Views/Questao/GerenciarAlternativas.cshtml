@@ -4,8 +4,10 @@
     ViewBag.Titulo = "Gestão de Alternativas";
 }
 
+<hr class="border border-white opacity-25" />
+
 <div class="card rounded-4 border-0">
-    <div class="card-body p-md-4">
+    <div class="card-body cor-padrao p-md-4">
         <div class="d-flex justify-content-between mb-4">
             <h3>@Model.Questao.NomeMateria</h3> 
             <h3>@Model.Questao.NomeDisciplina</h3>
@@ -28,7 +30,7 @@
                     <input class="form-control" id="inputTextoAlternativa" asp-for="TextoAlternativa" />
                     <span class="text-danger d-block mt-2" asp-validation-for="TextoAlternativa"></span>
                 </div>
-                <button type="submit" class="btn btn-primary align-self-end col">
+                <button type="submit" class="botao align-self-end col">
                     <i class="bi bi-journal-plus"></i>
                     Adicionar Alternativa
                 </button>
@@ -55,8 +57,8 @@
                         </td>
                         <td>
                             <form asp-action="RemoverAlternativa" asp-route-id="@Model.Questao.Id" asp-route-idAlternativa="@alternativa.Id" method="post" style="display:inline;">
-                                <button type="submit" class="btn btn-link text-danger p-0">
-                                    Excluir
+                                <button type="submit" class="botao-excluir botao-excluir-outline rounded-3 px-2 py-1">
+                                    <i class="bi bi-trash3"></i>
                                 </button>
                             </form>
                         </td>
@@ -67,10 +69,10 @@
 
         <div class="d-flex justify-content-center gap-5 mb-4">
             <form asp-action="Excluir" asp-route-id="@Model.Questao.Id" method="post">
-                <button type="submit" class="btn btn-outline-danger rounded-3 px-2">Cancelar</button>
+                <button type="submit" class="botao-excluir botao-excluir-outline rounded-3 px-2">Cancelar</button>
             </form>
             <form asp-action="FinalizarQuestao" asp-route-id="@Model.Questao.Id" method="post">
-                <button type="submit" class="btn btn-primary rounded-3 px-2">
+                <button type="submit" class="botao rounded-3 p-2">
                     Finalizar Questão
                 </button>
             </form>

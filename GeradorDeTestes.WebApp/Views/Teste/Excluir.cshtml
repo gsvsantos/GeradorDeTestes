@@ -4,19 +4,20 @@
     ViewBag.Titulo = "Exclusão de Teste/Provão";
 }
 
-<hr class="border border-dark opacity-25" />
+<hr class="border border-white opacity-25" />
+
 <div class="d-flex flex-wrap justify-content-between my-5 gap-1">
     <div class="col-12 col-md-6 align-self-center m-auto">
         <div class="card rounded-4 border-0">
-            <div class="card-body p-md-4">
+            <div class="card-body cor-padrao p-md-4">
                 <h3>Formulário de Exclusão</h3>
 
                 <p class="mt-4">Você deseja realmente excluir o teste "@Model.Titulo"?</p>
 
                 <form asp-action="Excluir" asp-route-id="@Model.Id">
                     <div class="form-group d-flex align-items-center justify-content-end gap-3">
-                        <a href="/questoes" class="btn btn-outline-primary rounded-3 px-2">Cancelar</a>
-                        <button type="submit" class="btn btn-primary px-5">Confirmar</button>
+                        <a href="/testes" class="botao-excluir botao-excluir-outline rounded-3 px-2">Cancelar</a>
+                        <button type="submit" class="botao px-5">Confirmar</button>
                     </div>
                 </form>
             </div>

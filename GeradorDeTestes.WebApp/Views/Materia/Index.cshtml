@@ -7,12 +7,18 @@
 }
 
 <div class="d-grid d-lg-flex flex-wrap gap-2 w-50 align-items-center">
-	<a class="btn btn-primary px-5 "title="Nova Máteria" asp-action="Cadastrar"> 
-		<i class="bi bi-person-fill-add"></i>
+    <a class="botao px-5 " title="Nova Máteria" asp-action="Cadastrar">
+        <i class="bi bi-person-fill-add"></i>
 		Cadastrar Nova
-	</a>
+    </a>
+    <a class="botao botao-outline px-5" title="Voltar para Listagem" asp-controller="Home" asp-action="Index">
+        <i class="bi bi-bookmark-plus-fill"></i>
+        Voltar
+    </a>
 </div>
-<hr class="border border-dark opacity-25" />
+
+<hr class="border border-white opacity-25" />
+
 <div class="@(mostrarScroll ? "table-responsive" : "")" style="@(mostrarScroll ? "" : "overflow: visible; max-height: none;")">
     <div class="row g-2">
         @if (!Model.Registros.Any())
@@ -25,14 +31,14 @@
             {
                 <div class="col-12 col-md-5 col-lg-4 col-xl-3 mb-3">
                     <div class="card rounded-4 border-0">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <h4 class="card-title mb-1 fw-semibold text-truncate overflow-hidden text-nowrap" style="max-width: 70%;" title="@materia.Nome">
-                                    @materia.Id.ToString().Substring(0, 13)..
-                                </h4>
-                                <h4 class="card-title mb-1 fw-semibold text-truncate overflow-hidden text-nowrap" style="max-width: 70%;" title="@materia.Nome">
-                                    @materia.Nome
-                                </h4>
+                        <div class="card-body cor-padrao">
+                            <div class="d-flex justify-content-between mb-4">
+                                <p class="card-text mb-1">
+                                    <span class="fw-semibold">@materia.NomeDisciplina</span>
+                                </p>
+                                <p class="card-text mb-1">
+                                    <span class="fw-semibold">@materia.Id.ToString().Substring(0, 8)</span>
+                                </p>
                             </div>
                             <p class="card-text mb-1">
                                 <span class="fw-semibold">Disciplina:</span> @materia.NomeDisciplina
@@ -41,13 +47,13 @@
                                 <span class="fw-semibold">Série/Ano:</span> @materia.Serie.GetDisplayName()
                             </p>
                             <span class="d-flex gap-1 justify-content-end">
-                                <a class="btn btn-primary rounded-circle" title="Deatlhes Máterias" asp-action="Detalhes" asp-route-id="@materia.Id">
-                                    <i class="bi bi-list-check"></i>
+                                <a class="botao rounded-circle" title="Detalhes Máterias" asp-action="Detalhes" asp-route-id="@materia.Id">
+                                    <i class="bi bi-eye"></i>
                                 </a>
-                                <a class="btn btn-primary rounded-circle" title="Editar Máteria" asp-action="Editar" asp-route-id="@materia.Id">
+                                <a class="botao rounded-circle" title="Editar Máteria" asp-action="Editar" asp-route-id="@materia.Id">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
-                                <a class="btn btn-outline-danger rounded-circle" title="Excluir Máteria" asp-action="Excluir" asp-route-id="@materia.Id">
+                                <a class="botao-excluir botao-excluir-outline rounded-circle" title="Excluir Máteria" asp-action="Excluir" asp-route-id="@materia.Id">
                                     <i class="bi bi-trash3"></i>
                                 </a>
                             </span>

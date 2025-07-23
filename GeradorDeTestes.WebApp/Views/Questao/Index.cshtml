@@ -4,29 +4,37 @@
     ViewBag.Titulo = "Visualização de Questões";
 }
 
-<a class="btn btn-primary px-5" title="Nova Questão" asp-action="Cadastrar">
-	<i class="bi bi-bookmark-plus-fill"></i>
-	Nova Questão
-</a>
+<div class="d-grid d-lg-flex flex-wrap gap-2 w-50 align-items-center">
+	<a class="botao px-5" title="Nova Questão" asp-action="Cadastrar">
+		<i class="bi bi-bookmark-plus-fill"></i>
+		Nova Questão
+	</a>
+	<a class="botao botao-outline px-5" title="Voltar para Listagem" asp-controller="Home" asp-action="Index">
+		<i class="bi bi-bookmark-plus-fill"></i>
+		Voltar
+	</a>
+</div>
 
-<hr class="border border-dark opacity-25" />
+<hr class="border border-white opacity-25" />
+
 <div class="row g-2">
     @if (!Model.Registros.Any())
     {
         <p class="fw-semibold mt-3">Ainda não há nenhuma questão cadastrada...</p>
     }
-    else{
+    else
+	{
 		@foreach (DetalhesQuestaoViewModel questao in Model.Registros)
 		{
 			<div class="col-12 col-md-5 col-lg-4 col-xl-3 mb-3">
 				<div class="card rounded-4 border-0">
-					<div class="card-body">
+					<div class="card-body cor-padrao">
 						<div class="d-flex justify-content-between mb-4">
 							<p class="card-text mb-1">
-								<span class="fw-semibold">@questao.Id.ToString().Substring(0, 13)...</span>
+								<span class="fw-semibold">@questao.NomeDisciplina</span>
 							</p>
 							<p class="card-text mb-1">
-								<span class="fw-semibold">@questao.NomeDisciplina</span>
+								<span class="fw-semibold">@questao.Id.ToString().Substring(0, 8)</span>
 							</p>
 						</div>
 						<p class="card-text mb-1">
@@ -46,17 +54,14 @@
 								}
 							}
 						<span class="d-flex gap-1 justify-content-end">
-							<a class="btn btn-primary rounded-circle" title="Detalhes Questão" asp-action="Detalhes" asp-route-id="@questao.Id">
+							<a class="botao rounded-circle" title="Detalhes Questão" asp-action="Detalhes" asp-route-id="@questao.Id">
 								<i class="bi bi-eye"></i>
 							</a>
-								<a class="btn btn-primary rounded-circle" title="Gerenciar Alternativas" asp-action="GerenciarAlternativas" asp-route-id="@questao.Id">
-								<i class="bi bi-list-check"></i>
-							</a>
-							<a class="btn btn-primary rounded-circle" title="Editar Questão" asp-action="Editar" asp-route-id="@questao.Id" asp-route-contexto="Index">
+							<a class="botao rounded-circle" title="Editar Questão" asp-action="Editar" asp-route-id="@questao.Id" asp-route-contexto="Index">
 								<i class="bi bi-pencil-square"></i>
 							</a>
-							<a class="btn btn-outline-danger rounded-circle" title="Excluir Questão" asp-action="Excluir" asp-route-id="@questao.Id">
-								<i class="bi bi-bookmark-x-fill"></i>
+							<a class="botao-excluir botao-excluir-outline rounded-circle" title="Excluir Questão" asp-action="Excluir" asp-route-id="@questao.Id">
+								<i class="bi bi-trash3"></i>
 							</a>
 						</span>
 					</div>

@@ -7,16 +7,18 @@
 <div class="row mb-4">
     <div class="col-md-6">
         <div class="d-flex flex-wrap gap-3">
-            <a href="/testes" class="btn btn-outline-primary flex-fill me-2">Menu Testes</a>
-            <a href="/disciplinas" class="btn btn-outline-primary flex-fill me-2">Menu Disciplinas</a>
-            <a href="/materias" class="btn btn-outline-primary flex-fill me-2">Menu Matérias</a>
-            <a href="/questoes" class="btn btn-outline-primary flex-fill me-2">Menu Questões</a>
+            <a href="/testes" class="botao botao-outline flex-fill me-2">Menu Testes</a>
+            <a href="/disciplinas" class="botao botao-outline flex-fill me-2">Menu Disciplinas</a>
+            <a href="/materias" class="botao botao-outline flex-fill me-2">Menu Matérias</a>
+            <a href="/questoes" class="botao botao-outline flex-fill me-2">Menu Questões</a>
         </div>
     </div>
     <div class="col-md-6 d-flex align-items-center justify-content-center">
-        <a href="/testes/cadastrar" class="btn btn-primary btn-lg">Criar Teste</a>
+        <a href="/testes/cadastrar" class="botao botao-lg">Criar Teste</a>
     </div>
 </div>
+
+<hr class="border border-white opacity-25" />
 
 <div class="row">
     @if (Model.UltimosTestes?.Any() == true)
@@ -25,7 +27,7 @@
         {
             <div class="col-12 col-sm-6 col-md-4 mb-3">
                 <div class="card h-100">
-                    <div class="card-body">
+                    <div class="card-body cor-padrao cor-padrao">
                         <h5 class="card-title">@t.Titulo</h5>
                         <p class="card-text">
                             <strong>Disciplina:</strong> @t.NomeDisciplina <br />
@@ -33,7 +35,7 @@
                             <strong>Matérias:</strong> @t.Materias.Count <br />
                             <strong>Qtd Questões:</strong> @t.QuantidadeQuestoes
                         </p>
-                        <a class="btn btn-primary rounded-circle" title="Detalhes Teste" asp-controller="Teste" asp-action="@(t.EhProvao ? "DetalhesProvao" : "DetalhesTeste")" asp-route-id="@t.Id">
+                        <a class="botao rounded-circle" title="Detalhes Teste" asp-controller="Teste" asp-action="@(t.EhProvao ? "DetalhesProvao" : "DetalhesTeste")" asp-route-id="@t.Id">
                             <i class="bi bi-eye"></i>
                         </a>
                     </div>
