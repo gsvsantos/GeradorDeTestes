@@ -123,6 +123,9 @@ public class TesteController : Controller
             }
         }
 
+        contexto.Testes.Update(testeSelecionado);
+        contexto.SaveChanges();
+
         if (TempData["Embaralhar"] is not null)
         {
             testeSelecionado.Questoes.Clear();
@@ -155,6 +158,7 @@ public class TesteController : Controller
                     repositorioTeste.AtualizarQuantidadePorMateria(testeSelecionado, questao.Materia);
                 }
             }
+            contexto.Testes.Update(testeSelecionado);
             contexto.SaveChanges();
             testeSelecionado.Questoes.Shuffle();
         }
@@ -300,20 +304,39 @@ public class TesteController : Controller
     [HttpPost, Route("/testes/{id:guid}/definir-quantidade-questoes/{materiaId:guid}")]
     public IActionResult DefinirQuantidadeQuestoes(Guid id, Guid materiaId, DefinirQuantidadeQuestoesPostViewModel vm)
     {
-        if (vm.QuantidadeQuestoesMateria < 0 || vm.QuantidadeQuestoesMateria > 100)
-            ModelState.AddModelError("ConflitoQuantidadeQuestoesMateria", "A quantidade deve ser entre 0 e 100.");
+        Teste testeSelecionado = repositorioTeste.SelecionarRegistroPorId(id)!;
+
+        Materia materiaSelecionada = testeSelecionado.Materias.FirstOrDefault(m => m.Id.Equals(materiaId))!;
+
+        TesteMateriaQuantidade? objComQuantidade = testeSelecionado.QuantidadesPorMateria
+            .FirstOrDefault(x => x.Materia.Id == materiaId);
+
+        int quantidadeTotalQuestoes = testeSelecionado.QuantidadesPorMateria.Sum(q => q.QuantidadeQuestoes);
+
+        int quantidadeAnterior = objComQuantidade?.QuantidadeQuestoes ?? 0;
+
+        int novaQuantidadeTotal = quantidadeTotalQuestoes - quantidadeAnterior + vm.QuantidadeQuestoesMateria;
+
+        if (vm.QuantidadeQuestoesMateria > materiaSelecionada.Questoes.Count)
+        {
+            ModelState.AddModelError("ConflitoQuantidadeQuestoesMateria", $"A quantidade inserida é maior do que a quantidade de questões da matéria.");
+        }
+        else if (novaQuantidadeTotal > testeSelecionado.QuantidadeQuestoes)
+        {
+            ModelState.AddModelError("ConflitoQuantidadeQuestoesMateria", $"A quantidade inserida ultrapassa o limite de questões do teste! Atual: {quantidadeTotalQuestoes}/{testeSelecionado.QuantidadeQuestoes}");
+        }
 
         if (!ModelState.IsValid)
         {
-            Teste testeSelecionado = repositorioTeste.SelecionarRegistroPorId(id)!;
-
-            Materia materiaSelecionada = contexto.Materias.First(m => m.Id == materiaId);
-
             List<Questao> questoes = materiaSelecionada.Questoes.ToList();
 
-            Disciplina disciplina = contexto.Disciplinas.Include(d => d.Materias).First(d => d.Id == testeSelecionado.Disciplina.Id);
+            Disciplina disciplina = contexto.Disciplinas
+                .Include(d => d.Materias)
+                .First(d => d.Id == testeSelecionado.Disciplina.Id);
 
-            List<Materia> materias = contexto.Materias.Where(m => m.Disciplina.Id == disciplina.Id && m.Serie == testeSelecionado.Serie).ToList();
+            List<Materia> materias = contexto.Materias
+                .Where(m => m.Disciplina.Id == disciplina.Id && m.Serie == testeSelecionado.Serie)
+                .ToList();
 
             DefinirQuantidadeQuestoesViewModel definirVM = new DefinirQuantidadeQuestoesViewModel
             {
@@ -332,14 +355,6 @@ public class TesteController : Controller
 
         try
         {
-
-            Teste testeSelecionado = repositorioTeste.SelecionarRegistroPorId(id)!;
-
-            Materia materiaSelecionada = testeSelecionado.Materias.FirstOrDefault(m => m.Id.Equals(materiaId))!;
-
-            TesteMateriaQuantidade? objComQuantidade = testeSelecionado.QuantidadesPorMateria
-                .FirstOrDefault(x => x.Materia.Id == materiaId);
-
             if (vm.QuantidadeQuestoesMateria == 0 && objComQuantidade is not null)
             {
                 testeSelecionado.QuantidadesPorMateria.Remove(objComQuantidade);
@@ -438,6 +453,7 @@ public class TesteController : Controller
                 repositorioTeste.AtualizarQuantidadePorMateria(testeSelecionado, questao.Materia);
             }
         }
+        contexto.Testes.Update(testeSelecionado);
         contexto.SaveChanges();
         testeSelecionado.Questoes.Shuffle();
 

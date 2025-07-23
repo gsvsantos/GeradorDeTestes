@@ -7,7 +7,7 @@
 
 <div class="d-grid d-lg-flex flex-wrap gap-2 w-50 align-items-center mb-3">
     <a class="botao botao-outline px-5" title="Voltar para Listagem" asp-action="Index">
-        <i class="bi bi-bookmark-plus-fill"></i>
+        <i class="bi bi-arrow-left"></i>
         Voltar
     </a>
 </div>
@@ -26,8 +26,14 @@
         </p>
     </div>
     <div class="ms-auto p-3">
-        <a class="botao" asp-action="GerarPdf" asp-route-id="@Model.Id" target="_blank">Baixar PDF</a>
-        <a class="botao botao-outline" asp-action="GerarGabaritoPdf" asp-route-id="@Model.Id" target="_blank">Baixar Gabarito</a>
+        <a class="botao" asp-action="GerarPdf" asp-route-id="@Model.Id" target="_blank">
+            <i class="bi bi-file-earmark-arrow-down"></i>
+            Baixar PDF
+        </a>
+        <a class="botao botao-outline" asp-action="GerarGabaritoPdf" asp-route-id="@Model.Id" target="_blank">
+            <i class="bi bi-file-earmark-arrow-down-fill"></i>
+            Baixar Gabarito
+        </a>
     </div>
 </div>
 

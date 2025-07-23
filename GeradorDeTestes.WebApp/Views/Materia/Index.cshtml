@@ -8,11 +8,11 @@
 
 <div class="d-grid d-lg-flex flex-wrap gap-2 w-50 align-items-center">
     <a class="botao px-5 " title="Nova Máteria" asp-action="Cadastrar">
-        <i class="bi bi-person-fill-add"></i>
-		Cadastrar Nova
+        <i class="bi bi-journal-plus"></i>
+        Cadastrar Nova
     </a>
     <a class="botao botao-outline px-5" title="Voltar para Listagem" asp-controller="Home" asp-action="Index">
-        <i class="bi bi-bookmark-plus-fill"></i>
+        <i class="bi bi-arrow-left"></i>
         Voltar
     </a>
 </div>
@@ -34,7 +34,7 @@
                         <div class="card-body cor-padrao">
                             <div class="d-flex justify-content-between mb-4">
                                 <p class="card-text mb-1">
-                                    <span class="fw-semibold">@materia.NomeDisciplina</span>
+                                    <span class="fw-semibold">@materia.Nome</span>
                                 </p>
                                 <p class="card-text mb-1">
                                     <span class="fw-semibold">@materia.Id.ToString().Substring(0, 8)</span>
