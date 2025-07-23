@@ -235,6 +235,9 @@ public class QuestaoController : Controller
         if (questaoSelecionada.Alternativas.Count >= 4)
             ModelState.AddModelError("ConflitoAlternativas", "A questão já possui o máximo de 4 alternativas.");
 
+        if (questaoSelecionada.Alternativas.Any(a => a.Texto.Equals(adicionarAlternativaVM.TextoAlternativa)))
+            ModelState.AddModelError("ConflitoAlternativas", "Essa alternativa já foi inserida.");
+
         if (!ModelState.IsValid)
         {
             GerenciarAlternativasViewModel gerenciarAlternativasVM = new(
