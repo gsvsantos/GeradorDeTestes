@@ -49,7 +49,11 @@ public static class TesteExtensions
                 NomeMateria = m.Nome,
                 Questoes = teste.Questoes
                     .Where(q => q.Materia.Id == m.Id)
-                    .Select(q => q.Enunciado)
+                    .Select(q => new SelectListItem()
+                    {
+                        Text = q.Enunciado,
+                        Value = q.Id.ToString()
+                    })
                     .ToList()
             }).ToList()
         };
@@ -75,7 +79,11 @@ public static class TesteExtensions
                 NomeMateria = m.Nome,
                 Questoes = teste.Questoes
                     .Where(q => q.Materia.Id == m.Id)
-                    .Select(q => q.Enunciado)
+                    .Select(q => new SelectListItem()
+                    {
+                        Text = q.Enunciado,
+                        Value = q.Id.ToString()
+                    })
                     .ToList()
             }).ToList()
         };

@@ -22,6 +22,7 @@ public class RepositorioDisciplinaORM : RepositorioBaseORM<Disciplina>, IReposit
         return contexto.Disciplinas
             .Include(d => d.Materias)
             .Include(d => d.Testes)
+            .ThenInclude(t => t.Materias)
             .FirstOrDefault(d => d.Id == idRegistro);
     }
 }

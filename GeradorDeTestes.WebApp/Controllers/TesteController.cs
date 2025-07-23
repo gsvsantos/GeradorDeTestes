@@ -614,7 +614,7 @@ public class TesteController : Controller
 
         byte[] pdfBytes = geradorPdfService.GerarPdfTeste(teste);
 
-        return File(pdfBytes, "application/pdf", $"Teste_{teste.Titulo}.pdf");
+        return File(pdfBytes, "application/pdf");
     }
 
     [HttpGet, Route("/testes/{id:guid}/gerar-gabarito")]
@@ -624,6 +624,6 @@ public class TesteController : Controller
 
         byte[] pdfBytes = geradorPdfService.GerarPdfGabarito(teste);
 
-        return File(pdfBytes, "application/pdf", $"Gabarito_{teste.Titulo}.pdf");
+        return File(pdfBytes, "application/pdf");
     }
 }

@@ -51,7 +51,12 @@ public class MateriaController : Controller
         }
 
         if (!ModelState.IsValid)
+        {
+            cadastrarVM.Disciplinas = repositorioDisciplina.SelecionarRegistros()
+                .Select(d => new SelectListItem { Text = d.Nome, Value = d.Id.ToString() }).ToList();
+
             return View(cadastrarVM);
+        }
 
         Materia materia = cadastrarVM.ParaEntidade(disciplinaSelecionada!);
 
@@ -100,6 +105,7 @@ public class MateriaController : Controller
         {
             editarVM.Disciplinas = repositorioDisciplina.SelecionarRegistros()
                 .Select(d => new SelectListItem { Text = d.Nome, Value = d.Id.ToString() }).ToList();
+
             return View(editarVM);
         }
 

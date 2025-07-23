@@ -42,6 +42,6 @@ public class MateriaResumoViewModel
 public class TesteResumoViewModel
 {
     public string Titulo { get; set; }
-    public string NomeMateria { get; set; }
+    public int QtdMaterias { get; set; }
     public int QuantidadeQuestoes { get; set; }
 }

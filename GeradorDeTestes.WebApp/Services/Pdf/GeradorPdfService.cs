@@ -22,8 +22,12 @@ public class GeradorPdfService
                         column.Item().Text($"\nMatéria: {materia.Nome}").FontSize(16).SemiBold();
 
                         int numeroQuestao = 1;
+
                         foreach (Questao questao in materia.Questoes)
                         {
+                            if (teste.Questoes.All(q => q.Id != questao.Id))
+                                continue;
+
                             column.Item().Text($"{numeroQuestao++}. {questao.Enunciado}");
                             foreach (Alternativa alt in questao.Alternativas)
                             {
@@ -58,11 +62,14 @@ public class GeradorPdfService
                         int numeroQuestao = 1;
                         foreach (Questao questao in materia.Questoes)
                         {
+                            if (teste.Questoes.All(q => q.Id != questao.Id))
+                                continue;
+
                             column.Item().Text($"{numeroQuestao++}. {questao.Enunciado}");
                             foreach (Alternativa alt in questao.Alternativas)
                             {
                                 string prefixo = alt.EstaCorreta ? "✔" : " ";
-                                column.Item().Text($" {prefixo} {alt.Texto}");
+                                column.Item().Text($" - {alt.Texto} {prefixo} ");
                             }
                             column.Item().Text("");
                         }

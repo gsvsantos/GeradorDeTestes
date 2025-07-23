@@ -21,7 +21,7 @@ public static class DisciplinaExtensions
             Testes = d.Testes.Select(t => new TesteResumoViewModel
             {
                 Titulo = t.Titulo,
-                NomeMateria = t.Materias.FirstOrDefault()?.Nome ?? "N/A",
+                QtdMaterias = t.Materias.Count,
                 QuantidadeQuestoes = t.QuantidadeQuestoes
             }).ToList()
         };

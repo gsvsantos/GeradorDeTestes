@@ -155,7 +155,7 @@ public class DetalhesTesteViewModel : DetalhesTestesViewModel
 public class MateriaComQuestoesViewModel
 {
     public string NomeMateria { get; set; }
-    public List<string> Questoes { get; set; }
+    public List<SelectListItem> Questoes { get; set; }
 }
 
 public class DetalhesProvaoViewModel : DetalhesTestesViewModel
