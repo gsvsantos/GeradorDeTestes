@@ -31,7 +31,7 @@
                     <span class="text-danger d-block mt-2" asp-validation-for="TextoAlternativa"></span>
                 </div>
                 <button type="submit" class="botao align-self-end col">
-                    <i class="bi bi-journal-plus"></i>
+                    <i class="bi bi-node-plus"></i>
                     Adicionar Alternativa
                 </button>
             </form>
@@ -69,10 +69,14 @@
 
         <div class="d-flex justify-content-center gap-5 mb-4">
             <form asp-action="Excluir" asp-route-id="@Model.Questao.Id" method="post">
-                <button type="submit" class="botao-excluir botao-excluir-outline rounded-3 px-2">Cancelar</button>
+                <button type="submit" class="botao-excluir botao-excluir-outline rounded-3 px-2">
+                    <i class="bi bi-x-circle"></i>
+                    Cancelar
+                </button>
             </form>
             <form asp-action="FinalizarQuestao" asp-route-id="@Model.Questao.Id" method="post">
                 <button type="submit" class="botao rounded-3 p-2">
+                    <i class="bi bi-check-circle"></i>
                     Finalizar Questão
                 </button>
             </form>

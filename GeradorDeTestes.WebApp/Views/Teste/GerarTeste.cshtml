@@ -78,13 +78,13 @@
                                             <td>
                                                 <div class="d-flex gap-2">
                                                     <form action="/testes/@Model.Id/definir-quantidade-questoes/@materia.Value" method="get">
-                                                        <button type="submit" class="botao rounded-circle">
-                                                            <i class="bi bi-list-check"></i>
+                                                        <button type="submit" class="botao rounded-circle" title="Definir Quantidade de Questões">
+                                                            <i class="bi bi-list-ol"></i>
                                                         </button>
                                                     </form>
                                                     <form asp-action="RemoverMateria" asp-route-id="@Model.Id" asp-route-materiaId="@materia.Value" method="post">
                                                         <button type="submit" class="botao-excluir botao-excluir-outline rounded-circle">
-                                                            <i class="bi bi-trash"></i>
+                                                            <i class="bi bi-trash3"></i>
                                                         </button>
                                                     </form>
                                                 </div>
@@ -97,7 +97,10 @@
                     }
                     <div class="d-flex align-items-center justify-content-end gap-3 mt-3">
                         <form class="d-inline" asp-action="Excluir" asp-route-id="@Model.Id" method="post">
-                            <button type="submit" class="botao-excluir botao-excluir-outline rounded-3 px-2">Cancelar</button>
+                            <button type="submit" class="botao-excluir botao-excluir-outline rounded-3 px-2">
+                                <i class="bi bi-x-circle"></i>
+                                Cancelar
+                            </button>
                         </form>
                         <form class="d-inline" asp-action="GerarTeste" asp-route-id="@Model.Id" method="post">
                             <input type="hidden" asp-for="Titulo" />
@@ -108,7 +111,10 @@
                             {
                                 <input type="hidden" name="QuestoesSelecionadasIds" value="@questao.Value" />
                             }
-                            <button type="submit" class="botao rounded-4 px-5">Confirmar</button>
+                            <button type="submit" class="botao rounded-4 px-5">
+                                <i class="bi bi-check-circle"></i>
+                                Confirmar
+                            </button>
                         </form>
                     </div>
                 </div>
@@ -125,7 +131,7 @@
                     <p class="card-text mb-1">
                         <form asp-action="AleatorizarQuestoes" asp-route-id="@Model.Id" method="post">
                             <button type="submit" class="botao rounded-3 px-3">
-                                <i class="bi bi-dice-3"></i>
+                                <i class="bi bi-shuffle"></i>
                             </button>
                         </form>
                     </p>
