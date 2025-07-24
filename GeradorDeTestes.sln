@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36221.1 d17.14
+VisualStudioVersion = 17.14.36221.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01-Apresentação", "01-Apresentação", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "02-Domínio", "02-Domínio", "{5ED3FDA1-8328-424C-BF1D-17853A5CEE8D}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "02-Núcleo", "02-Núcleo", "{5ED3FDA1-8328-424C-BF1D-17853A5CEE8D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "03-Infraestrutura", "03-Infraestrutura", "{E7A64F96-7306-4A9C-B85A-9F7CE23D786E}"
 EndProject
@@ -14,6 +14,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeradorDeTestes.Infraestrutura.ORM", "GeradorDeTestes.Infraestrutura.ORM\GeradorDeTestes.Infraestrutura.ORM.csproj", "{B61ACE9E-40C6-467D-80C7-7CD4B37BD992}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeradorDeTestes.WebApp", "GeradorDeTestes.WebApp\GeradorDeTestes.WebApp.csproj", "{F8242703-8978-401E-9B53-C9A3ACB0E44B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeradorDeTestes.Aplicacao", "GeradorDeTestes.Aplicacao\GeradorDeTestes.Aplicacao.csproj", "{FF43FBC6-3944-4BDD-8B0E-485AAC15223C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{F8242703-8978-401E-9B53-C9A3ACB0E44B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F8242703-8978-401E-9B53-C9A3ACB0E44B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F8242703-8978-401E-9B53-C9A3ACB0E44B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF43FBC6-3944-4BDD-8B0E-485AAC15223C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF43FBC6-3944-4BDD-8B0E-485AAC15223C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF43FBC6-3944-4BDD-8B0E-485AAC15223C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF43FBC6-3944-4BDD-8B0E-485AAC15223C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -41,6 +47,7 @@ Global
 		{DE19C131-94F5-4035-B7B1-19B7095AB198} = {5ED3FDA1-8328-424C-BF1D-17853A5CEE8D}
 		{B61ACE9E-40C6-467D-80C7-7CD4B37BD992} = {E7A64F96-7306-4A9C-B85A-9F7CE23D786E}
 		{F8242703-8978-401E-9B53-C9A3ACB0E44B} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{FF43FBC6-3944-4BDD-8B0E-485AAC15223C} = {5ED3FDA1-8328-424C-BF1D-17853A5CEE8D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {39BE8CAD-B1C4-498C-AB77-23EBBA02E6E7}

@@ -1,3 +1,4 @@
+using GeradorDeTestes.Aplicacao.ModuloDisciplina;
 using GeradorDeTestes.Dominio.ModuloDisciplina;
 using GeradorDeTestes.Dominio.ModuloMateria;
 using GeradorDeTestes.Dominio.ModuloQuestao;
@@ -36,6 +37,7 @@ public class Program
         builder.Services.AddScoped<IRepositorioMateria, RepositorioMateriaORM>();
         builder.Services.AddScoped<IRepositorioQuestao, RepositorioQuestaoORM>();
         builder.Services.AddScoped<IRepositorioTeste, RepositorioTesteORM>();
+        builder.Services.AddScoped<DisciplinaAppService>();
         builder.Services.AddScoped<GeradorPdfService>();
         builder.Services.AddEntityFrameworkConfig(builder.Configuration);
         builder.Services.AddSerilogConfig(builder.Logging);

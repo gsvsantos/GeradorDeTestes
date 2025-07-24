@@ -1,30 +1,33 @@
-﻿using GeradorDeTestes.Dominio.ModuloDisciplina;
-using GeradorDeTestes.Infraestrutura.ORM.Compartilhado;
+﻿using FluentResults;
+using GeradorDeTestes.Aplicacao.ModuloDisciplina;
+using GeradorDeTestes.Dominio.ModuloDisciplina;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Storage;
 
 namespace GeradorDeTestes.WebApp.Controllers;
 
 [Route("disciplinas")]
 public class DisciplinaController : Controller
 {
-    private readonly GeradorDeTestesDbContext contexto;
-    private readonly IRepositorioDisciplina repositorio;
+    private readonly DisciplinaAppService disciplinaAppService;
 
-    public DisciplinaController(GeradorDeTestesDbContext contexto, IRepositorioDisciplina repositorio)
+    public DisciplinaController(DisciplinaAppService disciplinaAppService)
     {
-        this.contexto = contexto;
-        this.repositorio = repositorio;
+        this.disciplinaAppService = disciplinaAppService;
     }
 
     [HttpGet]
     public IActionResult Index()
     {
-        List<Disciplina> disciplinas = repositorio.SelecionarRegistros();
+        Result<List<Disciplina>> resultado = disciplinaAppService.SelecionarRegistros();
+
+        if (resultado.IsFailed)
+            return RedirectToAction("Home/Index");
+
+        List<Disciplina> registros = resultado.Value;
 
         VisualizarDisciplinasViewModel visualizarVM = new()
         {
-            Registros = disciplinas.Select(d => d.ParaDetalhesVM()).ToList()
+            Registros = registros.Select(d => d.ParaDetalhesVM()).ToList()
         };
 
         return View(visualizarVM);
@@ -33,35 +36,23 @@ public class DisciplinaController : Controller
     [HttpGet("cadastrar")]
     public IActionResult Cadastrar()
     {
-        return View(new CadastrarDisciplinaViewModel());
+        CadastrarDisciplinaViewModel cadastrarVM = new();
+
+        return View(cadastrarVM);
     }
 
     [HttpPost("cadastrar")]
     public IActionResult Cadastrar(CadastrarDisciplinaViewModel cadastrarVM)
     {
-        if (repositorio.SelecionarRegistros().Any(d => d.Nome == cadastrarVM.Nome))
-            ModelState.AddModelError("ConflitoCadastro", "Já existe uma disciplina com este nome.");
-
-        if (!ModelState.IsValid)
-            return View(cadastrarVM);
-
         Disciplina disciplina = cadastrarVM.ParaEntidade();
 
-        IDbContextTransaction transacao = contexto.Database.BeginTransaction();
+        Result resultado = disciplinaAppService.Cadastrar(disciplina);
 
-        try
+        if (resultado.IsFailed)
         {
-            repositorio.CadastrarRegistro(disciplina);
+            ModelState.AddModelError("ConflitoCadastro", resultado.Errors[0].Message);
 
-            contexto.SaveChanges();
-
-            transacao.Commit();
-        }
-        catch
-        {
-            transacao.Rollback();
-
-            throw;
+            return View(cadastrarVM);
         }
 
         return RedirectToAction(nameof(Index));
@@ -70,12 +61,17 @@ public class DisciplinaController : Controller
     [HttpGet("editar/{id}")]
     public IActionResult Editar(Guid id)
     {
-        Disciplina disciplina = repositorio.SelecionarRegistroPorId(id)!;
+        Result<Disciplina> resultado = disciplinaAppService.SelecionarRegistroPorId(id)!;
+
+        if (resultado.IsFailed)
+            return RedirectToAction(nameof(Index));
+
+        Disciplina disciplinaSelecionada = resultado.ValueOrDefault;
 
         EditarDisciplinaViewModel editarVM = new()
         {
-            Id = disciplina.Id,
-            Nome = disciplina.Nome
+            Id = disciplinaSelecionada.Id,
+            Nome = disciplinaSelecionada.Nome
         };
 
         return View(editarVM);
@@ -84,32 +80,15 @@ public class DisciplinaController : Controller
     [HttpPost("editar/{id}")]
     public IActionResult Editar(Guid id, EditarDisciplinaViewModel editarVM)
     {
-        if (repositorio.SelecionarRegistros().Any(d => d.Nome == editarVM.Nome && d.Id != id))
-            ModelState.AddModelError("ConflitoEdicao", "Já existe uma disciplina com este nome.");
-
-        if (!ModelState.IsValid)
-            return View(editarVM);
-
-        Disciplina existente = repositorio.SelecionarRegistros()
-                                   .FirstOrDefault(d => d.Nome == editarVM.Nome && d.Id != id)!;
-
         Disciplina disciplinaEditada = editarVM.ParaEntidade();
 
-        IDbContextTransaction transacao = contexto.Database.BeginTransaction();
+        Result<string> resultado = disciplinaAppService.Editar(id, disciplinaEditada);
 
-        try
+        if (resultado.IsFailed)
         {
-            repositorio.EditarRegistro(id, disciplinaEditada);
+            ModelState.AddModelError("ConflitoEdicao", resultado.Errors[0].Message);
 
-            contexto.SaveChanges();
-
-            transacao.Commit();
-        }
-        catch
-        {
-            transacao.Rollback();
-
-            throw;
+            return View(editarVM);
         }
 
         return RedirectToAction(nameof(Index));
@@ -118,12 +97,17 @@ public class DisciplinaController : Controller
     [HttpGet("excluir/{id}")]
     public IActionResult Excluir(Guid id)
     {
-        Disciplina disciplina = repositorio.SelecionarRegistroPorId(id)!;
+        Result<Disciplina> resultado = disciplinaAppService.SelecionarRegistroPorId(id)!;
+
+        if (resultado.IsFailed)
+            return RedirectToAction(nameof(Index));
+
+        Disciplina disciplinaSelecionada = resultado.ValueOrDefault;
 
         ExcluirDisciplinaViewModel excluirVM = new()
         {
-            Id = disciplina.Id,
-            Nome = disciplina.Nome
+            Id = disciplinaSelecionada.Id,
+            Nome = disciplinaSelecionada.Nome
         };
 
         return View(excluirVM);
@@ -132,11 +116,14 @@ public class DisciplinaController : Controller
     [HttpPost("excluir/{id}")]
     public IActionResult ExcluirConfirmado(Guid id)
     {
-        Disciplina disciplina = repositorio.SelecionarRegistroPorId(id)!;
+        Result resultado = disciplinaAppService.Excluir(id);
 
-        if (contexto.Materias.Any(m => m.Disciplina.Id == id) || contexto.Testes.Any(t => t.Disciplina.Id == id))
+        if (resultado.IsFailed)
         {
-            ModelState.AddModelError("ConflitoExclusao", "Não é possível excluir: há matérias ou testes vinculados.");
+            Result<Disciplina> disciplinaSelecionada = disciplinaAppService.SelecionarRegistroPorId(id)!;
+            Disciplina disciplina = disciplinaSelecionada.ValueOrDefault;
+
+            ModelState.AddModelError("ConflitoExclusao", resultado.Errors[0].Message);
 
             ExcluirDisciplinaViewModel excluirVM = new()
             {
@@ -144,24 +131,7 @@ public class DisciplinaController : Controller
                 Nome = disciplina.Nome
             };
 
-            return View("Excluir", excluirVM);
-        }
-
-        IDbContextTransaction transacao = contexto.Database.BeginTransaction();
-
-        try
-        {
-            repositorio.ExcluirRegistro(id);
-
-            contexto.SaveChanges();
-
-            transacao.Commit();
-        }
-        catch
-        {
-            transacao.Rollback();
-
-            throw;
+            return View(nameof(Excluir), excluirVM);
         }
 
         return RedirectToAction(nameof(Index));
@@ -170,7 +140,12 @@ public class DisciplinaController : Controller
     [HttpGet("detalhes/{id}")]
     public IActionResult Detalhes(Guid id)
     {
-        Disciplina disciplina = repositorio.SelecionarRegistroPorId(id)!;
+        Result<Disciplina> disciplinaSelecionada = disciplinaAppService.SelecionarRegistroPorId(id)!;
+
+        if (disciplinaSelecionada.IsFailed)
+            return RedirectToAction(nameof(Index));
+
+        Disciplina disciplina = disciplinaSelecionada.ValueOrDefault;
 
         DetalhesDisciplinaViewModel detalhesVM = disciplina.ParaDetalhesVM();
 
