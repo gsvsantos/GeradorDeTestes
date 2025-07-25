@@ -15,7 +15,9 @@ public class DisciplinaAppService
     private readonly IRepositorioTeste repositorioTeste;
     private readonly ILogger<DisciplinaAppService> logger;
 
-    public DisciplinaAppService(IUnitOfWork unitOfWork, IRepositorioDisciplina repositorioDisciplina, IRepositorioMateria repositorioMateria, IRepositorioTeste repositorioTeste, ILogger<DisciplinaAppService> logger)
+    public DisciplinaAppService(IUnitOfWork unitOfWork, IRepositorioDisciplina repositorioDisciplina,
+        IRepositorioMateria repositorioMateria, IRepositorioTeste repositorioTeste,
+        ILogger<DisciplinaAppService> logger)
     {
         this.unitOfWork = unitOfWork;
         this.repositorioDisciplina = repositorioDisciplina;
@@ -24,9 +26,11 @@ public class DisciplinaAppService
         this.logger = logger;
     }
 
-    public Result Cadastrar(Disciplina disciplina)
+    public Result CadastrarRegistro(Disciplina disciplina)
     {
-        if (repositorioDisciplina.SelecionarRegistros().Any(d => d.Nome.Equals(disciplina.Nome)))
+        List<Disciplina> disciplinas = repositorioDisciplina.SelecionarRegistros();
+
+        if (disciplinas.Any(d => d.Nome.Equals(disciplina.Nome)))
             return Result.Fail("Já existe uma disciplina com este nome.");
 
         try
@@ -41,7 +45,7 @@ public class DisciplinaAppService
 
             logger.LogError(
                 ex,
-                "Ocorreu um erro durante o registro de {@ViewModel}.",
+                "Ocorreu um erro durante o cadastro de {@ViewModel}.",
                 disciplina
             );
         }
@@ -49,7 +53,7 @@ public class DisciplinaAppService
         return Result.Ok();
     }
 
-    public Result Editar(Guid id, Disciplina disciplinaEditada)
+    public Result EditarRegistro(Guid id, Disciplina disciplinaEditada)
     {
         List<Disciplina> disciplinas = repositorioDisciplina.SelecionarRegistros();
 
@@ -76,7 +80,7 @@ public class DisciplinaAppService
         return Result.Ok();
     }
 
-    public Result Excluir(Guid id)
+    public Result ExcluirRegistro(Guid id)
     {
         Disciplina disciplina = repositorioDisciplina.SelecionarRegistroPorId(id)!;
         List<Materia> materias = repositorioMateria.SelecionarRegistros();
@@ -102,11 +106,11 @@ public class DisciplinaAppService
 
             logger.LogError(
                 ex,
-                "Ocorreu um erro durante a exclusão do registro {Id}.",
+                "Ocorreu um erro durante a exclusão da disciplina {Id}.",
                 id
             );
 
-            return Result.Fail("Ocorreu um erro inesperado ao tentar excluir o registro.");
+            return Result.Fail("Ocorreu um erro inesperado ao tentar excluir a disciplina.");
         }
     }
 
@@ -114,22 +118,22 @@ public class DisciplinaAppService
     {
         try
         {
-            Disciplina registroSelecionado = repositorioDisciplina.SelecionarRegistroPorId(id)!;
+            Disciplina disciplinaSelecionada = repositorioDisciplina.SelecionarRegistroPorId(id)!;
 
-            if (registroSelecionado is null)
-                return Result.Fail("Não foi possível obter o registro.");
+            if (disciplinaSelecionada is null)
+                return Result.Fail("Não foi possível obter o registro da disciplina selecionada.");
 
-            return Result.Ok(registroSelecionado);
+            return Result.Ok(disciplinaSelecionada);
         }
         catch (Exception ex)
         {
             logger.LogError(
                 ex,
-                "Ocorreu um erro durante a seleção do registro {Id}.",
+                "Ocorreu um erro durante a seleção da disciplina {Id}.",
                 id
             );
 
-            return Result.Fail("Ocorreu um erro inesperado ao tentar obter o registro.");
+            return Result.Fail("Ocorreu um erro inesperado ao tentar obter a disciplina.");
         }
     }
 
@@ -137,18 +141,18 @@ public class DisciplinaAppService
     {
         try
         {
-            List<Disciplina> registros = repositorioDisciplina.SelecionarRegistros();
+            List<Disciplina> disciplinas = repositorioDisciplina.SelecionarRegistros();
 
-            return Result.Ok(registros);
+            return Result.Ok(disciplinas);
         }
         catch (Exception ex)
         {
             logger.LogError(
                 ex,
-                "Ocorreu um erro durante a seleção de registros."
+                "Ocorreu um erro durante a seleção das disciplinas registradas."
             );
 
-            return Result.Fail("Ocorreu um erro inesperado ao tentar obter os registros.");
+            return Result.Fail("Ocorreu um erro inesperado ao tentar obter as disciplinas.");
         }
     }
 }

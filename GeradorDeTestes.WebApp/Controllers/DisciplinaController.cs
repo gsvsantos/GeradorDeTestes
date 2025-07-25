@@ -18,16 +18,16 @@ public class DisciplinaController : Controller
     [HttpGet]
     public IActionResult Index()
     {
-        Result<List<Disciplina>> resultado = disciplinaAppService.SelecionarRegistros();
+        Result<List<Disciplina>> resultadosDisciplinas = disciplinaAppService.SelecionarRegistros();
 
-        if (resultado.IsFailed)
-            return RedirectToAction("Home/Index");
+        if (resultadosDisciplinas.IsFailed)
+            return RedirectToAction("Index", "Home");
 
-        List<Disciplina> registros = resultado.Value;
+        List<Disciplina> disciplinas = resultadosDisciplinas.Value;
 
         VisualizarDisciplinasViewModel visualizarVM = new()
         {
-            Registros = registros.Select(d => d.ParaDetalhesVM()).ToList()
+            Registros = disciplinas.Select(d => d.ParaDetalhesVM()).ToList()
         };
 
         return View(visualizarVM);
@@ -44,15 +44,15 @@ public class DisciplinaController : Controller
     [HttpPost("cadastrar")]
     public IActionResult Cadastrar(CadastrarDisciplinaViewModel cadastrarVM)
     {
-        Disciplina disciplina = cadastrarVM.ParaEntidade();
+        Disciplina novaDisciplina = cadastrarVM.ParaEntidade();
 
-        Result resultado = disciplinaAppService.Cadastrar(disciplina);
+        Result resultadoCadastro = disciplinaAppService.CadastrarRegistro(novaDisciplina);
 
-        if (resultado.IsFailed)
+        if (resultadoCadastro.IsFailed)
         {
-            ModelState.AddModelError("ConflitoCadastro", resultado.Errors[0].Message);
+            ModelState.AddModelError("ConflitoCadastro", resultadoCadastro.Errors[0].Message);
 
-            return View(cadastrarVM);
+            return View(nameof(Cadastrar), cadastrarVM);
         }
 
         return RedirectToAction(nameof(Index));
@@ -61,12 +61,12 @@ public class DisciplinaController : Controller
     [HttpGet("editar/{id}")]
     public IActionResult Editar(Guid id)
     {
-        Result<Disciplina> resultado = disciplinaAppService.SelecionarRegistroPorId(id)!;
+        Result<Disciplina> resultadoDisciplina = disciplinaAppService.SelecionarRegistroPorId(id)!;
 
-        if (resultado.IsFailed)
+        if (resultadoDisciplina.IsFailed)
             return RedirectToAction(nameof(Index));
 
-        Disciplina disciplinaSelecionada = resultado.ValueOrDefault;
+        Disciplina disciplinaSelecionada = resultadoDisciplina.ValueOrDefault;
 
         EditarDisciplinaViewModel editarVM = new()
         {
@@ -82,13 +82,13 @@ public class DisciplinaController : Controller
     {
         Disciplina disciplinaEditada = editarVM.ParaEntidade();
 
-        Result<string> resultado = disciplinaAppService.Editar(id, disciplinaEditada);
+        Result resultadoEdicao = disciplinaAppService.EditarRegistro(id, disciplinaEditada);
 
-        if (resultado.IsFailed)
+        if (resultadoEdicao.IsFailed)
         {
-            ModelState.AddModelError("ConflitoEdicao", resultado.Errors[0].Message);
+            ModelState.AddModelError("ConflitoEdicao", resultadoEdicao.Errors[0].Message);
 
-            return View(editarVM);
+            return View(nameof(Editar), editarVM);
         }
 
         return RedirectToAction(nameof(Index));
@@ -97,12 +97,12 @@ public class DisciplinaController : Controller
     [HttpGet("excluir/{id}")]
     public IActionResult Excluir(Guid id)
     {
-        Result<Disciplina> resultado = disciplinaAppService.SelecionarRegistroPorId(id)!;
+        Result<Disciplina> resultadoDisciplina = disciplinaAppService.SelecionarRegistroPorId(id)!;
 
-        if (resultado.IsFailed)
+        if (resultadoDisciplina.IsFailed)
             return RedirectToAction(nameof(Index));
 
-        Disciplina disciplinaSelecionada = resultado.ValueOrDefault;
+        Disciplina disciplinaSelecionada = resultadoDisciplina.ValueOrDefault;
 
         ExcluirDisciplinaViewModel excluirVM = new()
         {
@@ -116,19 +116,20 @@ public class DisciplinaController : Controller
     [HttpPost("excluir/{id}")]
     public IActionResult ExcluirConfirmado(Guid id)
     {
-        Result resultado = disciplinaAppService.Excluir(id);
+        Result resultadoExclusao = disciplinaAppService.ExcluirRegistro(id);
 
-        if (resultado.IsFailed)
+        if (resultadoExclusao.IsFailed)
         {
-            Result<Disciplina> disciplinaSelecionada = disciplinaAppService.SelecionarRegistroPorId(id)!;
-            Disciplina disciplina = disciplinaSelecionada.ValueOrDefault;
+            Result<Disciplina> resultadoDisciplina = disciplinaAppService.SelecionarRegistroPorId(id)!;
 
-            ModelState.AddModelError("ConflitoExclusao", resultado.Errors[0].Message);
+            Disciplina disciplinaSelecionada = resultadoDisciplina.ValueOrDefault;
+
+            ModelState.AddModelError("ConflitoExclusao", resultadoExclusao.Errors[0].Message);
 
             ExcluirDisciplinaViewModel excluirVM = new()
             {
-                Id = disciplina.Id,
-                Nome = disciplina.Nome
+                Id = disciplinaSelecionada.Id,
+                Nome = disciplinaSelecionada.Nome
             };
 
             return View(nameof(Excluir), excluirVM);
@@ -140,14 +141,14 @@ public class DisciplinaController : Controller
     [HttpGet("detalhes/{id}")]
     public IActionResult Detalhes(Guid id)
     {
-        Result<Disciplina> disciplinaSelecionada = disciplinaAppService.SelecionarRegistroPorId(id)!;
+        Result<Disciplina> resultadoDisciplina = disciplinaAppService.SelecionarRegistroPorId(id)!;
 
-        if (disciplinaSelecionada.IsFailed)
+        if (resultadoDisciplina.IsFailed)
             return RedirectToAction(nameof(Index));
 
-        Disciplina disciplina = disciplinaSelecionada.ValueOrDefault;
+        Disciplina disciplinaSelecionda = resultadoDisciplina.ValueOrDefault;
 
-        DetalhesDisciplinaViewModel detalhesVM = disciplina.ParaDetalhesVM();
+        DetalhesDisciplinaViewModel detalhesVM = disciplinaSelecionda.ParaDetalhesVM();
 
         return View(detalhesVM);
     }
