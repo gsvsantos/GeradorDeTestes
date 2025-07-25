@@ -1,144 +1,125 @@
-﻿using GeradorDeTestes.Dominio.ModuloDisciplina;
+﻿using FluentResults;
+using GeradorDeTestes.Aplicacao.ModuloDisciplina;
+using GeradorDeTestes.Aplicacao.ModuloMateria;
+using GeradorDeTestes.Dominio.ModuloDisciplina;
 using GeradorDeTestes.Dominio.ModuloMateria;
-using GeradorDeTestes.Infraestrutura.ORM.Compartilhado;
 using GeradorDeTestes.WebApp.Extensions;
 using GeradorDeTestes.WebApp.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore.Storage;
 
 namespace GeradorDeTestes.WebApp.Controllers;
 
 [Route("materias")]
 public class MateriaController : Controller
 {
-    private readonly GeradorDeTestesDbContext contexto;
-    private readonly IRepositorioMateria repositorioMateria;
-    private readonly IRepositorioDisciplina repositorioDisciplina;
-    public MateriaController(GeradorDeTestesDbContext contexto, IRepositorioMateria repoitorioMateria, IRepositorioDisciplina repositorioDisciplina)
+    private readonly DisciplinaAppService disciplinaAppService;
+    private readonly MateriaAppService materiaAppService;
+
+    public MateriaController(DisciplinaAppService disciplinaAppService, MateriaAppService materiaAppService)
     {
-        this.contexto = contexto;
-        this.repositorioMateria = repoitorioMateria;
-        this.repositorioDisciplina = repositorioDisciplina;
+        this.disciplinaAppService = disciplinaAppService;
+        this.materiaAppService = materiaAppService;
     }
 
     [HttpGet("")]
     public IActionResult Index()
     {
-        List<Materia> registros = repositorioMateria.SelecionarRegistros();
-        VisualizarMateriaViewModel visualizarVM = new VisualizarMateriaViewModel(registros);
+        Result<List<Materia>> resultadosMaterias = materiaAppService.SelecionarRegistros();
+
+        if (resultadosMaterias.IsFailed)
+            return RedirectToAction("Index", "Home");
+
+        List<Materia> materias = resultadosMaterias.Value;
+
+        VisualizarMateriaViewModel visualizarVM = new(materias);
+
         return View(visualizarVM);
     }
 
     [HttpGet("cadastrar")]
     public IActionResult Cadastrar()
     {
-        List<Disciplina> disciplinas = repositorioDisciplina.SelecionarRegistros();
+        Result<List<Disciplina>> resultadoDisciplinas = disciplinaAppService.SelecionarRegistros();
 
-        CadastrarMateriaViewModel cadastrarVM = new CadastrarMateriaViewModel(disciplinas);
+        List<Disciplina> disciplinas = resultadoDisciplinas.Value;
+
+        CadastrarMateriaViewModel cadastrarVM = new(disciplinas);
+
         return View(cadastrarVM);
     }
 
     [HttpPost("cadastrar")]
     public IActionResult Cadastrar(CadastrarMateriaViewModel cadastrarVM)
     {
-        Disciplina disciplinaSelecionada = repositorioDisciplina.SelecionarRegistroPorId(cadastrarVM.DisciplinaId)!;
+        Result<Disciplina> resultadoDisciplina = disciplinaAppService.SelecionarRegistroPorId(cadastrarVM.DisciplinaId)!;
 
-        if (repositorioMateria.SelecionarRegistros().Any(m => m.Nome == cadastrarVM.Nome
-        && m.Disciplina.Id == cadastrarVM.DisciplinaId && m.Serie == cadastrarVM.Serie))
+        Disciplina disciplinaSelecionada = resultadoDisciplina.ValueOrDefault;
+
+        Materia novaMateria = cadastrarVM.ParaEntidade(disciplinaSelecionada!);
+
+        Result resultadoCadastro = materiaAppService.CadastrarRegistro(novaMateria);
+
+        if (resultadoCadastro.IsFailed)
         {
-            ModelState.AddModelError("ConflitoCadastro", "Já existe uma matéria com este nome para a mesma disciplina e série.");
+            ModelState.AddModelError("ConflitoCadastro", resultadoCadastro.Errors[0].Message);
+
+            return View(nameof(Cadastrar), cadastrarVM);
         }
 
-        if (!ModelState.IsValid)
-        {
-            cadastrarVM.Disciplinas = repositorioDisciplina.SelecionarRegistros()
-                .Select(d => new SelectListItem { Text = d.Nome, Value = d.Id.ToString() }).ToList();
-
-            return View(cadastrarVM);
-        }
-
-        Materia materia = cadastrarVM.ParaEntidade(disciplinaSelecionada!);
-
-        IDbContextTransaction transacao = contexto.Database.BeginTransaction();
-
-        try
-        {
-            repositorioMateria.CadastrarRegistro(materia);
-            contexto.SaveChanges();
-            transacao.Commit();
-        }
-        catch
-        {
-            transacao.Rollback();
-            throw;
-        }
-
-        return RedirectToAction("index");
+        return RedirectToAction(nameof(Index));
     }
 
     [HttpGet("editar/{id:Guid}")]
     public IActionResult Editar(Guid id)
     {
-        Materia materia = repositorioMateria.SelecionarRegistroPorId(id)!;
+        Result<Materia> resultadoMateria = materiaAppService.SelecionarRegistroPorId(id)!;
 
-        List<Disciplina> disciplinas = contexto.Disciplinas.ToList();
+        if (resultadoMateria.IsFailed)
+            return RedirectToAction(nameof(Index));
 
-        if (materia == null)
-            return NotFound();
+        Materia materiaSelecionada = resultadoMateria.ValueOrDefault;
 
-        EditarMateriaViewModel editarVM = new EditarMateriaViewModel(materia, disciplinas);
+        Result<List<Disciplina>> resultadoDisciplinas = disciplinaAppService.SelecionarRegistros();
 
-        return View(editarVM);
+        List<Disciplina> disciplinas = resultadoDisciplinas.Value;
+
+        EditarMateriaViewModel editarVM = new(materiaSelecionada, disciplinas);
+
+        return View(nameof(Editar), editarVM);
     }
 
     [HttpPost("editar/{id:Guid}")]
     public IActionResult Editar(Guid id, EditarMateriaViewModel editarVM)
     {
-        if (repositorioMateria.SelecionarRegistros().Any(m => m.Nome == editarVM.Nome
-        && m.Disciplina.Id == editarVM.DisciplinaId && m.Serie == editarVM.Serie && m.Id != id))
-        {
-            ModelState.AddModelError("ConflitoEdicao", "Já existe outra matéria com este nome para a mesma disciplina e série.");
-        }
+        Result<Disciplina> resultadoDisciplina = disciplinaAppService.SelecionarRegistroPorId(editarVM.DisciplinaId)!;
 
-        if (!ModelState.IsValid)
+        Disciplina disciplinaSelecionada = resultadoDisciplina.ValueOrDefault;
+
+        Materia materiaEditada = editarVM.ParaEntidade(disciplinaSelecionada!);
+
+        Result resultadoEdicao = materiaAppService.EditarRegistro(id, materiaEditada);
+
+        if (resultadoEdicao.IsFailed)
         {
-            editarVM.Disciplinas = repositorioDisciplina.SelecionarRegistros()
-                .Select(d => new SelectListItem { Text = d.Nome, Value = d.Id.ToString() }).ToList();
+            ModelState.AddModelError("ConflitoEdicao", resultadoEdicao.Errors[0].Message);
 
             return View(editarVM);
         }
 
-        Disciplina disciplinaSelecionada = repositorioDisciplina.SelecionarRegistroPorId(editarVM.DisciplinaId)!;
-
-        Materia materiaEditada = editarVM.ParaEntidade(disciplinaSelecionada!);
-
-        IDbContextTransaction transacao = contexto.Database.BeginTransaction();
-
-        try
-        {
-            repositorioMateria.EditarRegistro(id, materiaEditada);
-            contexto.SaveChanges();
-            transacao.Commit();
-        }
-        catch
-        {
-            transacao.Rollback();
-            throw;
-        }
-        return RedirectToAction("Index");
-
+        return RedirectToAction(nameof(Index));
     }
 
     [HttpGet("excluir/{id:Guid}")]
     public IActionResult Excluir(Guid id)
     {
-        Materia materia = repositorioMateria.SelecionarRegistroPorId(id)!;
+        Result<Materia> resultadoMateria = materiaAppService.SelecionarRegistroPorId(id)!;
 
-        if (materia == null)
-            return NotFound();
+        if (resultadoMateria.IsFailed)
+            return RedirectToAction(nameof(Index));
 
-        ExcluirMateriaViewModel excluirVM = new ExcluirMateriaViewModel(id, materia.Nome);
+        Materia materiaSelecionada = resultadoMateria.ValueOrDefault;
+
+        ExcluirMateriaViewModel excluirVM = new(id, materiaSelecionada.Nome);
 
         return View(excluirVM);
     }
@@ -146,46 +127,39 @@ public class MateriaController : Controller
     [HttpPost("excluir/{id:Guid}")]
     public IActionResult ExcluirConfirmado(Guid id)
     {
-        Materia materia = repositorioMateria.SelecionarRegistroPorId(id)!;
+        Result resultadoExclusao = materiaAppService.ExcluirRegistro(id)!;
 
-        if (contexto.Questoes.Any(q => q.Materia.Id == id))
+        if (resultadoExclusao.IsFailed)
         {
             ModelState.AddModelError("ConflitoExclusao", "Não é possível excluir a matéria pois ela possui questões associadas.");
 
+            Result<Materia> resultadoMateria = materiaAppService.SelecionarRegistroPorId(id)!;
+
+            Materia materiaSelecionada = resultadoMateria.ValueOrDefault;
+
             ExcluirMateriaViewModel excluirVM = new()
             {
-                Id = materia.Id,
-                Nome = materia.Nome
+                Id = materiaSelecionada.Id,
+                Nome = materiaSelecionada.Nome
             };
 
-            return View("Excluir", excluirVM);
+            return View(nameof(Excluir), excluirVM);
         }
 
-        IDbContextTransaction transacao = contexto.Database.BeginTransaction();
-
-        try
-        {
-            repositorioMateria.ExcluirRegistro(id);
-            contexto.SaveChanges();
-            transacao.Commit();
-        }
-        catch
-        {
-            transacao.Rollback();
-            throw;
-        }
         return RedirectToAction("Index");
     }
 
     [HttpGet("detalhes/{id:Guid}")]
     public IActionResult Detalhes(Guid id)
     {
-        Materia materia = repositorioMateria.SelecionarRegistroPorId(id)!;
+        Result<Materia> resultadoMateria = materiaAppService.SelecionarRegistroPorId(id)!;
 
-        if (materia == null)
-            return NotFound();
+        if (resultadoMateria.IsFailed)
+            return RedirectToAction(nameof(Index));
 
-        DetalhesMateriaViewModel detalhesVM = materia.ParaDetalhesVM();
+        Materia materiaSelecionada = resultadoMateria.ValueOrDefault;
+
+        DetalhesMateriaViewModel detalhesVM = materiaSelecionada.ParaDetalhesVM();
 
         return View(detalhesVM);
     }
