@@ -1,37 +1,43 @@
-﻿using GeradorDeTestes.Dominio.ModuloMateria;
+﻿using FluentResults;
+using GeradorDeTestes.Aplicacao.ModuloMateria;
+using GeradorDeTestes.Aplicacao.ModuloQuestao;
+using GeradorDeTestes.Dominio.ModuloMateria;
 using GeradorDeTestes.Dominio.ModuloQuestao;
-using GeradorDeTestes.Infraestrutura.ORM.Compartilhado;
 using GeradorDeTestes.WebApp.Extensions;
 using GeradorDeTestes.WebApp.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore.Storage;
 
 namespace GeradorDeTestes.WebApp.Controllers;
 
 [Route("questoes")]
 public class QuestaoController : Controller
 {
-    private readonly GeradorDeTestesDbContext contexto;
-    private readonly IRepositorioMateria repositorioMateria;
-    private readonly IRepositorioQuestao repositorioQuestao;
+    private readonly QuestaoAppService questaoAppService;
+    private readonly MateriaAppService materiaAppService;
 
-    public QuestaoController(GeradorDeTestesDbContext contexto, IRepositorioMateria repositorioMateria, IRepositorioQuestao repositorioQuestao)
+    public QuestaoController(QuestaoAppService questaoAppService, MateriaAppService materiaAppService)
     {
-        this.contexto = contexto;
-        this.repositorioMateria = repositorioMateria;
-        this.repositorioQuestao = repositorioQuestao;
+        this.questaoAppService = questaoAppService;
+        this.materiaAppService = materiaAppService;
     }
 
     public IActionResult Index()
     {
-        List<Questao> questoesNaoFinalizadas = repositorioQuestao.SelecionarNaoFinalizados();
+        Result<List<Questao>> resultadosQuestoesNaoFinalizadas = questaoAppService.SelecionarNaoFinalizados();
 
-        repositorioQuestao.RemoverRegistros(questoesNaoFinalizadas);
+        if (resultadosQuestoesNaoFinalizadas.IsFailed)
+            return RedirectToAction("Index", "Home");
 
-        List<Questao> questoes = repositorioQuestao.SelecionarRegistros()
-                                                   .Where(q => q.Finalizado)
-                                                   .ToList();
+        List<Questao> questoesNaoFinalizadas = resultadosQuestoesNaoFinalizadas.Value;
+
+        questaoAppService.RemoverRegistros(questoesNaoFinalizadas);
+
+        Result<List<Questao>> resultadosQuestoes = questaoAppService.SelecionarRegistros();
+
+        List<Questao> questoes = resultadosQuestoes.Value.Where(q => q.Finalizado).ToList();
+
+        if (resultadosQuestoes.IsFailed)
+            return RedirectToAction("Index", "Home");
 
         VisualizarQuestoesViewModel visualizarVM = new(questoes);
 
@@ -41,7 +47,12 @@ public class QuestaoController : Controller
     [HttpGet("cadastrar")]
     public IActionResult Cadastrar()
     {
-        List<Materia> materias = repositorioMateria.SelecionarRegistros();
+        Result<List<Materia>> resultadosMaterias = materiaAppService.SelecionarRegistros();
+
+        if (resultadosMaterias.IsFailed)
+            return RedirectToAction(nameof(Index));
+
+        List<Materia> materias = resultadosMaterias.Value;
 
         CadastrarQuestaoViewModel cadastrarVM = new(materias);
 
@@ -51,38 +62,19 @@ public class QuestaoController : Controller
     [HttpPost("cadastrar")]
     public IActionResult Cadastrar(CadastrarQuestaoViewModel cadastrarVM)
     {
-        if (repositorioQuestao.SelecionarRegistros()
-            .Any(q => q.Enunciado == cadastrarVM.Enunciado && q.Materia.Id == cadastrarVM.MateriaId))
-            ModelState.AddModelError("ConflitoCadastro", "Já existe uma questão com este enunciado para a mesma matéria.");
+        Result<Materia> resultadoMateria = materiaAppService.SelecionarRegistroPorId(cadastrarVM.MateriaId)!;
 
-        if (!ModelState.IsValid)
-        {
-            cadastrarVM.Materias = repositorioMateria.SelecionarRegistros()
-                .Select(m => new SelectListItem { Text = m.Nome, Value = m.Id.ToString() })
-                .ToList();
-
-            return View(cadastrarVM);
-        }
-
-        Materia materiaSelecionada = repositorioMateria.SelecionarRegistroPorId(cadastrarVM.MateriaId)!;
+        Materia materiaSelecionada = resultadoMateria.Value;
 
         Questao novaQuestao = cadastrarVM.ParaEntidade(materiaSelecionada);
 
-        IDbContextTransaction transacao = contexto.Database.BeginTransaction();
+        Result resultadoCadastro = questaoAppService.CadastrarRegistro(novaQuestao);
 
-        try
+        if (resultadoCadastro.IsFailed)
         {
-            repositorioQuestao.CadastrarRegistro(novaQuestao);
+            ModelState.AddModelError("ConflitoCadastro", resultadoCadastro.Errors[0].Message);
 
-            contexto.SaveChanges();
-
-            transacao.Commit();
-        }
-        catch (Exception)
-        {
-            transacao.Rollback();
-
-            throw;
+            return View(nameof(Cadastrar), cadastrarVM);
         }
 
         return RedirectToAction(nameof(GerenciarAlternativas), new { id = novaQuestao.Id });
@@ -91,9 +83,19 @@ public class QuestaoController : Controller
     [HttpGet("editar/{id:guid}")]
     public IActionResult Editar(Guid id)
     {
-        Questao questaoSelecionada = repositorioQuestao.SelecionarRegistroPorId(id)!;
+        Result<Questao> resultadoQuestao = questaoAppService.SelecionarRegistroPorId(id)!;
 
-        List<Materia> materias = repositorioMateria.SelecionarRegistros();
+        if (resultadoQuestao.IsFailed)
+            return RedirectToAction(nameof(Index));
+
+        Questao questaoSelecionada = resultadoQuestao.Value;
+
+        Result<List<Materia>> resultadosMaterias = materiaAppService.SelecionarRegistros();
+
+        if (resultadosMaterias.IsFailed)
+            return RedirectToAction(nameof(Index));
+
+        List<Materia> materias = resultadosMaterias.Value;
 
         EditarQuestaoViewModel editarVM = new(
             questaoSelecionada,
@@ -105,47 +107,37 @@ public class QuestaoController : Controller
     [HttpPost("editar/{id:guid}")]
     public IActionResult Editar(Guid id, EditarQuestaoViewModel editarVM)
     {
-        if (repositorioQuestao.SelecionarRegistros()
-            .Any(q => q.Enunciado == editarVM.Enunciado && q.Materia.Id == editarVM.MateriaId && q.Id != id))
-            ModelState.AddModelError("ConflitoEdicao", "Já existe uma questão com este enunciado para a mesma matéria.");
+        Result<List<Questao>> resultadosQuestoes = questaoAppService.SelecionarRegistros();
 
-        if (!ModelState.IsValid)
+        List<Questao> questoes = resultadosQuestoes.Value;
+
+        Result<Materia> resultadoMateria = materiaAppService.SelecionarRegistroPorId(editarVM.MateriaId)!;
+
+        Materia materiaSelecionada = resultadoMateria.Value;
+
+        Questao questaoEditada = editarVM.ParaEntidade(materiaSelecionada);
+
+        Result resultadoEdicao = questaoAppService.EditarRegistro(id, questaoEditada);
+
+        if (resultadoEdicao.IsFailed)
         {
-            editarVM.Materias = repositorioMateria.SelecionarRegistros()
-                .Select(m => new SelectListItem { Text = m.Nome, Value = m.Id.ToString() })
-                .ToList();
+            ModelState.AddModelError("ConflitoEdicao", resultadoEdicao.Errors[0].Message);
 
             return View(editarVM);
         }
 
-        Materia materiaSelecionada = repositorioMateria.SelecionarRegistroPorId(editarVM.MateriaId)!;
-
-        Questao questaoEditada = editarVM.ParaEntidade(materiaSelecionada);
-
-        IDbContextTransaction transacao = contexto.Database.BeginTransaction();
-
-        try
-        {
-            repositorioQuestao.EditarRegistro(id, questaoEditada);
-
-            contexto.SaveChanges();
-
-            transacao.Commit();
-        }
-        catch (Exception)
-        {
-            transacao.Rollback();
-
-            throw;
-        }
-
-        return RedirectToAction(nameof(Index));
+        return RedirectToAction(nameof(GerenciarAlternativas), new { id });
     }
 
     [HttpGet("excluir/{id:guid}")]
     public IActionResult Excluir(Guid id)
     {
-        Questao questaoSelecionada = repositorioQuestao.SelecionarRegistroPorId(id)!;
+        Result<Questao> resultadoQuestao = questaoAppService.SelecionarRegistroPorId(id)!;
+
+        if (resultadoQuestao.IsFailed)
+            return RedirectToAction(nameof(Index));
+
+        Questao questaoSelecionada = resultadoQuestao.Value;
 
         ExcluirQuestaoViewModel excluirVM = new(
             id,
@@ -157,44 +149,32 @@ public class QuestaoController : Controller
     [HttpPost("excluir/{id:guid}")]
     public IActionResult ExcluirConfirmado(Guid id)
     {
-        Questao questaoSelecionada = repositorioQuestao.SelecionarRegistroPorId(id)!;
+        Result resultadoExclusao = questaoAppService.ExcluirRegistro(id);
 
-        if (contexto.Testes.Any(t => t.Questoes.Any(q => q.Id == id)))
+        if (resultadoExclusao.IsFailed)
         {
-            ModelState.AddModelError("ConflitoExclusao", "Não é possível excluir a questão pois ela está vinculada a testes.");
+            ModelState.AddModelError("ConflitoExclusao", resultadoExclusao.Errors[0].Message);
 
-            ExcluirQuestaoViewModel excluirVM = new()
-            {
-                Id = questaoSelecionada.Id,
-                Enunciado = questaoSelecionada.Enunciado
-            };
+            Result<Questao> resultadoQuestao = questaoAppService.SelecionarRegistroPorId(id)!;
 
-            return View("Excluir", excluirVM);
+            Questao questaoSelecionada = resultadoQuestao.Value;
+
+            ExcluirQuestaoViewModel excluirVM = new(
+                id,
+                questaoSelecionada.Enunciado);
+
+            return View(nameof(Excluir), excluirVM);
         }
 
-        IDbContextTransaction transacao = contexto.Database.BeginTransaction();
-
-        try
-        {
-            repositorioQuestao.ExcluirRegistro(id);
-
-            contexto.SaveChanges();
-
-            transacao.Commit();
-        }
-        catch (Exception)
-        {
-            transacao.Rollback();
-
-            throw;
-        }
         return RedirectToAction("Index");
     }
 
     [HttpGet, Route("/questoes/{id:guid}/detalhes")]
     public IActionResult Detalhes(Guid id)
     {
-        Questao questaoSelecionada = repositorioQuestao.SelecionarRegistroPorId(id)!;
+        Result<Questao> resultadoQuestao = questaoAppService.SelecionarRegistroPorId(id)!;
+
+        Questao questaoSelecionada = resultadoQuestao.Value;
 
         DetalhesQuestaoViewModel detalhesQuestaoVM = questaoSelecionada.ParaDetalhesVM();
 
@@ -204,7 +184,9 @@ public class QuestaoController : Controller
     [HttpGet, Route("/questoes/{id:guid}/alternativas")]
     public IActionResult GerenciarAlternativas(Guid id)
     {
-        Questao questaoSelecionada = repositorioQuestao.SelecionarRegistroPorId(id)!;
+        Result<Questao> resultadoQuestao = questaoAppService.SelecionarRegistroPorId(id)!;
+
+        Questao questaoSelecionada = resultadoQuestao.Value;
 
         List<Alternativa> alternativas = questaoSelecionada.Alternativas.ToList();
 
@@ -227,47 +209,22 @@ public class QuestaoController : Controller
     [HttpPost, Route("/questoes/{id:guid}/adicionar-alternativa")]
     public IActionResult AdicionarAlternativa(Guid id, AdicionarAlternativaViewModel adicionarAlternativaVM)
     {
-        Questao questaoSelecionada = repositorioQuestao.SelecionarRegistroPorId(id)!;
+        Result resultadoAdicaoAlternativa = questaoAppService.AdicionarAlternativa(
+            id, adicionarAlternativaVM.TextoAlternativa);
 
-        if (string.IsNullOrWhiteSpace(adicionarAlternativaVM.TextoAlternativa))
-            ModelState.AddModelError("ConflitoAlternativas", "O texto da alternativa é obrigatório.");
-
-        if (questaoSelecionada.Alternativas.Count >= 4)
-            ModelState.AddModelError("ConflitoAlternativas", "A questão já possui o máximo de 4 alternativas.");
-
-        if (questaoSelecionada.Alternativas.Any(a => a.Texto.Equals(adicionarAlternativaVM.TextoAlternativa)))
-            ModelState.AddModelError("ConflitoAlternativas", "Essa alternativa já foi inserida.");
-
-        if (!ModelState.IsValid)
+        if (resultadoAdicaoAlternativa.IsFailed)
         {
+            ModelState.AddModelError("ConflitoAlternativas", resultadoAdicaoAlternativa.Errors[0].Message);
+
+            Result<Questao> resultadoQuestao = questaoAppService.SelecionarRegistroPorId(id)!;
+
+            Questao questaoSelecionada = resultadoQuestao.Value;
+
             GerenciarAlternativasViewModel gerenciarAlternativasVM = new(
                 questaoSelecionada,
                 questaoSelecionada.Alternativas.ToList());
 
             return View(nameof(GerenciarAlternativas), gerenciarAlternativasVM);
-        }
-
-        Alternativa novaAlternativa = new(
-            adicionarAlternativaVM.TextoAlternativa,
-            questaoSelecionada);
-
-        IDbContextTransaction transacao = contexto.Database.BeginTransaction();
-
-        try
-        {
-            questaoSelecionada.AderirAlternativa(novaAlternativa);
-
-            contexto.Alternativas.Add(novaAlternativa);
-
-            contexto.SaveChanges();
-
-            transacao.Commit();
-        }
-        catch (Exception)
-        {
-            transacao.Rollback();
-
-            throw;
         }
 
         return RedirectToAction(nameof(GerenciarAlternativas), new { id });
@@ -276,27 +233,22 @@ public class QuestaoController : Controller
     [HttpPost, Route("/questoes/{id:guid}/remover-alternativa/{idAlternativa:guid}")]
     public IActionResult RemoverAlternativa(Guid id, Guid idAlternativa)
     {
-        Questao questaoSelecionada = repositorioQuestao.SelecionarRegistroPorId(id)!;
+        Result resultadoRemocaoAlternativa = questaoAppService.RemoverAlternativa(
+            id, idAlternativa);
 
-        Alternativa alternativaEscolhida = repositorioQuestao.SelecionarAlternativa(questaoSelecionada, idAlternativa)!;
-
-        IDbContextTransaction transacao = contexto.Database.BeginTransaction();
-
-        try
+        if (resultadoRemocaoAlternativa.IsFailed)
         {
-            questaoSelecionada.RemoverAlternativa(alternativaEscolhida);
+            ModelState.AddModelError("ConflitoAlternativas", resultadoRemocaoAlternativa.Errors[0].Message);
 
-            contexto.Alternativas.Remove(alternativaEscolhida);
+            Result<Questao> resultadoQuestao = questaoAppService.SelecionarRegistroPorId(id)!;
 
-            contexto.SaveChanges();
+            Questao questaoSelecionada = resultadoQuestao.Value;
 
-            transacao.Commit();
-        }
-        catch (Exception)
-        {
-            transacao.Rollback();
+            GerenciarAlternativasViewModel gerenciarAlternativasVM = new(
+                questaoSelecionada,
+                questaoSelecionada.Alternativas.ToList());
 
-            throw;
+            return View(nameof(GerenciarAlternativas), gerenciarAlternativasVM);
         }
 
         return RedirectToAction(nameof(GerenciarAlternativas), new { id });
@@ -305,12 +257,22 @@ public class QuestaoController : Controller
     [HttpPost("/questoes/{id:guid}/marcar-alternativa-correta")]
     public IActionResult MarcarAlternativaCorreta(Guid id, Guid idAlternativaCorreta)
     {
-        Questao questao = repositorioQuestao.SelecionarRegistroPorId(id)!;
+        Result resultadoMarcacao = questaoAppService.MarcarAlternativaCorreta(id, idAlternativaCorreta);
 
-        foreach (Alternativa a in questao.Alternativas)
-            a.EstaCorreta = (a.Id == idAlternativaCorreta);
+        if (resultadoMarcacao.IsFailed)
+        {
+            ModelState.AddModelError("ConflitoAlternativas", resultadoMarcacao.Errors[0].Message);
 
-        contexto.SaveChanges();
+            Result<Questao> resultadoQuestao = questaoAppService.SelecionarRegistroPorId(id)!;
+
+            Questao questaoSelecionada = resultadoQuestao.Value;
+
+            GerenciarAlternativasViewModel gerenciarAlternativasVM = new(
+                questaoSelecionada,
+                questaoSelecionada.Alternativas.ToList());
+
+            return View(nameof(GerenciarAlternativas), gerenciarAlternativasVM);
+        }
 
         return RedirectToAction(nameof(GerenciarAlternativas), new { id });
     }
@@ -318,26 +280,22 @@ public class QuestaoController : Controller
     [HttpPost, Route("/questoes/{id:guid}/finalizar")]
     public IActionResult FinalizarQuestao(Guid id)
     {
-        Questao questao = repositorioQuestao.SelecionarRegistroPorId(id)!;
+        Result resultadoFinalizacao = questaoAppService.FinalizarQuestao(id);
 
-        if (questao.Alternativas.Count < 2 || questao.Alternativas.Count > 4)
-            ModelState.AddModelError("ConflitoAlternativas", "A questão deve ter entre 2 e 4 alternativas.");
-
-        if (questao.Alternativas.Count(a => a.EstaCorreta) != 1)
-            ModelState.AddModelError("ConflitoAlternativas", "A questão deve ter exatamente uma alternativa correta.");
-
-        if (!ModelState.IsValid)
+        if (resultadoFinalizacao.IsFailed)
         {
+            ModelState.AddModelError("ConflitoAlternativas", resultadoFinalizacao.Errors[0].Message);
+
+            Result<Questao> resultadoQuestao = questaoAppService.SelecionarRegistroPorId(id)!;
+
+            Questao questaoSelecionada = resultadoQuestao.Value;
+
             GerenciarAlternativasViewModel gerenciarAlternativasVM = new(
-                questao,
-                questao.Alternativas.ToList());
+                questaoSelecionada,
+                questaoSelecionada.Alternativas.ToList());
 
-            return View("GerenciarAlternativas", gerenciarAlternativasVM);
+            return View(nameof(GerenciarAlternativas), gerenciarAlternativasVM);
         }
-
-        questao.Finalizado = true;
-
-        contexto.SaveChanges();
 
         return RedirectToAction(nameof(Index));
     }
