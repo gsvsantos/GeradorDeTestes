@@ -1,7 +1,6 @@
 ﻿using FluentResults;
 using GeradorDeTestes.Aplicacao.ModuloDisciplina;
 using GeradorDeTestes.Dominio.Compartilhado;
-using GeradorDeTestes.Dominio.ModuloDisciplina;
 using GeradorDeTestes.Dominio.ModuloMateria;
 using GeradorDeTestes.Dominio.ModuloQuestao;
 using Microsoft.Extensions.Logging;
@@ -10,35 +9,32 @@ namespace GeradorDeTestes.Aplicacao.ModuloMateria;
 public class MateriaAppService
 {
     private readonly IUnitOfWork unitOfWork;
-    private readonly IRepositorioDisciplina repositorioDisciplina;
     private readonly IRepositorioMateria repositorioMateria;
     private readonly IRepositorioQuestao repositorioQuestao;
     private readonly ILogger<DisciplinaAppService> logger;
 
-    public MateriaAppService(IUnitOfWork unitOfWork, IRepositorioDisciplina repositorioDisciplina,
-        IRepositorioMateria repositorioMateria, IRepositorioQuestao repositorioQuestao,
-        ILogger<DisciplinaAppService> logger)
+    public MateriaAppService(IUnitOfWork unitOfWork, IRepositorioMateria repositorioMateria,
+        IRepositorioQuestao repositorioQuestao, ILogger<DisciplinaAppService> logger)
     {
         this.unitOfWork = unitOfWork;
-        this.repositorioDisciplina = repositorioDisciplina;
         this.repositorioMateria = repositorioMateria;
         this.repositorioQuestao = repositorioQuestao;
         this.logger = logger;
     }
 
-    public Result CadastrarRegistro(Materia materia)
+    public Result CadastrarRegistro(Materia novaMateria)
     {
         List<Materia> materias = repositorioMateria.SelecionarRegistros();
 
-        if (materias.Any(m => m.Nome.Equals(materia.Nome)
-        && m.Disciplina.Id.Equals(materia.Disciplina.Id) && m.Serie.Equals(materia.Serie)))
+        if (materias.Any(m => m.Nome.Equals(novaMateria.Nome)
+        && m.Disciplina.Id.Equals(novaMateria.Disciplina.Id) && m.Serie.Equals(novaMateria.Serie)))
         {
             return Result.Fail("Já existe uma matéria com este nome para a mesma disciplina e série.");
         }
 
         try
         {
-            repositorioMateria.CadastrarRegistro(materia);
+            repositorioMateria.CadastrarRegistro(novaMateria);
 
             unitOfWork.Commit();
         }
@@ -49,7 +45,7 @@ public class MateriaAppService
             logger.LogError(
                 ex,
                 "Ocorreu um erro durante o cadastro de {@ViewModel}.",
-                materia
+                novaMateria
             );
         }
 
@@ -88,11 +84,12 @@ public class MateriaAppService
 
     public Result ExcluirRegistro(Guid id)
     {
-        Materia materia = repositorioMateria.SelecionarRegistroPorId(id)!;
-        List<Questao> questoes = repositorioQuestao.SelecionarRegistros();
-
         try
         {
+            Materia materiaSelecionada = repositorioMateria.SelecionarRegistroPorId(id)!;
+
+            List<Questao> questoes = repositorioQuestao.SelecionarRegistros();
+
             if (questoes.Any(q => q.Materia.Id.Equals(id)))
                 return Result.Fail("Não é possível excluir a matéria pois ela possui questões associadas.");
 

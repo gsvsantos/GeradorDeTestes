@@ -26,16 +26,16 @@ public class DisciplinaAppService
         this.logger = logger;
     }
 
-    public Result CadastrarRegistro(Disciplina disciplina)
+    public Result CadastrarRegistro(Disciplina novaDisciplina)
     {
         List<Disciplina> disciplinas = repositorioDisciplina.SelecionarRegistros();
 
-        if (disciplinas.Any(d => d.Nome.Equals(disciplina.Nome)))
+        if (disciplinas.Any(d => d.Nome.Equals(novaDisciplina.Nome)))
             return Result.Fail("Já existe uma disciplina com este nome.");
 
         try
         {
-            repositorioDisciplina.CadastrarRegistro(disciplina);
+            repositorioDisciplina.CadastrarRegistro(novaDisciplina);
 
             unitOfWork.Commit();
         }
@@ -46,7 +46,7 @@ public class DisciplinaAppService
             logger.LogError(
                 ex,
                 "Ocorreu um erro durante o cadastro de {@ViewModel}.",
-                disciplina
+                novaDisciplina
             );
         }
 
@@ -82,16 +82,18 @@ public class DisciplinaAppService
 
     public Result ExcluirRegistro(Guid id)
     {
-        Disciplina disciplina = repositorioDisciplina.SelecionarRegistroPorId(id)!;
-        List<Materia> materias = repositorioMateria.SelecionarRegistros();
-        List<Teste> testes = repositorioTeste.SelecionarRegistros();
-
         try
         {
+            Disciplina disciplinaSelecionada = repositorioDisciplina.SelecionarRegistroPorId(id)!;
+
+            List<Materia> materias = repositorioMateria.SelecionarRegistros();
+
+            List<Teste> testes = repositorioTeste.SelecionarRegistros();
+
             if (materias.Any(m => m.Disciplina.Id == id) ||
                 testes.Any(t => t.Disciplina.Id == id))
             {
-                return Result.Fail("Não é possível excluir: há matérias ou testes vinculados");
+                return Result.Fail("Não é possível excluir: há matérias ou testes vinculados.");
             }
 
             repositorioDisciplina.ExcluirRegistro(id);

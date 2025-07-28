@@ -34,10 +34,10 @@ public class QuestaoController : Controller
 
         Result<List<Questao>> resultadosQuestoes = questaoAppService.SelecionarRegistros();
 
-        List<Questao> questoes = resultadosQuestoes.Value.Where(q => q.Finalizado).ToList();
-
         if (resultadosQuestoes.IsFailed)
             return RedirectToAction("Index", "Home");
+
+        List<Questao> questoes = resultadosQuestoes.Value.Where(q => q.Finalizado).ToList();
 
         VisualizarQuestoesViewModel visualizarVM = new(questoes);
 

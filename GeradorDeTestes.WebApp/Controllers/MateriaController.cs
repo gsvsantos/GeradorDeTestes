@@ -41,6 +41,9 @@ public class MateriaController : Controller
     {
         Result<List<Disciplina>> resultadoDisciplinas = disciplinaAppService.SelecionarRegistros();
 
+        if (resultadoDisciplinas.IsFailed)
+            return RedirectToAction(nameof(Index));
+
         List<Disciplina> disciplinas = resultadoDisciplinas.Value;
 
         CadastrarMateriaViewModel cadastrarVM = new(disciplinas);
@@ -80,6 +83,9 @@ public class MateriaController : Controller
         Materia materiaSelecionada = resultadoMateria.ValueOrDefault;
 
         Result<List<Disciplina>> resultadoDisciplinas = disciplinaAppService.SelecionarRegistros();
+
+        if (resultadoDisciplinas.IsFailed)
+            return RedirectToAction(nameof(Index));
 
         List<Disciplina> disciplinas = resultadoDisciplinas.Value;
 

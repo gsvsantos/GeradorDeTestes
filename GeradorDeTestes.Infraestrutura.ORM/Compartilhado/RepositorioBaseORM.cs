@@ -21,24 +21,24 @@ public class RepositorioBaseORM<T> where T : EntidadeBase<T>
 
     public virtual bool EditarRegistro(Guid idRegistro, T registroEditado)
     {
-        T? categoriaSelecionada = SelecionarRegistroPorId(idRegistro);
+        T? registroSelecionado = SelecionarRegistroPorId(idRegistro);
 
-        if (categoriaSelecionada is null)
+        if (registroSelecionado is null)
             return false;
 
-        categoriaSelecionada.AtualizarRegistro(registroEditado);
+        registroSelecionado.AtualizarRegistro(registroEditado);
 
         return true;
     }
 
     public virtual bool ExcluirRegistro(Guid idRegistro)
     {
-        T? categoriaSelecionada = SelecionarRegistroPorId(idRegistro);
+        T? registroSelecionado = SelecionarRegistroPorId(idRegistro);
 
-        if (categoriaSelecionada is null)
+        if (registroSelecionado is null)
             return false;
 
-        registros.Remove(categoriaSelecionada);
+        registros.Remove(registroSelecionado);
 
         return true;
     }

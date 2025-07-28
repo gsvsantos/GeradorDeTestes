@@ -26,19 +26,19 @@ public class QuestaoAppService
         this.logger = logger;
     }
 
-    public Result CadastrarRegistro(Questao questao)
+    public Result CadastrarRegistro(Questao novaQuestao)
     {
         List<Questao> questoes = repositorioQuestao.SelecionarRegistros();
 
-        if (questoes.Any(q => q.Enunciado.Equals(questao.Enunciado)
-        && q.Materia.Id.Equals(questao.Materia.Id)))
+        if (questoes.Any(q => q.Enunciado.Equals(novaQuestao.Enunciado)
+        && q.Materia.Id.Equals(novaQuestao.Materia.Id)))
         {
             return Result.Fail("Já existe uma questão com este enunciado para a mesma matéria.");
         }
 
         try
         {
-            repositorioQuestao.CadastrarRegistro(questao);
+            repositorioQuestao.CadastrarRegistro(novaQuestao);
 
             unitOfWork.Commit();
         }
@@ -49,7 +49,7 @@ public class QuestaoAppService
             logger.LogError(
                 ex,
                 "Ocorreu um erro durante o cadastro de {@ViewModel}.",
-                questao
+                novaQuestao
             );
         }
 

@@ -33,6 +33,14 @@
     </div>
 </div>
 
+@if (ViewData.ModelState["ConflitoGeral"]?.Errors.Count > 0)
+{
+    <div class="alert alert-danger alert-dismissible fade show my-3" role="alert">
+        @ViewData.ModelState["ConflitoGeral"]!.Errors.First().ErrorMessage
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
 <hr class="border border-white opacity-25" />
 
 <div class="row">
