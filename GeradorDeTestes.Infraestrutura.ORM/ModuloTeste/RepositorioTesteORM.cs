@@ -9,16 +9,17 @@ public class RepositorioTesteORM : RepositorioBaseORM<Teste>, IRepositorioTeste
 {
     public RepositorioTesteORM(GeradorDeTestesDbContext contexto) : base(contexto) { }
 
-    public void AtualizarQuantidadePorMateria(Teste teste, Materia materia)
+    public void AtualizarRegistro(Teste testeSelecionado)
     {
-        TesteMateriaQuantidade? objComQuantidade = teste.QuantidadesPorMateria
+        contexto.Update(testeSelecionado);
+    }
+
+    public void AtualizarQuantidadePorMateria(Teste testeSelecionado, Materia materia)
+    {
+        TesteMateriaQuantidade? objComQuantidade = testeSelecionado.QuantidadesPorMateria
             .FirstOrDefault(x => x.Materia.Id == materia.Id);
 
-        if (objComQuantidade is not null)
-        {
-            objComQuantidade.QuantidadeQuestoes++;
-        }
-        else
+        if (objComQuantidade is null)
         {
             objComQuantidade = new TesteMateriaQuantidade
             {
@@ -27,8 +28,13 @@ public class RepositorioTesteORM : RepositorioBaseORM<Teste>, IRepositorioTeste
                 QuantidadeQuestoes = 1
             };
 
-            teste.QuantidadesPorMateria.Add(objComQuantidade);
-            contexto.QuantidadesPorMateria.Add(objComQuantidade);
+            testeSelecionado.QuantidadesPorMateria.Add(objComQuantidade);
+
+            contexto.Entry(objComQuantidade).State = EntityState.Added;
+        }
+        else
+        {
+            objComQuantidade.QuantidadeQuestoes++;
         }
     }
 
@@ -43,21 +49,20 @@ public class RepositorioTesteORM : RepositorioBaseORM<Teste>, IRepositorioTeste
     {
         return registros.Where(t => !t.Finalizado).ToList();
     }
+
     public List<Questao> SelecionarQuestoesParaProvao(Guid disciplinaId, int quantidade)
     {
         return contexto.Questoes
             .Include(q => q.Materia)
-            .Where(q => q.Materia.Disciplina.Id == disciplinaId)
+            .Where(q => q.Materia.Disciplina.Id == disciplinaId && q.Finalizado)
             .OrderBy(q => Guid.NewGuid())
             .Take(quantidade)
             .ToList();
     }
 
-    public int RemoverRegistros(List<Teste> testes)
+    public void RemoverRegistros(List<Teste> testes)
     {
         contexto.Testes.RemoveRange(testes);
-
-        return contexto.SaveChanges();
     }
 
     public override Teste? SelecionarRegistroPorId(Guid idRegistro)
@@ -78,7 +83,8 @@ public class RepositorioTesteORM : RepositorioBaseORM<Teste>, IRepositorioTeste
 
     public override List<Teste> SelecionarRegistros()
     {
-        return registros.Include(t => t.Disciplina)
+        return registros.Where(t => t.Finalizado)
+            .Include(t => t.Disciplina)
             .Include(t => t.Materias)
             .ThenInclude(m => m.Questoes)
             .Include(t => t.Questoes)
