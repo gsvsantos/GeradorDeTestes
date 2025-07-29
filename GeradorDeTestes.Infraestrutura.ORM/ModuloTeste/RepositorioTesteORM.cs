@@ -37,6 +37,10 @@ public class RepositorioTesteORM : RepositorioBaseORM<Teste>, IRepositorioTeste
             objComQuantidade.QuantidadeQuestoes++;
         }
     }
+    public void RemoverQuantidadePorMateria(TesteMateriaQuantidade quantidade)
+    {
+        contexto.Remove(quantidade);
+    }
 
     public List<Teste> SelecionarNaoFinalizadosAntigos(TimeSpan tempoMaximo)
     {
