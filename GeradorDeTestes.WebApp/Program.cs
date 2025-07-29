@@ -6,14 +6,14 @@ using GeradorDeTestes.Dominio.ModuloDisciplina;
 using GeradorDeTestes.Dominio.ModuloMateria;
 using GeradorDeTestes.Dominio.ModuloQuestao;
 using GeradorDeTestes.Dominio.ModuloTeste;
-using GeradorDeTestes.Infraestrutura.ORM.ModuloDisciplina;
+using GeradorDeTestes.Infraestrutura.ORM.Dapper.ModuloDisciplina;
 using GeradorDeTestes.Infraestrutura.ORM.ModuloMateria;
 using GeradorDeTestes.Infraestrutura.ORM.ModuloQuestao;
 using GeradorDeTestes.Infraestrutura.ORM.ModuloTeste;
 using GeradorDeTestes.WebApp.ActionFilters;
 using GeradorDeTestes.WebApp.DependencyInjection;
 using GeradorDeTestes.WebApp.ORM;
-using Microsoft.Data.SqlClient;
+using Npgsql;
 using System.Data;
 
 namespace GeradorDeTestes.WebApp;
@@ -33,10 +33,10 @@ public class Program
         {
             string? connectionString = builder.Configuration["SQL_CONNECTION_STRING"];
 
-            return new SqlConnection(connectionString);
+            return new NpgsqlConnection(connectionString);
         });
 
-        builder.Services.AddScoped<IRepositorioDisciplina, RepositorioDisciplinaORM>();
+        builder.Services.AddScoped<IRepositorioDisciplina, RepositorioDisciplinaDapper>();
         builder.Services.AddScoped<IRepositorioMateria, RepositorioMateriaORM>();
         builder.Services.AddScoped<IRepositorioQuestao, RepositorioQuestaoORM>();
         builder.Services.AddScoped<IRepositorioTeste, RepositorioTesteORM>();
