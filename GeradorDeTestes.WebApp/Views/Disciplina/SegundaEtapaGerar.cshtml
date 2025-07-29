@@ -1,0 +1,71 @@
+﻿@model SegundaEtapaGerarDisciplinasViewModel
+
+@{
+    ViewBag.Titulo = "Geração Automática de Disciplinas";
+}
+
+<hr class="border border-white opacity-25" />
+
+<div class="row justify-content-center my-5">
+    <div class="col-md-8">
+        <div class="card rounded-4 border-0">
+            <div class="card-body cor-padrao p-md-4">
+                <form asp-action="SegundaEtapaGerar" method="post">
+                    <h3 class="mb-4">Geração Automática de Disciplinas</h3>
+
+                    @if (ViewData.ModelState["ConflitoGeracao"]?.Errors.Count > 0)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show my-3" role="alert">
+                            @ViewData.ModelState["ConflitoGeracao"]!.Errors.First().ErrorMessage
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    @* Reenvia disciplinas geradas*@
+                    @for (int i = 0; i < Model.DisciplinaGeradas.Count; i++)
+                    {
+                        <input type="hidden" asp-for="DisciplinaGeradas[@i].Nome" />
+                    }
+
+                    @if (Model.DisciplinaGeradas.Count > 0)
+                    {
+                        <label for="QuestoesGeradas" class="control-label fs-5 mt-4">Questões:</label>
+
+                        <table class="table table-sm table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var q in Model.DisciplinaGeradas)
+                                {
+                                    <tr>
+                                        <td valign="middle">
+                                            @q.Nome
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+
+                    <div class="form-group d-flex align-items-center justify-content-end gap-3 mt-3">
+                        <a href="/disciplinas" class="botao-excluir botao-excluir-outline rounded-3 px-2">
+                            <i class="bi bi-x-circle"></i>
+                            Cancelar
+                        </a>
+                        <button type="submit" class="botao rounded-3 p-2">
+                            <i class="bi bi-check-circle"></i>
+                            Confirmar Disciplinas
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

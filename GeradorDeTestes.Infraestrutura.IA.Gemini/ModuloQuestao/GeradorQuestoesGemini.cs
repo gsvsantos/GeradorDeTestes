@@ -1,11 +1,11 @@
 ﻿using GeradorDeTestes.Dominio.ModuloMateria;
 using GeradorDeTestes.Dominio.ModuloQuestao;
-using GeradorDeTestes.Infraestrutura.IA.Gemini.DTOs;
+using GeradorDeTestes.Infraestrutura.IA.Gemini.ModuloQuestao.DTOs;
 using Microsoft.Extensions.Configuration;
 using System.Text;
 using System.Text.Json;
 
-namespace GeradorDeTestes.Infraestrutura.IA.Gemini;
+namespace GeradorDeTestes.Infraestrutura.IA.Gemini.ModuloQuestao;
 
 public class GeradorQuestoesGemini : IGeradorQuestoes
 {
@@ -41,8 +41,7 @@ public class GeradorQuestoesGemini : IGeradorQuestoes
                 ]
               }},
               ...
-            ]"
-        ;
+            ]";
 
         var requestBody = new
         {

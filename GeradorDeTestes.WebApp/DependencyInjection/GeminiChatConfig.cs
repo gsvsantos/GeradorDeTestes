@@ -1,5 +1,7 @@
-﻿using GeradorDeTestes.Dominio.ModuloQuestao;
-using GeradorDeTestes.Infraestrutura.IA.Gemini;
+﻿using GeradorDeTestes.Dominio.ModuloDisciplina;
+using GeradorDeTestes.Dominio.ModuloQuestao;
+using GeradorDeTestes.Infraestrutura.IA.Gemini.ModuloDisciplina;
+using GeradorDeTestes.Infraestrutura.IA.Gemini.ModuloQuestao;
 
 namespace GeradorDeTestes.WebApp.DependencyInjection;
 
@@ -9,5 +11,6 @@ public static class GeminiChatConfig
     {
         services.AddHttpClient();
         services.AddScoped<IGeradorQuestoes, GeradorQuestoesGemini>();
+        services.AddScoped<IGeradorDisciplinas, GeradorDisciplinaGemini>();
     }
 }

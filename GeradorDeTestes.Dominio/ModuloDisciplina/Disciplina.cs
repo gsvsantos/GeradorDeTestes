@@ -9,11 +9,11 @@ public class Disciplina : EntidadeBase<Disciplina>
     public List<Materia> Materias { get; set; } = new List<Materia>();
     public List<Teste> Testes { get; set; } = new List<Teste>();
 
-    public Disciplina(string nome)
+    public Disciplina() { }
+    public Disciplina(string nome) : this()
     {
         Nome = nome;
     }
-    protected Disciplina() { }
 
     public void AderirMateria(Materia materia)
     {

@@ -1,4 +1,5 @@
-﻿using GeradorDeTestes.Dominio.ModuloMateria;
+﻿using GeradorDeTestes.Dominio.ModuloDisciplina;
+using GeradorDeTestes.Dominio.ModuloMateria;
 using System.ComponentModel.DataAnnotations;
 
 public class FormularioDisciplinaViewModel
@@ -44,4 +45,52 @@ public class TesteResumoViewModel
     public string Titulo { get; set; }
     public int QtdMaterias { get; set; }
     public int QuantidadeQuestoes { get; set; }
+}
+
+public class PrimeiraEtapaGerarDisciplinasViewModel
+{
+    [Required(ErrorMessage = "O campo \"Quantidade de Disciplinas\" é obrigatório.")]
+    [Range(1, 100, ErrorMessage = "O campo \"Quantidade de Disciplinas\" precisa conter um valor numérico entre 1 e 10.")]
+    public int QuantidadeDisciplinas { get; set; }
+}
+
+public class SegundaEtapaGerarDisciplinasViewModel
+{
+    public List<DisciplinaGeradaViewModel> DisciplinaGeradas { get; set; } = new List<DisciplinaGeradaViewModel>();
+
+    public SegundaEtapaGerarDisciplinasViewModel() { }
+    public SegundaEtapaGerarDisciplinasViewModel(List<Disciplina> disciplinas) : this()
+    {
+        DisciplinaGeradas = disciplinas
+            .Select(DisciplinaGeradaViewModel.ParaViewModel)
+            .ToList();
+    }
+
+    public static List<Disciplina> ObterDisciplinasGeradas(SegundaEtapaGerarDisciplinasViewModel segundaEtapaVM)
+    {
+        List<Disciplina> disciplinas = new List<Disciplina>();
+
+        foreach (DisciplinaGeradaViewModel disciplinaVM in segundaEtapaVM.DisciplinaGeradas)
+        {
+            Disciplina disciplina = new()
+            {
+                Id = Guid.NewGuid(),
+                Nome = disciplinaVM.Nome
+            };
+
+            disciplinas.Add(disciplina);
+        }
+
+        return disciplinas;
+    }
+}
+
+public class DisciplinaGeradaViewModel
+{
+    public required string Nome { get; set; }
+
+    public static DisciplinaGeradaViewModel ParaViewModel(Disciplina disciplina)
+    {
+        return new() { Nome = disciplina.Nome };
+    }
 }

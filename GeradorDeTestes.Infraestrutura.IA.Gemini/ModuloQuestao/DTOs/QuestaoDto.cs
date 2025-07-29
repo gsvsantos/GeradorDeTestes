@@ -1,4 +1,4 @@
-﻿namespace GeradorDeTestes.Infraestrutura.IA.Gemini.DTOs;
+﻿namespace GeradorDeTestes.Infraestrutura.IA.Gemini.ModuloQuestao.DTOs;
 
 public class QuestaoDto
 {

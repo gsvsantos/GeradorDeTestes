@@ -1,7 +1,9 @@
 ﻿using FluentResults;
 using GeradorDeTestes.Aplicacao.ModuloDisciplina;
 using GeradorDeTestes.Dominio.ModuloDisciplina;
+using GeradorDeTestes.WebApp.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace GeradorDeTestes.WebApp.Controllers;
 
@@ -151,5 +153,80 @@ public class DisciplinaController : Controller
         DetalhesDisciplinaViewModel detalhesVM = disciplinaSelecionda.ParaDetalhesVM();
 
         return View(detalhesVM);
+    }
+
+    [HttpGet("gerar-disciplinas/primeira-etapa")]
+    public IActionResult PrimeiraEtapaGerar()
+    {
+        PrimeiraEtapaGerarDisciplinasViewModel primeiraEtapaVM = new();
+
+        return View(primeiraEtapaVM);
+    }
+
+    [HttpPost("gerar-disciplinas/primeira-etapa")]
+    public async Task<IActionResult> PrimeiraEtapaGerar(PrimeiraEtapaGerarDisciplinasViewModel primeiraEtapaVM)
+    {
+        Result<List<Disciplina>> resultado = await disciplinaAppService.GerarDisciplinas(primeiraEtapaVM.QuantidadeDisciplinas);
+
+        if (resultado.Value.Count == 0)
+        {
+            TempData["ConflitoGeracao"] = "Nenhuma nova disciplina foi gerada. Tente novamente.";
+            return RedirectToAction(nameof(PrimeiraEtapaGerar));
+        }
+
+        if (resultado.IsFailed)
+        {
+            foreach (IError? erro in resultado.Errors)
+            {
+                string notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                    erro.Message,
+                    erro.Reasons[0].Message
+                );
+
+                TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+                break;
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        SegundaEtapaGerarDisciplinasViewModel segundaEtapavm = new(resultado.Value);
+
+        string jsonString = JsonSerializer.Serialize(segundaEtapavm);
+
+        TempData.Clear();
+
+        TempData.Add(nameof(SegundaEtapaGerarDisciplinasViewModel), jsonString);
+
+        return RedirectToAction(nameof(SegundaEtapaGerar));
+    }
+
+    [HttpGet("gerar-disciplinas/segunda-etapa")]
+    public IActionResult SegundaEtapaGerar()
+    {
+        bool existeViewModel = TempData.TryGetValue(nameof(SegundaEtapaGerarDisciplinasViewModel), out object? valor);
+
+        if (!existeViewModel || valor is not string jsonString)
+            return RedirectToAction(nameof(PrimeiraEtapaGerar));
+
+        SegundaEtapaGerarDisciplinasViewModel? segundaEtapaVm = JsonSerializer.Deserialize<SegundaEtapaGerarDisciplinasViewModel>(jsonString);
+
+        return View(segundaEtapaVm);
+    }
+
+    [HttpPost("gerar-disciplinas/segunda-etapa")]
+    public IActionResult SegundaEtapaGerar(SegundaEtapaGerarDisciplinasViewModel segundaEtapaVm)
+    {
+        List<Disciplina> disciplinasGeradas = SegundaEtapaGerarDisciplinasViewModel.ObterDisciplinasGeradas(segundaEtapaVm);
+
+        foreach (Disciplina disciplina in disciplinasGeradas)
+        {
+            Result resultado = disciplinaAppService.CadastrarRegistro(disciplina);
+
+            if (resultado.IsFailed)
+                return View(nameof(PrimeiraEtapaGerar));
+        }
+
+        return RedirectToAction(nameof(Index));
     }
 }

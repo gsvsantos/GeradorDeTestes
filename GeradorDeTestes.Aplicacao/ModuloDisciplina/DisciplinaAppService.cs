@@ -9,16 +9,18 @@ namespace GeradorDeTestes.Aplicacao.ModuloDisciplina;
 
 public class DisciplinaAppService
 {
+    private readonly IGeradorDisciplinas geradorDisciplinas;
     private readonly IUnitOfWork unitOfWork;
     private readonly IRepositorioDisciplina repositorioDisciplina;
     private readonly IRepositorioMateria repositorioMateria;
     private readonly IRepositorioTeste repositorioTeste;
     private readonly ILogger<DisciplinaAppService> logger;
 
-    public DisciplinaAppService(IUnitOfWork unitOfWork, IRepositorioDisciplina repositorioDisciplina,
-        IRepositorioMateria repositorioMateria, IRepositorioTeste repositorioTeste,
-        ILogger<DisciplinaAppService> logger)
+    public DisciplinaAppService(IGeradorDisciplinas geradorDisciplinas, IUnitOfWork unitOfWork,
+        IRepositorioDisciplina repositorioDisciplina, IRepositorioMateria repositorioMateria,
+        IRepositorioTeste repositorioTeste, ILogger<DisciplinaAppService> logger)
     {
+        this.geradorDisciplinas = geradorDisciplinas;
         this.unitOfWork = unitOfWork;
         this.repositorioDisciplina = repositorioDisciplina;
         this.repositorioMateria = repositorioMateria;
@@ -155,6 +157,27 @@ public class DisciplinaAppService
             );
 
             return Result.Fail("Ocorreu um erro inesperado ao tentar obter as disciplinas.");
+        }
+    }
+
+    public async Task<Result<List<Disciplina>>> GerarDisciplinas(int quantidade)
+    {
+        try
+        {
+            List<Disciplina> disciplinas = repositorioDisciplina.SelecionarRegistros();
+
+            List<Disciplina> disciplinasGeradas = await geradorDisciplinas.GerarDisciplinasAsync(quantidade, disciplinas);
+
+            return Result.Ok(disciplinasGeradas);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(
+                ex,
+                "Ocorreu um erro durante a geração das disciplinas."
+            );
+
+            return Result.Fail("Ocorreu um erro durante a geração das disciplinas");
         }
     }
 }
