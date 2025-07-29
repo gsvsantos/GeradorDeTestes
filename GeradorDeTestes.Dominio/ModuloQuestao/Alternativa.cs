@@ -7,11 +7,11 @@ public class Alternativa
     public Questao Questao { get; set; }
     public bool EstaCorreta { get; set; }
 
-    public Alternativa(string texto, Questao questao)
+    public Alternativa() { }
+    public Alternativa(string texto, Questao questao) : this()
     {
         Id = Guid.NewGuid();
         Texto = texto;
         Questao = questao;
     }
-    protected Alternativa() { }
 }

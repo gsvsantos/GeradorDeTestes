@@ -9,16 +9,18 @@ using Microsoft.Extensions.Logging;
 namespace GeradorDeTestes.Aplicacao.ModuloQuestao;
 public class QuestaoAppService
 {
+    private readonly IGeradorQuestoes geradorQuestoes;
     private readonly IUnitOfWork unitOfWork;
     private readonly IRepositorioMateria repositorioMateria;
     private readonly IRepositorioQuestao repositorioQuestao;
     private readonly IRepositorioTeste repositorioTeste;
     private readonly ILogger<DisciplinaAppService> logger;
 
-    public QuestaoAppService(IUnitOfWork unitOfWork, IRepositorioMateria repositorioMateria,
-        IRepositorioQuestao repositorioQuestao, IRepositorioTeste repositorioTeste,
-        ILogger<DisciplinaAppService> logger)
+    public QuestaoAppService(IGeradorQuestoes geradorQuestoes, IUnitOfWork unitOfWork,
+        IRepositorioMateria repositorioMateria, IRepositorioQuestao repositorioQuestao,
+        IRepositorioTeste repositorioTeste, ILogger<DisciplinaAppService> logger)
     {
+        this.geradorQuestoes = geradorQuestoes;
         this.unitOfWork = unitOfWork;
         this.repositorioMateria = repositorioMateria;
         this.repositorioQuestao = repositorioQuestao;
@@ -365,6 +367,26 @@ public class QuestaoAppService
             logger.LogError(ex, "Erro ao finalizar a questão {Id}", idQuestao);
 
             return Result.Fail("Erro ao finalizar a questão.");
+        }
+    }
+
+    public async Task<Result<List<Questao>>> GerarQuestoesDaMateria(Materia materiaSelecionada, int quantidadeQuestoes)
+    {
+        try
+        {
+            List<Questao> questoes = await geradorQuestoes.GerarQuestoesAsync(materiaSelecionada, quantidadeQuestoes);
+
+            return Result.Ok(questoes);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(
+                ex,
+                "Ocorreu um erro durante a geração de questões da matéria {@Registro}.",
+                materiaSelecionada
+            );
+
+            return Result.Fail("Ocorreu um erro durante a geração de questões da matéria");
         }
     }
 }

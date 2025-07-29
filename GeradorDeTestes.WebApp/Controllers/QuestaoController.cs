@@ -6,6 +6,7 @@ using GeradorDeTestes.Dominio.ModuloQuestao;
 using GeradorDeTestes.WebApp.Extensions;
 using GeradorDeTestes.WebApp.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace GeradorDeTestes.WebApp.Controllers;
 
@@ -295,6 +296,87 @@ public class QuestaoController : Controller
                 questaoSelecionada.Alternativas.ToList());
 
             return View(nameof(GerenciarAlternativas), gerenciarAlternativasVM);
+        }
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpGet("gerar-questoes/primeira-etapa")]
+    public IActionResult PrimeiraEtapaGerar()
+    {
+        List<Materia> materias = materiaAppService.SelecionarRegistros().ValueOrDefault;
+
+        PrimeiraEtapaGerarQuestoesViewModel primeiraEtapaVm = new PrimeiraEtapaGerarQuestoesViewModel(materias);
+
+        return View(primeiraEtapaVm);
+    }
+
+    [HttpPost("gerar-questoes/primeira-etapa")]
+    public async Task<IActionResult> PrimeiraEtapaGerar(PrimeiraEtapaGerarQuestoesViewModel primeiraEtapaVm)
+    {
+        Materia materiaSelecionada = materiaAppService.SelecionarRegistroPorId(primeiraEtapaVm.MateriaId).ValueOrDefault;
+
+        Result<List<Questao>> resultado = await questaoAppService.GerarQuestoesDaMateria(materiaSelecionada, primeiraEtapaVm.QuantidadeQuestoes);
+
+        if (resultado.IsFailed)
+        {
+            foreach (IError? erro in resultado.Errors)
+            {
+                string notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                    erro.Message,
+                    erro.Reasons[0].Message
+                );
+
+                TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+                break;
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        SegundaEtapaGerarQuestoesViewModel segundaEtapavm = new SegundaEtapaGerarQuestoesViewModel(resultado.Value)
+        {
+            MateriaId = primeiraEtapaVm.MateriaId,
+            Materia = materiaSelecionada.Nome
+        };
+
+        string jsonString = JsonSerializer.Serialize(segundaEtapavm);
+
+        TempData.Clear();
+
+        TempData.Add(nameof(SegundaEtapaGerarQuestoesViewModel), jsonString);
+
+        return RedirectToAction(nameof(SegundaEtapaGerar));
+    }
+
+    [HttpGet("gerar-questoes/segunda-etapa")]
+    public IActionResult SegundaEtapaGerar()
+    {
+        bool existeViewModel = TempData.TryGetValue(nameof(SegundaEtapaGerarQuestoesViewModel), out object? valor);
+
+        if (!existeViewModel || valor is not string jsonString)
+            return RedirectToAction(nameof(PrimeiraEtapaGerar));
+
+        SegundaEtapaGerarQuestoesViewModel? segundaEtapaVm = JsonSerializer.Deserialize<SegundaEtapaGerarQuestoesViewModel>(jsonString);
+
+        return View(segundaEtapaVm);
+    }
+
+    [HttpPost("gerar-questoes/segunda-etapa")]
+    public IActionResult SegundaEtapaGerar(SegundaEtapaGerarQuestoesViewModel segundaEtapaVm)
+    {
+        List<Materia> materias = materiaAppService.SelecionarRegistros().ValueOrDefault;
+
+        Materia materiaSelecionada = materiaAppService.SelecionarRegistroPorId(segundaEtapaVm.MateriaId).ValueOrDefault;
+
+        List<Questao> questoesGeradas = SegundaEtapaGerarQuestoesViewModel.ObterQuestoesGeradas(segundaEtapaVm, materiaSelecionada);
+
+        foreach (Questao questao in questoesGeradas)
+        {
+            Result resultado = questaoAppService.CadastrarRegistro(questao);
+
+            if (resultado.IsFailed)
+                return View(nameof(PrimeiraEtapaGerar));
         }
 
         return RedirectToAction(nameof(Index));

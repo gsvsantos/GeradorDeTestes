@@ -44,9 +44,10 @@ public class Program
         builder.Services.AddScoped<MateriaAppService>();
         builder.Services.AddScoped<QuestaoAppService>();
         builder.Services.AddScoped<TesteAppService>();
-        builder.Services.AddScoped<GeradorPdfService>();
         builder.Services.AddEntityFrameworkConfig(builder.Configuration);
         builder.Services.AddSerilogConfig(builder.Logging);
+        builder.Services.AddQuestPDFConfig();
+        builder.Services.AddGeminiChatConfig();
 
         WebApplication app = builder.Build();
 

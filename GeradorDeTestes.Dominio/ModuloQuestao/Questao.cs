@@ -12,12 +12,12 @@ public class Questao : EntidadeBase<Questao>
     public List<Alternativa> Alternativas { get; set; } = new List<Alternativa>();
     public List<Teste> Testes { get; set; } = new List<Teste>();
 
-    public Questao(string enunciado, Materia materia)
+    public Questao() { }
+    public Questao(string enunciado, Materia materia) : this()
     {
         Enunciado = enunciado;
         Materia = materia;
     }
-    protected Questao() { }
 
     public void AderirAlternativa(Alternativa alternativa)
     {
