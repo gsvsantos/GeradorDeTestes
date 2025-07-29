@@ -334,10 +334,13 @@ public class QuestaoController : Controller
             return RedirectToAction(nameof(Index));
         }
 
+        string serieFormatada = (int)materiaSelecionada.Serie >= 10
+        ? materiaSelecionada.Serie.GetDisplayName()[..8] : materiaSelecionada.Serie.GetDisplayName()[..7];
+
         SegundaEtapaGerarQuestoesViewModel segundaEtapavm = new SegundaEtapaGerarQuestoesViewModel(resultado.Value)
         {
             MateriaId = primeiraEtapaVm.MateriaId,
-            Materia = materiaSelecionada.Nome
+            Materia = $"{materiaSelecionada.Nome} - {serieFormatada}"
         };
 
         string jsonString = JsonSerializer.Serialize(segundaEtapavm);
@@ -373,6 +376,7 @@ public class QuestaoController : Controller
 
         foreach (Questao questao in questoesGeradas)
         {
+            questao.Finalizado = true;
             Result resultado = questaoAppService.CadastrarRegistro(questao);
 
             if (resultado.IsFailed)
