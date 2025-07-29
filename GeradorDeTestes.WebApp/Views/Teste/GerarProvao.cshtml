@@ -39,19 +39,6 @@
                 }
 
                 <div class="form-group mt-2">
-                    <form action="/testes/@Model.Id/selecionar-materia/@Model.MateriaId" method="post">
-                        <div class="form-group d-grid mt-2">
-                            <label class="form-label fs-5" asp-for="MateriaId">Matéria:</label>
-                            <select class="form-select" id="selectMateria" asp-for="MateriaId" asp-items="@Model.Materias">
-                                <option value="" disabled selected>Selecione uma Matéria</option>
-                            </select>
-                            <span class="text-danger d-block mt-2" asp-validation-for="MateriaId"></span>
-                        </div>
-                        <button type="submit" class="botao align-self-end col">
-                            <i class="bi bi-journal-plus"></i>
-                            Selecionar Matéria
-                        </button>
-                    </form>
                     @if (!Model.MateriasSelecionadas.Any())
                     {
                         <p class="fw-semibold mt-3">Ainda não há nenhuma matéria selecionada...</p>
@@ -62,7 +49,7 @@
                             <table class="table table-wrapper table-hover">
                                 <thead>
                                     <tr>
-                                        <th>Matérias Selecionadas</th>
+                                        <th>Matérias Da Disciplina</th>
                                         <th>Quantidade Questões</th>
                                     </tr>
                                 </thead>

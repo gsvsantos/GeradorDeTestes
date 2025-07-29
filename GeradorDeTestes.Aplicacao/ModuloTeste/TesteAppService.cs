@@ -144,6 +144,8 @@ public class TesteAppService
                 return Result.Fail("Não foi possível obter o registro da matéria selecionada.");
 
             testeSelecionado.RemoverMateria(materia);
+            testeSelecionado.Questoes.RemoveAll(q => q.Materia.Id == materia.Id);
+            testeSelecionado.QuantidadesPorMateria.RemoveAll(qpm => qpm.Materia.Id == materia.Id);
 
             repositorioTeste.AtualizarRegistro(testeSelecionado);
 
@@ -193,6 +195,8 @@ public class TesteAppService
             if (novaQuantidade == 0 && objComQuantidade is not null)
             {
                 testeSelecionado.QuantidadesPorMateria.Remove(objComQuantidade);
+                testeSelecionado.Materias.RemoveAll(m => m.Id == materiaSelecionada.Id);
+                testeSelecionado.Questoes.RemoveAll(q => q.Materia.Id == materiaSelecionada.Id);
             }
             else if (objComQuantidade is not null)
             {
@@ -239,24 +243,32 @@ public class TesteAppService
             if (testeSelecionado is null)
                 return Result.Fail("Não foi possível obter o registro do teste selecionado.");
 
-            List<Materia> materias = testeSelecionado.Materias;
+            List<Guid> materiasSelecionadas = testeSelecionado.QuantidadesPorMateria
+                .Where(q => q.QuantidadeQuestoes > 0)
+                .Select(q => q.Materia.Id)
+                .ToList();
 
             List<Questao> todasQuestoes = repositorioQuestao.SelecionarRegistros()
-                .Where(q => materias.Select(m => m.Id).Contains(q.Materia.Id) && q.Finalizado)
+                .Where(q => materiasSelecionadas.Contains(q.Materia.Id) && q.Finalizado)
                 .ToList();
 
             testeSelecionado.Questoes.Clear();
 
             foreach (TesteMateriaQuantidade qpm in testeSelecionado.QuantidadesPorMateria)
             {
+                if (qpm.QuantidadeQuestoes == 0)
+                    continue;
+
                 List<Questao> questoesDaMateria = todasQuestoes
                     .Where(q => q.Materia.Id == qpm.Materia.Id)
                     .Take(qpm.QuantidadeQuestoes)
                     .ToList();
 
-                foreach (Questao? questao in questoesDaMateria)
+                foreach (Questao questao in questoesDaMateria)
                     testeSelecionado.AderirQuestao(questao);
             }
+
+            testeSelecionado.Questoes.Shuffle();
 
             repositorioTeste.AtualizarRegistro(testeSelecionado);
 
@@ -291,11 +303,9 @@ public class TesteAppService
 
             materias.Shuffle();
 
+            testeSelecionado.Materias.Clear();
             testeSelecionado.Questoes.Clear();
             testeSelecionado.QuantidadesPorMateria.Clear();
-
-            foreach (Materia materia in materias)
-                testeSelecionado.AderirMateria(materia);
 
             List<Questao> todasQuestoes = repositorioQuestao.SelecionarRegistros()
                 .Where(q => materias.Select(m => m.Id).Contains(q.Materia.Id) && q.Finalizado)
@@ -308,9 +318,13 @@ public class TesteAppService
                 if (testeSelecionado.Questoes.Any(q => q.Equals(questao)))
                     continue;
 
-                testeSelecionado.AderirQuestao(questao);
+                Materia materia = questao.Materia;
 
-                repositorioTeste.AtualizarQuantidadePorMateria(testeSelecionado, questao.Materia);
+                if (!testeSelecionado.Materias.Any(m => m.Id == materia.Id))
+                    testeSelecionado.AderirMateria(materia);
+
+                testeSelecionado.AderirQuestao(questao);
+                repositorioTeste.AtualizarQuantidadePorMateria(testeSelecionado, materia);
             }
 
             testeSelecionado.Questoes.Shuffle();
@@ -328,6 +342,92 @@ public class TesteAppService
         }
     }
 
+    public Result AtualizarQuestoes(Guid id)
+    {
+        Result<Teste> testeResult = SelecionarRegistroPorId(id);
+
+        if (testeResult.IsFailed)
+            return Result.Fail(testeResult.Errors.First().Message);
+
+        Teste teste = testeResult.Value;
+
+        if (teste.EhProvao)
+            return GerarQuestoesAutomaticamente(id);
+
+        if (teste.Questoes.Count == teste.QuantidadeQuestoes)
+            return EmbaralharQuestoes(id);
+
+        return GerarQuestoesAutomaticamente(id);
+    }
+
+    public Result GerarQuestoesAutomaticamente(Guid id)
+    {
+        try
+        {
+            Teste testeSelecionado = repositorioTeste.SelecionarRegistroPorId(id)!;
+
+            if (testeSelecionado is null)
+                return Result.Fail("Não foi possível obter o registro do teste selecionado.");
+
+            testeSelecionado.Questoes.Clear();
+            testeSelecionado.QuantidadesPorMateria.Clear();
+
+            List<Materia> materias = repositorioMateria.SelecionarRegistros()
+                .Where(m => m.Disciplina.Id == testeSelecionado.Disciplina.Id &&
+                            m.Serie == testeSelecionado.Serie)
+                .ToList();
+
+            if (testeSelecionado.EhProvao)
+                materias.Shuffle();
+
+            List<Questao> todasQuestoes = repositorioQuestao.SelecionarRegistros()
+                .Where(q => materias.Select(m => m.Id).Contains(q.Materia.Id) && q.Finalizado)
+                .ToList();
+
+            todasQuestoes.Shuffle();
+
+            List<Questao> questoesSelecionadas = todasQuestoes
+                .DistinctBy(q => q.Id)
+                .Take(testeSelecionado.QuantidadeQuestoes)
+                .ToList();
+
+            foreach (Materia materia in materias)
+            {
+                List<Questao> questoesDaMateria = questoesSelecionadas
+                    .Where(q => q.Materia.Id == materia.Id)
+                    .ToList();
+
+                if (questoesDaMateria.Count == 0)
+                    continue;
+
+                testeSelecionado.AderirMateria(materia);
+
+                foreach (Questao questao in questoesDaMateria)
+                {
+                    testeSelecionado.AderirQuestao(questao);
+                    repositorioTeste.AtualizarQuantidadePorMateria(testeSelecionado, materia);
+                }
+            }
+
+            testeSelecionado.Questoes.Shuffle();
+
+            repositorioTeste.AtualizarRegistro(testeSelecionado);
+            unitOfWork.Commit();
+
+            return Result.Ok();
+        }
+        catch (Exception ex)
+        {
+            unitOfWork.Rollback();
+
+            logger.LogError(ex,
+                "Erro ao gerar questões automaticamente para o teste {Id}",
+                id);
+
+            return Result.Fail("Erro ao gerar questões automaticamente.");
+        }
+    }
+
     public Result EmbaralharQuestoes(Guid id)
     {
         try
@@ -337,30 +437,51 @@ public class TesteAppService
             if (testeSelecionado is null)
                 return Result.Fail("Não foi possível obter o registro do teste selecionado.");
 
-            List<Materia> materias = testeSelecionado.Materias.ToList();
-
-            List<Questao> questoes = repositorioQuestao.SelecionarRegistros()
-                .Where(q => materias.Select(m => m.Id).Contains(q.Materia.Id) && q.Finalizado)
-                .ToList();
-
+            testeSelecionado.Materias.Clear();
             testeSelecionado.Questoes.Clear();
             testeSelecionado.QuantidadesPorMateria.Clear();
 
-            questoes.Shuffle();
+            List<Materia> materias = repositorioMateria.SelecionarRegistros()
+                .Where(m => m.Disciplina.Id == testeSelecionado.Disciplina.Id &&
+                            m.Serie == testeSelecionado.Serie)
+                .ToList();
 
-            foreach (Questao? questao in questoes.Take(testeSelecionado.QuantidadeQuestoes))
+            materias.Shuffle();
+
+            List<Questao> todasQuestoes = repositorioQuestao.SelecionarRegistros()
+                .Where(q => materias.Select(m => m.Id).Contains(q.Materia.Id) && q.Finalizado)
+                .ToList();
+
+            todasQuestoes.Shuffle();
+
+            List<Questao> questoesSelecionadas = todasQuestoes
+                .DistinctBy(q => q.Id)
+                .Take(testeSelecionado.QuantidadeQuestoes)
+                .ToList();
+
+            foreach (Materia materia in materias)
             {
-                if (testeSelecionado.Questoes.Any(q => q.Equals(questao)))
+                List<Questao> questoesDaMateria = questoesSelecionadas
+                    .Where(q => q.Materia.Id == materia.Id)
+                    .ToList();
+
+                if (questoesDaMateria.Count == 0)
                     continue;
 
-                testeSelecionado.AderirQuestao(questao);
-                repositorioTeste.AtualizarQuantidadePorMateria(testeSelecionado, questao.Materia);
+                testeSelecionado.AderirMateria(materia);
+
+                foreach (Questao questao in questoesDaMateria)
+                {
+                    testeSelecionado.AderirQuestao(questao);
+                    repositorioTeste.AtualizarQuantidadePorMateria(testeSelecionado, materia);
+                }
             }
 
             testeSelecionado.Questoes.Shuffle();
 
-            repositorioTeste.AtualizarRegistro(testeSelecionado);
+            RemoverMateriasSemQuestoes(testeSelecionado);
 
+            repositorioTeste.AtualizarRegistro(testeSelecionado);
             unitOfWork.Commit();
 
             return Result.Ok();
@@ -368,7 +489,11 @@ public class TesteAppService
         catch (Exception ex)
         {
             unitOfWork.Rollback();
-            logger.LogError(ex, "Erro ao embaralhar questões para o teste {Id}", id);
+
+            logger.LogError(ex,
+                "Erro ao embaralhar questões para o teste {Id}",
+                id);
+
             return Result.Fail("Erro ao embaralhar questões.");
         }
     }
@@ -575,5 +700,17 @@ public class TesteAppService
             logger.LogError(ex, "Erro ao finalizar o teste {Id}", id);
             return Result.Fail("Erro ao finalizar o teste.");
         }
+    }
+
+    private void RemoverMateriasSemQuestoes(Teste teste)
+    {
+        HashSet<Guid> idsMateriasComQuestoes = teste.Questoes
+            .Select(q => q.Materia.Id)
+            .Distinct()
+            .ToHashSet();
+
+        // Remove matérias que não têm nenhuma questão associada
+        teste.Materias.RemoveAll(m => !idsMateriasComQuestoes.Contains(m.Id));
+        teste.QuantidadesPorMateria.RemoveAll(qpm => !idsMateriasComQuestoes.Contains(qpm.Materia.Id));
     }
 }

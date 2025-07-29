@@ -103,52 +103,29 @@ public class TesteController : Controller
     [HttpGet("gerar-teste")]
     public IActionResult GerarTeste(Guid id)
     {
-        Result<Teste> resultadoTeste = testeAppService.SelecionarRegistroPorId(id);
+        Result resultadoGeracao = testeAppService.GerarQuestoesParaTeste(id);
 
-        Teste testeSelecionado = resultadoTeste.ValueOrDefault;
-
-        List<Materia> materiasSelecionadas = testeSelecionado.Materias;
-
-        Result<List<Materia>> resultadosMaterias = materiaAppService.SelecionarRegistros();
-
-        List<Materia> materias = resultadosMaterias.Value.Where(m => m.Disciplina.Equals(testeSelecionado.Disciplina))
-            .Where(m => m.Serie.Equals(testeSelecionado.Serie))
-            .ToList();
-
-        Result<List<Questao>> resultadosQuestoes = questaoAppService.SelecionarRegistros();
-
-        List<Questao> questoes = resultadosQuestoes.Value;
-
-        testeSelecionado.Questoes.Clear();
-
-        foreach (TesteMateriaQuantidade q in testeSelecionado.QuantidadesPorMateria)
+        if (resultadoGeracao.IsFailed)
         {
-            List<Questao> questoesDaMateria = questoes
-                .Where(questao => questao.Materia.Id.Equals(q.Materia.Id))
-                .Where(q => q.Finalizado)
-                .Take(q.QuantidadeQuestoes)
-                .ToList();
-
-            foreach (Questao questao in questoesDaMateria)
-            {
-                testeSelecionado.AderirQuestao(questao);
-            }
-        }
-
-        Result resultadoAtualizacao = testeAppService.AtualizarQuestoesETeste(testeSelecionado);
-
-        if (resultadoAtualizacao.IsFailed)
-        {
-            ModelState.AddModelError("ConflitoGeral", resultadoAtualizacao.Errors[0].Message);
+            ModelState.AddModelError("ConflitoGeral", resultadoGeracao.Errors[0].Message);
             return RedirectToAction("Index", "Home");
         }
 
-        if (TempData["Embaralhar"] is not null)
-        {
-            testeAppService.EmbaralharQuestoes(id);
-        }
+        Result<Teste> resultadoTeste = testeAppService.SelecionarRegistroPorId(id);
 
-        FormGerarPostViewModel gerarTestePostVM = testeSelecionado.ParaGerarTestePostVM(materias, materiasSelecionadas);
+        if (resultadoTeste.IsFailed)
+            return RedirectToAction("Index", "Home");
+
+        Teste testeSelecionado = resultadoTeste.Value;
+
+        Result<List<Materia>> resultadosMaterias = materiaAppService.SelecionarRegistros();
+
+        List<Materia> materias = resultadosMaterias.Value
+            .Where(m => m.Disciplina.Equals(testeSelecionado.Disciplina))
+            .Where(m => m.Serie.Equals(testeSelecionado.Serie))
+            .ToList();
+
+        FormGerarPostViewModel gerarTestePostVM = testeSelecionado.ParaGerarTestePostVM(materias, testeSelecionado.Materias);
 
         return View(gerarTestePostVM);
     }
@@ -156,7 +133,10 @@ public class TesteController : Controller
     [HttpPost("gerar-teste")]
     public IActionResult GerarTeste(Guid id, FormGerarPostViewModel gerarTestePostVM)
     {
-        Result<Teste> resultadoTeste = testeAppService.SelecionarRegistroPorId(id)!;
+        Result<Teste> resultadoTeste = testeAppService.SelecionarRegistroPorId(id);
+
+        if (resultadoTeste.IsFailed)
+            return RedirectToAction(nameof(Index));
 
         Teste testeSelecionado = resultadoTeste.ValueOrDefault;
 
@@ -284,11 +264,14 @@ public class TesteController : Controller
     [HttpPost, Route("/testes/{id:guid}/aleatorizar-questoes")]
     public IActionResult AleatorizarQuestoes(Guid id)
     {
-        Result<Teste> resultadoTeste = testeAppService.SelecionarRegistroPorId(id);
+        Result resultado = testeAppService.AtualizarQuestoes(id);
+
+        if (resultado.IsFailed)
+            ModelState.AddModelError("ConflitoGeracao", resultado.Errors[0].Message);
+
+        Result<Teste> resultadoTeste = testeAppService.SelecionarRegistroPorId(id)!;
 
         Teste testeSelecionado = resultadoTeste.ValueOrDefault;
-
-        TempData["Embaralhar"] = true;
 
         string tipoGeracao = testeSelecionado.EhProvao ? nameof(GerarProvao) : nameof(GerarTeste);
 

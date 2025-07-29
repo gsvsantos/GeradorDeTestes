@@ -42,7 +42,10 @@ public class Teste : EntidadeBase<Teste>
 
     public void AderirMateria(Materia materia)
     {
-        Materias.Add(materia);
+        if (!Materias.Any(m => m.Id == materia.Id))
+        {
+            Materias.Add(materia);
+        }
     }
 
     public void RemoverMateria(Materia materia)
