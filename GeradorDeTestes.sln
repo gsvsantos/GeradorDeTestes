@@ -19,6 +19,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeradorDeTestes.Aplicacao",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeradorDeTestes.Infraestrutura.IA.Gemini", "GeradorDeTestes.Infraestrutura.IA.Gemini\GeradorDeTestes.Infraestrutura.IA.Gemini.csproj", "{E372145A-51FA-430C-9E51-F4AF41380F41}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "04-Testes", "04-Testes", "{3781CF8C-9DE0-4567-AEFC-C7C182AE419D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeradorDeTestes.Testes.Integracao", "GeradorDeTestes.Testes.Integracao\GeradorDeTestes.Testes.Integracao.csproj", "{8590EA60-C2E7-4537-B7B5-47E231E51311}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +49,10 @@ Global
 		{E372145A-51FA-430C-9E51-F4AF41380F41}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E372145A-51FA-430C-9E51-F4AF41380F41}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E372145A-51FA-430C-9E51-F4AF41380F41}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8590EA60-C2E7-4537-B7B5-47E231E51311}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8590EA60-C2E7-4537-B7B5-47E231E51311}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8590EA60-C2E7-4537-B7B5-47E231E51311}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8590EA60-C2E7-4537-B7B5-47E231E51311}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -55,6 +63,7 @@ Global
 		{F8242703-8978-401E-9B53-C9A3ACB0E44B} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{FF43FBC6-3944-4BDD-8B0E-485AAC15223C} = {5ED3FDA1-8328-424C-BF1D-17853A5CEE8D}
 		{E372145A-51FA-430C-9E51-F4AF41380F41} = {E7A64F96-7306-4A9C-B85A-9F7CE23D786E}
+		{8590EA60-C2E7-4537-B7B5-47E231E51311} = {3781CF8C-9DE0-4567-AEFC-C7C182AE419D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {39BE8CAD-B1C4-498C-AB77-23EBBA02E6E7}
