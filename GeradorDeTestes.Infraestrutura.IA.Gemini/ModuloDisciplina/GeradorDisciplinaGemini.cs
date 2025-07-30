@@ -1,6 +1,7 @@
 ﻿using GeradorDeTestes.Dominio.ModuloDisciplina;
 using GeradorDeTestes.Infraestrutura.IA.Gemini.ModuloDisciplina.DTOs;
 using Microsoft.Extensions.Configuration;
+using System.Net;
 using System.Text;
 using System.Text.Json;
 
@@ -47,7 +48,7 @@ public class GeradorDisciplinaGemini : IGeradorDisciplinas
         {
             int faltamGerar = quantidadeDesejada - disciplinasNovas.Count;
 
-            List<DisciplinaDto> geradas = await GerarComGeminiAsync(faltamGerar);
+            List<DisciplinaDto> geradas = await GerarComGeminiAsync(faltamGerar, nomesExistentes);
 
             foreach (DisciplinaDto dto in geradas)
             {
@@ -73,8 +74,10 @@ public class GeradorDisciplinaGemini : IGeradorDisciplinas
         return disciplinasNovas;
     }
 
-    private async Task<List<DisciplinaDto>> GerarComGeminiAsync(int quantidade)
+    private async Task<List<DisciplinaDto>> GerarComGeminiAsync(int quantidade, HashSet<string> nomesExistentes)
     {
+        string nomesExistentesJson = string.Join(", ", nomesExistentes.Select(nome => $"\"{nome}\""));
+
         string prompt = @$"
         Gere {quantidade} disciplinas escolares válidas para uso em escolas brasileiras, com base na Base Nacional Comum Curricular (BNCC).
 
@@ -85,8 +88,13 @@ public class GeradorDisciplinaGemini : IGeradorDisciplinas
         Critérios:
         - A lista deve conter **nomes únicos** e **padronizados** (ex: 'Matemática', 'Língua Portuguesa', 'Filosofia', 'Projeto de Vida').
         - Evite repetições ou variações desnecessárias.
+        - Evite nomes similares aos já existentes (como variações com sinônimos, diminutivos ou duplicações com pequenas diferenças).
         - Não vincule a disciplina a nenhum ano/série específico.
         - Pode incluir disciplinas obrigatórias e opcionais (como 'Educação Financeira', 'Robótica', 'Empreendedorismo', etc).
+        
+        Considere também os seguintes nomes já cadastrados (evite gerar nomes iguais ou similares):
+
+        [{nomesExistentesJson}]        
 
         Formato de resposta JSON:
         [
@@ -111,7 +119,7 @@ public class GeradorDisciplinaGemini : IGeradorDisciplinas
 
         StringContent content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
 
-        HttpResponseMessage response = await _httpClient.PostAsync(_geminiEndpoint, content);
+        HttpResponseMessage response = await EnviarComRetryAsync(content);
 
         response.EnsureSuccessStatusCode();
 
@@ -131,6 +139,30 @@ public class GeradorDisciplinaGemini : IGeradorDisciplinas
         return JsonSerializer.Deserialize<List<DisciplinaDto>>(text, _jsonSerializerOptions) ?? [];
     }
 
+    private async Task<HttpResponseMessage> EnviarComRetryAsync(StringContent content)
+    {
+        const int maxTentativas = 3;
+        int tentativa = 0;
+
+        while (tentativa < maxTentativas)
+        {
+            HttpResponseMessage response = await _httpClient.PostAsync(_geminiEndpoint, content);
+
+            if (response.IsSuccessStatusCode)
+                return response;
+
+            if (response.StatusCode == HttpStatusCode.ServiceUnavailable)
+            {
+                tentativa++;
+                await Task.Delay(2000 * tentativa);
+                continue;
+            }
+
+            response.EnsureSuccessStatusCode();
+        }
+
+        throw new HttpRequestException("Serviço indisponível após múltiplas tentativas (503).");
+    }
     private static string ProcessarTexto(string? text)
     {
         text = text?.Trim() ?? string.Empty;
