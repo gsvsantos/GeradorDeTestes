@@ -1,4 +1,5 @@
 ﻿using GeradorDeTestes.Infraestrutura.ORM.Compartilhado;
+using GeradorDeTestes.Testes.Integracao.ModuloDisciplina;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
