@@ -2,7 +2,7 @@ using FizzWare.NBuilder;
 using GeradorDeTestes.Dominio.ModuloDisciplina;
 using GeradorDeTestes.Dominio.ModuloMateria;
 
-namespace GeradorDeTestes.Testes.Integracao;
+namespace GeradorDeTestes.Testes.Integracao.ModuloMateria;
 
 [TestClass]
 [TestCategory("Testes de Integração de Matéria")]
@@ -95,8 +95,8 @@ public sealed class RepositorioMateriaORMTestes : TestFixture
         // Assert
         Materia? materiaSelecionada = repositorioMateriaORM.SelecionarRegistroPorId(novaMateria.Id);
 
-        Assert.IsNull(materiaSelecionada, "A matéria ainda está no banco após exclusão.");
         Assert.IsTrue(conseguiuExcluir, "Não conseguiu excluir a matéria.");
+        Assert.IsNull(materiaSelecionada, "A matéria ainda está no banco após exclusão.");
     }
 
     [TestMethod]

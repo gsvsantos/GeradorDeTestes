@@ -75,8 +75,8 @@ public sealed class RepositorioDisciplinaORMTestes : TestFixture
         // Assert
         Disciplina? disciplinaSelecionada = repositorioDisciplinaORM.SelecionarRegistroPorId(novaDisciplina.Id);
 
-        Assert.IsNull(disciplinaSelecionada, "A disciplina ainda está no banco após exclusão.");
         Assert.IsTrue(conseguiuExcluir, "Não conseguiu excluir a disciplina.");
+        Assert.IsNull(disciplinaSelecionada, "A disciplina ainda está no banco após exclusão.");
     }
 
     [TestMethod]

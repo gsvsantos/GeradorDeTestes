@@ -3,7 +3,7 @@ using GeradorDeTestes.Dominio.ModuloDisciplina;
 using GeradorDeTestes.Dominio.ModuloMateria;
 using GeradorDeTestes.Dominio.ModuloQuestao;
 
-namespace GeradorDeTestes.Testes.Integracao;
+namespace GeradorDeTestes.Testes.Integracao.ModuloQuestao;
 
 [TestClass]
 [TestCategory("Testes de Integração de Questão")]
