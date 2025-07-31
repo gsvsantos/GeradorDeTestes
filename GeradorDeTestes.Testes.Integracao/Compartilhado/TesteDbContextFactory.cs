@@ -21,6 +21,12 @@ public class TesteDbContextFactory
         await container.StartAsync();
     }
 
+    public async Task EncerrarAsync()
+    {
+        await container.StopAsync();
+        await container.DisposeAsync();
+    }
+
     public GeradorDeTestesDbContext CriarDbContext()
     {
         DbContextOptions<GeradorDeTestesDbContext> options = new DbContextOptionsBuilder<GeradorDeTestesDbContext>()
@@ -29,25 +35,6 @@ public class TesteDbContextFactory
 
         GeradorDeTestesDbContext dbContext = new(options);
 
-        ConfigurarDbContext(dbContext);
-
         return dbContext;
-    }
-
-    public async Task EncerrarAsync()
-    {
-        await container.DisposeAsync();
-    }
-
-    private static void ConfigurarDbContext(GeradorDeTestesDbContext dbContext)
-    {
-        dbContext.Database.EnsureCreated();
-
-        dbContext.Testes.RemoveRange(dbContext.Testes);
-        dbContext.Questoes.RemoveRange(dbContext.Questoes);
-        dbContext.Materias.RemoveRange(dbContext.Materias);
-        dbContext.Disciplinas.RemoveRange(dbContext.Disciplinas);
-
-        dbContext.SaveChanges();
     }
 }

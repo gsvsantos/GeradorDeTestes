@@ -19,6 +19,11 @@ public class RepositorioBaseORM<T> where T : EntidadeBase<T>
         registros.Add(novoRegistro);
     }
 
+    public void CadastrarMultiplosRegistros(IList<T> entidades)
+    {
+        registros.AddRange(entidades);
+    }
+
     public virtual bool EditarRegistro(Guid idRegistro, T registroEditado)
     {
         T? registroSelecionado = SelecionarRegistroPorId(idRegistro);

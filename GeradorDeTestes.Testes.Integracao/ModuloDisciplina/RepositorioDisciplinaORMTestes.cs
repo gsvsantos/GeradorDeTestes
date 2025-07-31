@@ -1,30 +1,16 @@
 ﻿using GeradorDeTestes.Dominio.ModuloDisciplina;
-using GeradorDeTestes.Infraestrutura.ORM.Compartilhado;
-using GeradorDeTestes.Infraestrutura.ORM.ModuloDisciplina;
-using GeradorDeTestes.Testes.Integracao.Compartilhado;
 
 namespace GeradorDeTestes.Testes.Integracao.ModuloDisciplina;
 
 [TestClass]
 [TestCategory("Testes de Integração de Disciplina")]
-public class RepositorioDisciplinaORMTestes
+public sealed class RepositorioDisciplinaORMTestes : TestFixture
 {
-    private GeradorDeTestesDbContext dbContext;
-    private RepositorioDisciplinaORM repositorioDisciplinaORM;
-
     #region Padrão AAA
     // Arrange - Arranjo
     // Act - Ação
     // Assert - Asseção 
     #endregion
-
-    [TestInitialize]
-    public void ConfigurarTestes()
-    {
-        dbContext = TestAssemblySetup.Factory.CriarDbContext();
-
-        repositorioDisciplinaORM = new RepositorioDisciplinaORM(dbContext);
-    }
 
     [TestMethod]
     public void Deve_Cadastrar_Disciplina_Corretamente()

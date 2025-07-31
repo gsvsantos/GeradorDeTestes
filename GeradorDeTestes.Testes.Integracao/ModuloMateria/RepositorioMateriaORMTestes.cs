@@ -1,43 +1,31 @@
 using FizzWare.NBuilder;
 using GeradorDeTestes.Dominio.ModuloDisciplina;
 using GeradorDeTestes.Dominio.ModuloMateria;
-using GeradorDeTestes.Infraestrutura.ORM.Compartilhado;
-using GeradorDeTestes.Infraestrutura.ORM.ModuloDisciplina;
-using GeradorDeTestes.Infraestrutura.ORM.ModuloMateria;
-using GeradorDeTestes.Testes.Integracao.Compartilhado;
 
 namespace GeradorDeTestes.Testes.Integracao;
 
 [TestClass]
 [TestCategory("Testes de Integração de Matéria")]
-public class RepositorioMateriaORMTestes
+public sealed class RepositorioMateriaORMTestes : TestFixture
 {
-    private GeradorDeTestesDbContext dbContext;
-    private RepositorioDisciplinaORM repositorioDisciplinaORM;
-    private RepositorioMateriaORM repositorioMateriaORM;
+    private Disciplina disciplinaPadrao = null!;
 
     [TestInitialize]
-    public void ConfigurarTestes()
+    public override void ConfigurarTestes()
     {
-        dbContext = TestAssemblySetup.Factory.CriarDbContext();
+        base.ConfigurarTestes();
 
-        repositorioDisciplinaORM = new RepositorioDisciplinaORM(dbContext);
-        repositorioMateriaORM = new RepositorioMateriaORM(dbContext);
-
-        BuilderSetup.SetCreatePersistenceMethod<Disciplina>(repositorioDisciplinaORM.CadastrarRegistro);
-        BuilderSetup.SetCreatePersistenceMethod<IList<Disciplina>>(CadastrarVariasDisciplinas);
+        disciplinaPadrao = Builder<Disciplina>
+            .CreateNew()
+            .With(d => d.Nome = "Matemática")
+            .Persist();
     }
 
     [TestMethod]
     public void Deve_Cadastrar_Materia_Corretamente()
     {
         // Arrange
-        Disciplina novaDisciplina = Builder<Disciplina>
-            .CreateNew()
-            .With(d => d.Nome = "Matemática")
-            .Persist();
-
-        Materia novaMateria = new("Multiplicação", novaDisciplina, EnumSerie.SetimoAnoFundamental);
+        Materia novaMateria = new("Multiplicação", disciplinaPadrao, EnumSerie.SetimoAnoFundamental);
 
         // Act
         repositorioMateriaORM.CadastrarRegistro(novaMateria);
@@ -45,13 +33,13 @@ public class RepositorioMateriaORMTestes
         dbContext.SaveChanges();
 
         // Assert
-        Materia materiaSelecionada = repositorioMateriaORM.SelecionarRegistroPorId(novaMateria.Id)!;
+        Materia? materiaSelecionada = repositorioMateriaORM.SelecionarRegistroPorId(novaMateria.Id);
 
         Assert.IsNotNull(materiaSelecionada, "Não conseguiu selecionar a matéria.");
         Assert.AreEqual(novaMateria.Id, materiaSelecionada.Id, "A matéria selecionada não condiz com a matéria cadastrada.");
         Assert.AreEqual(novaMateria.Nome, materiaSelecionada.Nome, "A matéria selecionada não condiz com a matéria cadastrada.");
-        Assert.AreEqual(novaDisciplina.Id, materiaSelecionada.Disciplina.Id, "A disciplina não corresponde com a disciplina da matéria cadastrada.");
-        Assert.AreEqual(novaDisciplina.Nome, materiaSelecionada.Disciplina.Nome, "A disciplina não corresponde com a disciplina da matéria cadastrada.");
+        Assert.AreEqual(disciplinaPadrao.Id, materiaSelecionada.Disciplina.Id, "A disciplina não corresponde com a disciplina da matéria cadastrada.");
+        Assert.AreEqual(disciplinaPadrao.Nome, materiaSelecionada.Disciplina.Nome, "A disciplina não corresponde com a disciplina da matéria cadastrada.");
         Assert.AreEqual(EnumSerie.SetimoAnoFundamental, materiaSelecionada.Serie, "A série não corresponde com a série da matéria cadastrada.");
     }
 
@@ -59,12 +47,7 @@ public class RepositorioMateriaORMTestes
     public void Deve_Editar_Materia_Corretamente()
     {
         // Arrange
-        Disciplina novaDisciplina = Builder<Disciplina>
-            .CreateNew()
-            .With(d => d.Nome = "Matemática")
-            .Persist();
-
-        Materia novaMateria = new("Multiplicação", novaDisciplina, EnumSerie.SetimoAnoFundamental);
+        Materia novaMateria = new("Multiplicação", disciplinaPadrao, EnumSerie.SetimoAnoFundamental);
 
         repositorioMateriaORM.CadastrarRegistro(novaMateria);
 
@@ -83,7 +66,7 @@ public class RepositorioMateriaORMTestes
         dbContext.SaveChanges();
 
         // Assert
-        Materia materiaSelecionada = repositorioMateriaORM.SelecionarRegistroPorId(novaMateria.Id)!;
+        Materia? materiaSelecionada = repositorioMateriaORM.SelecionarRegistroPorId(novaMateria.Id);
 
         Assert.IsTrue(conseguiuEditar, "Não conseguiu editar a matéria.");
         Assert.IsNotNull(materiaSelecionada, "Não conseguiu selecionar a matéria.");
@@ -98,12 +81,7 @@ public class RepositorioMateriaORMTestes
     public void Deve_Excluir_Materia_Corretamente()
     {
         // Arrange
-        Disciplina novaDisciplina = Builder<Disciplina>
-            .CreateNew()
-            .With(d => d.Nome = "Matemática")
-            .Persist();
-
-        Materia novaMateria = new("Multiplicação", novaDisciplina, EnumSerie.SetimoAnoFundamental);
+        Materia novaMateria = new("Multiplicação", disciplinaPadrao, EnumSerie.SetimoAnoFundamental);
 
         repositorioMateriaORM.CadastrarRegistro(novaMateria);
 
@@ -129,7 +107,7 @@ public class RepositorioMateriaORMTestes
 
         List<Materia> novasMaterias = new()
         {
-            new Materia("Multiplicação", novasDisciplinas[0], EnumSerie.QuintoAnoFundamental),
+            new Materia("Multiplicão", novasDisciplinas[0], EnumSerie.QuintoAnoFundamental),
             new Materia("ABC e Verbos", novasDisciplinas[1], EnumSerie.PrimeiroAnoFundamental),
             new Materia("Verbo to Be", novasDisciplinas[2], EnumSerie.SetimoAnoFundamental)
         };
@@ -145,6 +123,7 @@ public class RepositorioMateriaORMTestes
         List<Materia> materiasExistentesOrganizadas = repositorioMateriaORM.SelecionarRegistros().OrderBy(m => m.Nome).ToList();
         List<Materia> novasMateriasOrganizadas = novasMaterias.OrderBy(m => m.Nome).ToList();
 
+        // Assert
         Assert.AreEqual(novasMaterias.Count, materiasExistentesOrganizadas.Count);
         for (int i = 0; i < novasMateriasOrganizadas.Count; i++)
         {
@@ -158,12 +137,5 @@ public class RepositorioMateriaORMTestes
             Assert.AreEqual(novaMateria.Disciplina.Id, materiaExistente.Disciplina.Id, $"Disciplina incorreta para a matéria '{novaMateria.Nome}'.");
             Assert.AreEqual(novaMateria.Disciplina.Nome, materiaExistente.Disciplina.Nome, $"Nome da disciplina incorreto para a matéria '{novaMateria.Nome}'.");
         }
-    }
-
-    private void CadastrarVariasDisciplinas(IList<Disciplina> disciplinas)
-    {
-        dbContext.Disciplinas.AddRange(disciplinas);
-
-        dbContext.SaveChanges();
     }
 }
