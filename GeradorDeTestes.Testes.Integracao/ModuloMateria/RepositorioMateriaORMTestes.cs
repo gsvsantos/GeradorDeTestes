@@ -1,3 +1,4 @@
+using FizzWare.NBuilder;
 using GeradorDeTestes.Dominio.ModuloDisciplina;
 using GeradorDeTestes.Dominio.ModuloMateria;
 using GeradorDeTestes.Infraestrutura.ORM.Compartilhado;
@@ -22,15 +23,19 @@ public class RepositorioMateriaORMTestes
 
         repositorioDisciplinaORM = new RepositorioDisciplinaORM(dbContext);
         repositorioMateriaORM = new RepositorioMateriaORM(dbContext);
+
+        BuilderSetup.SetCreatePersistenceMethod<Disciplina>(repositorioDisciplinaORM.CadastrarRegistro);
+        BuilderSetup.SetCreatePersistenceMethod<IList<Disciplina>>(CadastrarVariasDisciplinas);
     }
 
     [TestMethod]
     public void Deve_Cadastrar_Materia_Corretamente()
     {
         // Arrange
-        Disciplina novaDisciplina = new("Matemática");
-
-        repositorioDisciplinaORM.CadastrarRegistro(novaDisciplina);
+        Disciplina novaDisciplina = Builder<Disciplina>
+            .CreateNew()
+            .With(d => d.Nome = "Matemática")
+            .Persist();
 
         Materia novaMateria = new("Multiplicação", novaDisciplina, EnumSerie.SetimoAnoFundamental);
 
@@ -54,9 +59,10 @@ public class RepositorioMateriaORMTestes
     public void Deve_Editar_Materia_Corretamente()
     {
         // Arrange
-        Disciplina novaDisciplina = new("Matemática");
-
-        repositorioDisciplinaORM.CadastrarRegistro(novaDisciplina);
+        Disciplina novaDisciplina = Builder<Disciplina>
+            .CreateNew()
+            .With(d => d.Nome = "Matemática")
+            .Persist();
 
         Materia novaMateria = new("Multiplicação", novaDisciplina, EnumSerie.SetimoAnoFundamental);
 
@@ -65,9 +71,10 @@ public class RepositorioMateriaORMTestes
         dbContext.SaveChanges();
 
         // Act
-        Disciplina novaDisciplina2 = new("Aritmética");
-
-        repositorioDisciplinaORM.CadastrarRegistro(novaDisciplina2);
+        Disciplina novaDisciplina2 = Builder<Disciplina>
+            .CreateNew()
+            .With(d => d.Nome = "Aritmética")
+            .Persist();
 
         Materia materiaEditada = new("Subtração", novaDisciplina2, EnumSerie.QuintoAnoFundamental);
 
@@ -91,9 +98,10 @@ public class RepositorioMateriaORMTestes
     public void Deve_Excluir_Materia_Corretamente()
     {
         // Arrange
-        Disciplina novaDisciplina = new("Matemática");
-
-        repositorioDisciplinaORM.CadastrarRegistro(novaDisciplina);
+        Disciplina novaDisciplina = Builder<Disciplina>
+            .CreateNew()
+            .With(d => d.Nome = "Matemática")
+            .Persist();
 
         Materia novaMateria = new("Multiplicação", novaDisciplina, EnumSerie.SetimoAnoFundamental);
 
@@ -117,22 +125,12 @@ public class RepositorioMateriaORMTestes
     public void Deve_Selecionar_Todas_As_Materias_Corretamente()
     {
         // Arrange
-        List<Disciplina> novasDisciplinas = new()
-        {
-            new Disciplina("Matemática"),
-            new Disciplina("Português"),
-            new Disciplina("Inglês")
-        };
-
-        foreach (Disciplina disciplina in novasDisciplinas)
-        {
-            repositorioDisciplinaORM.CadastrarRegistro(disciplina);
-        }
+        List<Disciplina> novasDisciplinas = Builder<Disciplina>.CreateListOfSize(3).Persist().ToList();
 
         List<Materia> novasMaterias = new()
         {
             new Materia("Multiplicação", novasDisciplinas[0], EnumSerie.QuintoAnoFundamental),
-            new Materia("Verbos", novasDisciplinas[1], EnumSerie.PrimeiroAnoFundamental),
+            new Materia("ABC e Verbos", novasDisciplinas[1], EnumSerie.PrimeiroAnoFundamental),
             new Materia("Verbo to Be", novasDisciplinas[2], EnumSerie.SetimoAnoFundamental)
         };
 
@@ -160,5 +158,12 @@ public class RepositorioMateriaORMTestes
             Assert.AreEqual(novaMateria.Disciplina.Id, materiaExistente.Disciplina.Id, $"Disciplina incorreta para a matéria '{novaMateria.Nome}'.");
             Assert.AreEqual(novaMateria.Disciplina.Nome, materiaExistente.Disciplina.Nome, $"Nome da disciplina incorreto para a matéria '{novaMateria.Nome}'.");
         }
+    }
+
+    private void CadastrarVariasDisciplinas(IList<Disciplina> disciplinas)
+    {
+        dbContext.Disciplinas.AddRange(disciplinas);
+
+        dbContext.SaveChanges();
     }
 }
