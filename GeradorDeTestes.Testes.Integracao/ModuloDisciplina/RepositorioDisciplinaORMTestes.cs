@@ -7,7 +7,7 @@ namespace GeradorDeTestes.Testes.Integracao.ModuloDisciplina;
 
 [TestClass]
 [TestCategory("Testes de Integração de Disciplina")]
-public sealed class RepositorioDisciplinaORMTestes
+public class RepositorioDisciplinaORMTestes
 {
     private GeradorDeTestesDbContext dbContext;
     private RepositorioDisciplinaORM repositorioDisciplinaORM;
@@ -21,7 +21,7 @@ public sealed class RepositorioDisciplinaORMTestes
     [TestInitialize]
     public void ConfigurarTestes()
     {
-        dbContext = TesteDbContextFactory.CriarDbContext();
+        dbContext = TestAssemblySetup.Factory.CriarDbContext();
 
         repositorioDisciplinaORM = new RepositorioDisciplinaORM(dbContext);
     }

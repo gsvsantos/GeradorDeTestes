@@ -19,7 +19,7 @@ public class RepositorioMateriaORMTestes
     [TestInitialize]
     public void ConfigurarTestes()
     {
-        dbContext = TesteDbContextFactory.CriarDbContext();
+        dbContext = TestAssemblySetup.Factory.CriarDbContext();
 
         repositorioDisciplinaORM = new RepositorioDisciplinaORM(dbContext);
         repositorioMateriaORM = new RepositorioMateriaORM(dbContext);

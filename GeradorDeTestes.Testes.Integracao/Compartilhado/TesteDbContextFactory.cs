@@ -1,31 +1,53 @@
 ﻿using GeradorDeTestes.Infraestrutura.ORM.Compartilhado;
-using GeradorDeTestes.Testes.Integracao.ModuloDisciplina;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+using Testcontainers.PostgreSql;
 
 namespace GeradorDeTestes.Testes.Integracao.Compartilhado;
 public class TesteDbContextFactory
 {
-    public static GeradorDeTestesDbContext CriarDbContext()
-    {
-        IConfiguration configuracao = CriarConfiguracao();
+    private readonly PostgreSqlContainer container;
 
+    public TesteDbContextFactory()
+    {
+        container = new PostgreSqlBuilder()
+            .WithImage("postgres:16")
+            .WithName("testes-geradordetestes-postgres")
+            .WithDatabase("GeradorDeTestesDbTest")
+            .WithCleanUp(true)
+            .Build();
+    }
+    public async Task InicializarAsync()
+    {
+        await container.StartAsync();
+    }
+
+    public GeradorDeTestesDbContext CriarDbContext()
+    {
         DbContextOptions<GeradorDeTestesDbContext> options = new DbContextOptionsBuilder<GeradorDeTestesDbContext>()
-            .UseNpgsql(configuracao["SQL_CONNECTION_STRING"])
+            .UseNpgsql(container.GetConnectionString())
             .Options;
 
         GeradorDeTestesDbContext dbContext = new(options);
 
-        dbContext.Database.EnsureDeleted();
-        dbContext.Database.EnsureCreated();
+        ConfigurarDbContext(dbContext);
 
         return dbContext;
     }
 
-    private static IConfiguration CriarConfiguracao()
+    public async Task EncerrarAsync()
     {
-        return new ConfigurationBuilder()
-            .AddUserSecrets(typeof(RepositorioDisciplinaORMTestes).Assembly)
-            .Build();
+        await container.DisposeAsync();
+    }
+
+    private static void ConfigurarDbContext(GeradorDeTestesDbContext dbContext)
+    {
+        dbContext.Database.EnsureCreated();
+
+        dbContext.Testes.RemoveRange(dbContext.Testes);
+        dbContext.Questoes.RemoveRange(dbContext.Questoes);
+        dbContext.Materias.RemoveRange(dbContext.Materias);
+        dbContext.Disciplinas.RemoveRange(dbContext.Disciplinas);
+
+        dbContext.SaveChanges();
     }
 }
