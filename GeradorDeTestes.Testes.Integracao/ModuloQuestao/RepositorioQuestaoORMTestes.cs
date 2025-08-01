@@ -42,12 +42,9 @@ public class RepositorioQuestaoORMTestes : TestFixture
         Questao? questaoSelecionada = repositorioQuestaoORM.SelecionarRegistroPorId(novaQuestao.Id);
 
         Assert.IsNotNull(questaoSelecionada, "Não conseguiu selecionar a questão.");
-        Assert.AreEqual(novaQuestao.Id, questaoSelecionada.Id, "A questão selecionada não condiz com a questão cadastrada.");
-        Assert.AreEqual(novaQuestao.Enunciado, questaoSelecionada.Enunciado, "A questão selecionada não condiz com a questão cadastrada.");
-        Assert.AreEqual(disciplinaPadrao.Id, questaoSelecionada.Materia.Disciplina.Id, "A disciplina não corresponde com a disciplina da matéria cadastrada.");
-        Assert.AreEqual(disciplinaPadrao.Nome, questaoSelecionada.Materia.Disciplina.Nome, "A disciplina não corresponde com a disciplina da matéria cadastrada.");
-        Assert.AreEqual(materiaPadrao.Id, questaoSelecionada.Materia.Id, "A matéria da questão selecionada não condiz com a matéria cadastrada.");
-        Assert.AreEqual(materiaPadrao.Nome, questaoSelecionada.Materia.Nome, "A matéria da questão selecionada não condiz com a matéria cadastrada.");
+        Assert.AreEqual(novaQuestao, questaoSelecionada, "A questão selecionada não condiz com a questão cadastrada.");
+        Assert.AreEqual(disciplinaPadrao, questaoSelecionada.Materia.Disciplina, "A disciplina não corresponde com a disciplina da matéria cadastrada.");
+        Assert.AreEqual(materiaPadrao, questaoSelecionada.Materia, "A matéria da questão selecionada não condiz com a matéria cadastrada.");
         Assert.AreEqual(EnumSerie.SetimoAnoFundamental, questaoSelecionada.Materia.Serie, "A série não corresponde com a série da matéria cadastrada.");
     }
 
@@ -77,13 +74,8 @@ public class RepositorioQuestaoORMTestes : TestFixture
 
         Assert.IsTrue(conseguiuEditar, "Não conseguiu editar a questão.");
         Assert.IsNotNull(questaoSelecionada, "Não conseguiu selecionar a questão.");
-        Assert.AreEqual(novaQuestao.Id, questaoSelecionada.Id, "A questão selecionada não condiz com a questão cadastrada.");
-        Assert.AreEqual(questaoEditada.Enunciado, questaoSelecionada.Enunciado, "O enunciado não corresponde ao editado.");
-        Assert.AreEqual(questaoEditada.Materia.Disciplina.Id, questaoSelecionada.Materia.Disciplina.Id, "A disciplina não corresponde com a disciplina da matéria cadastrada.");
-        Assert.AreEqual(questaoEditada.Materia.Disciplina.Nome, questaoSelecionada.Materia.Disciplina.Nome, "A disciplina não corresponde com a disciplina da matéria cadastrada.");
-        Assert.AreEqual(questaoEditada.Materia.Id, questaoSelecionada.Materia.Id, "A matéria da questão selecionada não condiz com a matéria cadastrada.");
-        Assert.AreEqual(questaoEditada.Materia.Nome, questaoSelecionada.Materia.Nome, "A matéria da questão selecionada não condiz com a matéria cadastrada.");
-        Assert.AreEqual(EnumSerie.SetimoAnoFundamental, questaoSelecionada.Materia.Serie, "A série não corresponde com a série da matéria cadastrada.");
+        Assert.AreEqual(novaQuestao, questaoSelecionada, "A questão selecionada não condiz com a questão editada.");
+        Assert.AreEqual(questaoEditada.Materia, questaoSelecionada.Materia, "A matéria da questão selecionada não condiz com a questão editada.");
     }
 
     [TestMethod]

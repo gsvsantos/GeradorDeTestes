@@ -36,10 +36,8 @@ public sealed class RepositorioMateriaORMTestes : TestFixture
         Materia? materiaSelecionada = repositorioMateriaORM.SelecionarRegistroPorId(novaMateria.Id);
 
         Assert.IsNotNull(materiaSelecionada, "Não conseguiu selecionar a matéria.");
-        Assert.AreEqual(novaMateria.Id, materiaSelecionada.Id, "A matéria selecionada não condiz com a matéria cadastrada.");
-        Assert.AreEqual(novaMateria.Nome, materiaSelecionada.Nome, "A matéria selecionada não condiz com a matéria cadastrada.");
-        Assert.AreEqual(disciplinaPadrao.Id, materiaSelecionada.Disciplina.Id, "A disciplina não corresponde com a disciplina da matéria cadastrada.");
-        Assert.AreEqual(disciplinaPadrao.Nome, materiaSelecionada.Disciplina.Nome, "A disciplina não corresponde com a disciplina da matéria cadastrada.");
+        Assert.AreEqual(novaMateria, materiaSelecionada, "A matéria selecionada não condiz com a matéria cadastrada.");
+        Assert.AreEqual(disciplinaPadrao, materiaSelecionada.Disciplina, "A disciplina não corresponde com a disciplina da matéria cadastrada.");
         Assert.AreEqual(EnumSerie.SetimoAnoFundamental, materiaSelecionada.Serie, "A série não corresponde com a série da matéria cadastrada.");
     }
 
@@ -70,11 +68,9 @@ public sealed class RepositorioMateriaORMTestes : TestFixture
 
         Assert.IsTrue(conseguiuEditar, "Não conseguiu editar a matéria.");
         Assert.IsNotNull(materiaSelecionada, "Não conseguiu selecionar a matéria.");
-        Assert.AreEqual(novaMateria.Id, materiaSelecionada.Id, "A matéria selecionada não condiz com a matéria cadastrada.");
-        Assert.AreEqual(materiaEditada.Nome, materiaSelecionada.Nome, "A matéria selecionada não condiz com a matéria cadastrada.");
-        Assert.AreEqual(materiaEditada.Disciplina.Id, materiaSelecionada.Disciplina.Id, "A disciplina não corresponde com a disciplina da matéria cadastrada.");
-        Assert.AreEqual(materiaEditada.Disciplina.Nome, materiaSelecionada.Disciplina.Nome, "A disciplina não corresponde com a disciplina da matéria cadastrada.");
-        Assert.AreEqual(materiaEditada.Serie, materiaSelecionada.Serie, "A série não corresponde com a série da matéria cadastrada.");
+        Assert.AreEqual(novaMateria, materiaSelecionada, "A matéria selecionada não condiz com a matéria editada.");
+        Assert.AreEqual(materiaEditada.Disciplina, materiaSelecionada.Disciplina, "A disciplina não corresponde com a disciplina da matéria editada.");
+        Assert.AreEqual(materiaEditada.Serie, materiaSelecionada.Serie, "A série não corresponde com a série da matéria editada.");
     }
 
     [TestMethod]
@@ -134,8 +130,7 @@ public sealed class RepositorioMateriaORMTestes : TestFixture
             Assert.AreEqual(novaMateria.Serie, materiaExistente.Serie, $"Série incorreta para a matéria '{novaMateria.Nome}'.");
 
             Assert.IsNotNull(materiaExistente.Disciplina, $"Disciplina não carregada para a matéria '{novaMateria.Nome}'.");
-            Assert.AreEqual(novaMateria.Disciplina.Id, materiaExistente.Disciplina.Id, $"Disciplina incorreta para a matéria '{novaMateria.Nome}'.");
-            Assert.AreEqual(novaMateria.Disciplina.Nome, materiaExistente.Disciplina.Nome, $"Nome da disciplina incorreto para a matéria '{novaMateria.Nome}'.");
+            Assert.AreEqual(novaMateria.Disciplina, materiaExistente.Disciplina, $"Disciplina incorreta para a matéria '{novaMateria.Nome}'.");
         }
     }
 }
