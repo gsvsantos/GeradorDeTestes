@@ -125,7 +125,7 @@ public class TesteController : Controller
             .Where(m => m.Serie.Equals(testeSelecionado.Serie))
             .ToList();
 
-        FormGerarPostViewModel gerarTestePostVM = testeSelecionado.ParaGerarTestePostVM(materias, testeSelecionado.Materias);
+        FormGerarPostViewModel gerarTestePostVM = testeSelecionado.ParaGerarPostVM(materias, testeSelecionado.Materias);
 
         return View(gerarTestePostVM);
     }
@@ -150,7 +150,7 @@ public class TesteController : Controller
                 .Where(m => m.Disciplina.Id.Equals(testeSelecionado.Disciplina.Id)
                 && m.Serie.Equals(testeSelecionado.Serie)).ToList();
 
-            FormGerarViewModel formGerarVM = testeSelecionado.ParaGerarTestePostVM(materias, testeSelecionado.Materias);
+            FormGerarViewModel formGerarVM = testeSelecionado.ParaGerarPostVM(materias, testeSelecionado.Materias);
 
             return View(nameof(GerarTeste), formGerarVM);
         }
@@ -165,7 +165,23 @@ public class TesteController : Controller
 
         if (resultadoAdesao.IsFailed)
         {
+            Result<Teste> resultadoTeste = testeAppService.SelecionarRegistroPorId(id);
+
+            if (resultadoTeste.IsFailed)
+                return RedirectToAction(nameof(Index));
+
+            Teste testeSelecionado = resultadoTeste.ValueOrDefault;
+
             TempData["Erros"] = resultadoAdesao.Errors.Select(e => e.Message).ToList();
+            ModelState.AddModelError("ConflitoGeracao", resultadoAdesao.Errors[0].Message);
+
+            List<Materia> materias = materiaAppService.SelecionarRegistros().Value
+                .Where(m => m.Disciplina.Id.Equals(testeSelecionado.Disciplina.Id)
+                && m.Serie.Equals(testeSelecionado.Serie)).ToList();
+
+            FormGerarViewModel formGerarVM = testeSelecionado.ParaGerarPostVM(materias, testeSelecionado.Materias);
+
+            return View(nameof(GerarTeste), formGerarVM);
         }
 
         return RedirectToAction(nameof(GerarTeste), new { id });
@@ -290,7 +306,7 @@ public class TesteController : Controller
 
         List<Materia> materias = teste.Materias;
 
-        FormGerarPostViewModel vm = teste.ParaGerarTestePostVM(materias, materias);
+        FormGerarPostViewModel vm = teste.ParaGerarPostVM(materias, materias);
 
         return View(vm);
     }
@@ -312,7 +328,7 @@ public class TesteController : Controller
                 .Where(m => m.Disciplina.Id.Equals(testeSelecionado.Disciplina.Id) &&
                             m.Serie.Equals(testeSelecionado.Serie)).ToList();
 
-            FormGerarViewModel formGerarVM = testeSelecionado.ParaGerarTestePostVM(materias, testeSelecionado.Materias);
+            FormGerarViewModel formGerarVM = testeSelecionado.ParaGerarPostVM(materias, testeSelecionado.Materias);
 
             return View(nameof(GerarProvao), formGerarVM);
         }

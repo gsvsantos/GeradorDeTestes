@@ -354,7 +354,7 @@ public class TesteAppService
         if (teste.EhProvao)
             return GerarQuestoesAutomaticamente(id);
 
-        if (teste.Questoes.Count == teste.QuantidadeQuestoes)
+        if (teste.Questoes.Count != 0)
             return EmbaralharQuestoes(id);
 
         return GerarQuestoesAutomaticamente(id);
@@ -419,9 +419,6 @@ public class TesteAppService
 
             if (testeSelecionado is null)
                 return Result.Fail("Não foi possível obter o registro do teste selecionado.");
-
-            testeSelecionado.Materias.Clear();
-            LimparQuestoesEQuantidades(testeSelecionado);
 
             if (testeSelecionado.EhProvao)
                 return EmbaralharQuestoesParaProvao(testeSelecionado);
@@ -605,17 +602,13 @@ public class TesteAppService
                         m.Serie == testeSelecionado.Serie)
             .ToList();
 
-        materias.Shuffle();
-
         List<Questao> todasQuestoes = repositorioQuestao.SelecionarRegistros()
             .Where(q => materias.Select(m => m.Id).Contains(q.Materia.Id) && q.Finalizado)
             .ToList();
 
-        todasQuestoes.Shuffle();
-
         List<Questao> questoesSelecionadas = todasQuestoes
             .DistinctBy(q => q.Id)
-            .Take(testeSelecionado.QuantidadeQuestoes)
+            .Take(testeSelecionado.QuantidadesPorMateria.Count)
             .ToList();
 
         AdicionarQuestoesAoTeste(testeSelecionado, questoesSelecionadas);
@@ -632,6 +625,9 @@ public class TesteAppService
 
     private Result EmbaralharQuestoesParaProvao(Teste testeSelecionado)
     {
+        testeSelecionado.Materias.Clear();
+        LimparQuestoesEQuantidades(testeSelecionado);
+
         List<Materia> materias = repositorioMateria.SelecionarRegistros()
             .Where(m => m.Disciplina.Id == testeSelecionado.Disciplina.Id &&
                         m.Serie == testeSelecionado.Serie)

@@ -275,7 +275,9 @@ public class QuestaoAppService
         {
             unitOfWork.Rollback();
 
-            logger.LogError(ex, "Erro ao adicionar alternativa à questão {Id}", idQuestao);
+            logger.LogError(ex,
+                "Erro ao adicionar alternativa à questão {Id}",
+                idQuestao);
 
             return Result.Fail("Erro ao adicionar alternativa.");
         }
@@ -302,7 +304,9 @@ public class QuestaoAppService
         {
             unitOfWork.Rollback();
 
-            logger.LogError(ex, "Erro ao remover alternativa da questão {Id}", idQuestao);
+            logger.LogError(ex,
+                "Erro ao remover alternativa da questão {Id}",
+                idQuestao);
 
             return Result.Fail("Erro ao remover alternativa.");
         }
@@ -333,7 +337,9 @@ public class QuestaoAppService
         {
             unitOfWork.Rollback();
 
-            logger.LogError(ex, "Erro ao marcar alternativa correta da questão {Id}", idQuestao);
+            logger.LogError(ex,
+                "Erro ao marcar alternativa correta da questão {Id}",
+                idQuestao);
 
             return Result.Fail("Erro ao marcar alternativa correta.");
         }
@@ -364,7 +370,9 @@ public class QuestaoAppService
         {
             unitOfWork.Rollback();
 
-            logger.LogError(ex, "Erro ao finalizar a questão {Id}", idQuestao);
+            logger.LogError(ex,
+                "Erro ao finalizar a questão {Id}",
+                idQuestao);
 
             return Result.Fail("Erro ao finalizar a questão.");
         }
@@ -387,6 +395,32 @@ public class QuestaoAppService
             );
 
             return Result.Fail("Ocorreu um erro durante a geração de questões da matéria");
+        }
+    }
+
+    public Result CadastrarQuestoesGeradas(List<Questao> questoesGeradas)
+    {
+        try
+        {
+            foreach (Questao questao in questoesGeradas)
+            {
+                questao.Finalizado = true;
+
+                CadastrarRegistro(questao);
+            }
+
+            unitOfWork.Commit();
+
+            return Result.Ok();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(
+                ex,
+                "Ocorreu um erro durante o cadastro das questões geradas."
+            );
+
+            return Result.Fail("Ocorreu um erro durante o cadastro das questões geradas.");
         }
     }
 }

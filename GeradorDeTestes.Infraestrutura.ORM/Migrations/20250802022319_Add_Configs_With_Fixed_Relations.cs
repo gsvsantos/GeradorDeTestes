@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
 {
     /// <inheritdoc />
-    public partial class Add_Initial_Configs_Postgre : Migration
+    public partial class Add_Configs_With_Fixed_Relations : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -118,8 +118,8 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     MateriaId = table.Column<Guid>(type: "uuid", nullable: false),
-                    QuantidadeQuestoes = table.Column<int>(type: "integer", nullable: false),
-                    TesteId = table.Column<Guid>(type: "uuid", nullable: true)
+                    TesteId = table.Column<Guid>(type: "uuid", nullable: false),
+                    QuantidadeQuestoes = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {

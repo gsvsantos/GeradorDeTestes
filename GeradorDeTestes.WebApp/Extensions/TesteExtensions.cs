@@ -89,7 +89,7 @@ public static class TesteExtensions
         };
     }
 
-    public static FormGerarPostViewModel ParaGerarTestePostVM(this Teste teste, List<Materia> materias, List<Materia> materiasSelecionadas)
+    public static FormGerarPostViewModel ParaGerarPostVM(this Teste teste, List<Materia> materias, List<Materia> materiasSelecionadas)
     {
         return new()
         {

@@ -312,11 +312,11 @@ public class QuestaoController : Controller
     }
 
     [HttpPost("gerar-questoes/primeira-etapa")]
-    public async Task<IActionResult> PrimeiraEtapaGerar(PrimeiraEtapaGerarQuestoesViewModel primeiraEtapaVm)
+    public async Task<IActionResult> PrimeiraEtapaGerar(PrimeiraEtapaGerarQuestoesViewModel primeiraEtapaVM)
     {
-        Materia materiaSelecionada = materiaAppService.SelecionarRegistroPorId(primeiraEtapaVm.MateriaId).ValueOrDefault;
+        Materia materiaSelecionada = materiaAppService.SelecionarRegistroPorId(primeiraEtapaVM.MateriaId).ValueOrDefault;
 
-        Result<List<Questao>> resultado = await questaoAppService.GerarQuestoesDaMateria(materiaSelecionada, primeiraEtapaVm.QuantidadeQuestoes);
+        Result<List<Questao>> resultado = await questaoAppService.GerarQuestoesDaMateria(materiaSelecionada, primeiraEtapaVM.QuantidadeQuestoes);
 
         if (resultado.IsFailed)
         {
@@ -337,13 +337,13 @@ public class QuestaoController : Controller
         string serieFormatada = (int)materiaSelecionada.Serie >= 10
         ? materiaSelecionada.Serie.GetDisplayName()[..8] : materiaSelecionada.Serie.GetDisplayName()[..7];
 
-        SegundaEtapaGerarQuestoesViewModel segundaEtapavm = new SegundaEtapaGerarQuestoesViewModel(resultado.Value)
+        SegundaEtapaGerarQuestoesViewModel segundaEtapaVM = new SegundaEtapaGerarQuestoesViewModel(resultado.Value)
         {
-            MateriaId = primeiraEtapaVm.MateriaId,
+            MateriaId = primeiraEtapaVM.MateriaId,
             Materia = $"{materiaSelecionada.Nome} - {serieFormatada}"
         };
 
-        string jsonString = JsonSerializer.Serialize(segundaEtapavm);
+        string jsonString = JsonSerializer.Serialize(segundaEtapaVM);
 
         TempData.Clear();
 
@@ -360,28 +360,24 @@ public class QuestaoController : Controller
         if (!existeViewModel || valor is not string jsonString)
             return RedirectToAction(nameof(PrimeiraEtapaGerar));
 
-        SegundaEtapaGerarQuestoesViewModel? segundaEtapaVm = JsonSerializer.Deserialize<SegundaEtapaGerarQuestoesViewModel>(jsonString);
+        SegundaEtapaGerarQuestoesViewModel? segundaEtapaVM = JsonSerializer.Deserialize<SegundaEtapaGerarQuestoesViewModel>(jsonString);
 
-        return View(segundaEtapaVm);
+        return View(segundaEtapaVM);
     }
 
     [HttpPost("gerar-questoes/segunda-etapa")]
-    public IActionResult SegundaEtapaGerar(SegundaEtapaGerarQuestoesViewModel segundaEtapaVm)
+    public IActionResult SegundaEtapaGerar(SegundaEtapaGerarQuestoesViewModel segundaEtapaVM)
     {
         List<Materia> materias = materiaAppService.SelecionarRegistros().ValueOrDefault;
 
-        Materia materiaSelecionada = materiaAppService.SelecionarRegistroPorId(segundaEtapaVm.MateriaId).ValueOrDefault;
+        Materia materiaSelecionada = materiaAppService.SelecionarRegistroPorId(segundaEtapaVM.MateriaId).ValueOrDefault;
 
-        List<Questao> questoesGeradas = SegundaEtapaGerarQuestoesViewModel.ObterQuestoesGeradas(segundaEtapaVm, materiaSelecionada);
+        List<Questao> questoesGeradas = SegundaEtapaGerarQuestoesViewModel.ObterQuestoesGeradas(segundaEtapaVM, materiaSelecionada);
 
-        foreach (Questao questao in questoesGeradas)
-        {
-            questao.Finalizado = true;
-            Result resultado = questaoAppService.CadastrarRegistro(questao);
+        Result resultadoCadastroQuestoes = questaoAppService.CadastrarQuestoesGeradas(questoesGeradas);
 
-            if (resultado.IsFailed)
-                return View(nameof(PrimeiraEtapaGerar));
-        }
+        if (resultadoCadastroQuestoes.IsFailed)
+            return View(nameof(SegundaEtapaGerar), segundaEtapaVM);
 
         return RedirectToAction(nameof(Index));
     }

@@ -142,7 +142,6 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
             modelBuilder.Entity("GeradorDeTestes.Dominio.ModuloTeste.TesteMateriaQuantidade", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("MateriaId")
@@ -151,7 +150,7 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
                     b.Property<int>("QuantidadeQuestoes")
                         .HasColumnType("integer");
 
-                    b.Property<Guid?>("TesteId")
+                    b.Property<Guid>("TesteId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
@@ -245,12 +244,15 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("GeradorDeTestes.Dominio.ModuloTeste.Teste", null)
+                    b.HasOne("GeradorDeTestes.Dominio.ModuloTeste.Teste", "Teste")
                         .WithMany("QuantidadesPorMateria")
                         .HasForeignKey("TesteId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Materia");
+
+                    b.Navigation("Teste");
                 });
 
             modelBuilder.Entity("MateriaTeste", b =>

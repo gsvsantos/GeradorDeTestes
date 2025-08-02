@@ -7,14 +7,21 @@ public class MapeadorTesteMateriaQuantidadeORM : IEntityTypeConfiguration<TesteM
 {
     public void Configure(EntityTypeBuilder<TesteMateriaQuantidade> builder)
     {
-        builder.HasKey(x => x.Id);
+        builder.Property(qmp => qmp.Id)
+            .ValueGeneratedNever()
+            .IsRequired();
 
-        builder.HasOne(x => x.Materia)
+        builder.HasOne(qmp => qmp.Materia)
                .WithMany()
                .OnDelete(DeleteBehavior.Restrict)
                .IsRequired();
 
-        builder.Property(x => x.QuantidadeQuestoes)
+        builder.HasOne(qpm => qpm.Teste)
+               .WithMany(t => t.QuantidadesPorMateria)
+               .OnDelete(DeleteBehavior.Cascade)
+               .IsRequired();
+
+        builder.Property(qmp => qmp.QuantidadeQuestoes)
                .IsRequired();
     }
 }

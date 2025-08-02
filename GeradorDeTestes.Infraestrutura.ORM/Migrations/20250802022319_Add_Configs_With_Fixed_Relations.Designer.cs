@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
 {
     [DbContext(typeof(GeradorDeTestesDbContext))]
-    [Migration("20250723052300_Add_Initial_Configs_Postgre")]
-    partial class Add_Initial_Configs_Postgre
+    [Migration("20250802022319_Add_Configs_With_Fixed_Relations")]
+    partial class Add_Configs_With_Fixed_Relations
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -145,7 +145,6 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
             modelBuilder.Entity("GeradorDeTestes.Dominio.ModuloTeste.TesteMateriaQuantidade", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("MateriaId")
@@ -154,7 +153,7 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
                     b.Property<int>("QuantidadeQuestoes")
                         .HasColumnType("integer");
 
-                    b.Property<Guid?>("TesteId")
+                    b.Property<Guid>("TesteId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
@@ -248,12 +247,15 @@ namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("GeradorDeTestes.Dominio.ModuloTeste.Teste", null)
+                    b.HasOne("GeradorDeTestes.Dominio.ModuloTeste.Teste", "Teste")
                         .WithMany("QuantidadesPorMateria")
                         .HasForeignKey("TesteId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Materia");
+
+                    b.Navigation("Teste");
                 });
 
             modelBuilder.Entity("MateriaTeste", b =>
