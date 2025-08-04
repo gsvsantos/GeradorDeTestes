@@ -116,21 +116,11 @@ public sealed class RepositorioMateriaORMTestes : TestFixture
         dbContext.SaveChanges();
 
         // Act 
-        List<Materia> materiasExistentesOrganizadas = repositorioMateriaORM.SelecionarRegistros().OrderBy(m => m.Nome).ToList();
+        List<Materia> materiasExistentesOrganizadas = repositorioMateriaORM.SelecionarRegistros();
         List<Materia> novasMateriasOrganizadas = novasMaterias.OrderBy(m => m.Nome).ToList();
 
         // Assert
         Assert.AreEqual(novasMaterias.Count, materiasExistentesOrganizadas.Count);
-        for (int i = 0; i < novasMateriasOrganizadas.Count; i++)
-        {
-            Materia novaMateria = novasMateriasOrganizadas[i];
-            Materia materiaExistente = materiasExistentesOrganizadas[i];
-
-            Assert.AreEqual(novaMateria.Nome, materiaExistente.Nome, $"Nome incorreto para a matéria '{novaMateria.Nome}'.");
-            Assert.AreEqual(novaMateria.Serie, materiaExistente.Serie, $"Série incorreta para a matéria '{novaMateria.Nome}'.");
-
-            Assert.IsNotNull(materiaExistente.Disciplina, $"Disciplina não carregada para a matéria '{novaMateria.Nome}'.");
-            Assert.AreEqual(novaMateria.Disciplina, materiaExistente.Disciplina, $"Disciplina incorreta para a matéria '{novaMateria.Nome}'.");
-        }
+        CollectionAssert.AreEquivalent(novasMateriasOrganizadas, materiasExistentesOrganizadas);
     }
 }

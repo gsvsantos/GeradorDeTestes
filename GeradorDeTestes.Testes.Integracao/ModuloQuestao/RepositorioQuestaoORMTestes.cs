@@ -24,9 +24,7 @@ public sealed class RepositorioQuestaoORMTestes : TestFixture
 
         materiaPadrao = Builder<Materia>
             .CreateNew()
-            .With(m => m.Nome = "Multiplicação")
-            .With(m => m.Disciplina = disciplinaPadrao)
-            .With(m => m.Serie = EnumSerie.SetimoAnoFundamental)
+            .WithFactory(() => new("Multiplicação", disciplinaPadrao, EnumSerie.SetimoAnoFundamental))
             .Persist();
     }
 
@@ -128,20 +126,10 @@ public sealed class RepositorioQuestaoORMTestes : TestFixture
 
         dbContext.SaveChanges();
 
-        List<Questao> questoesExistentesOrganizadas = repositorioQuestaoORM.SelecionarRegistros().OrderBy(m => m.Enunciado).ToList();
-        List<Questao> novasQuestoesOrganizadas = novasQuestoes.OrderBy(m => m.Enunciado).ToList();
+        List<Questao> questoesExistentesOrganizadas = repositorioQuestaoORM.SelecionarRegistros();
+        List<Questao> novasQuestoesOrganizadas = novasQuestoes.OrderBy(q => q.Enunciado).ToList();
 
         Assert.AreEqual(novasMaterias.Count, questoesExistentesOrganizadas.Count);
-        for (int i = 0; i < novasQuestoesOrganizadas.Count; i++)
-        {
-            Questao novaQuestao = novasQuestoesOrganizadas[i];
-            Questao questaoExistente = questoesExistentesOrganizadas[i];
-
-            Assert.AreEqual(novaQuestao.Enunciado, questaoExistente.Enunciado, $"Nome incorreto para a questão '{novaQuestao.Enunciado}'.");
-            Assert.AreEqual(novaQuestao.Materia.Serie, questaoExistente.Materia.Serie, $"Série incorreta para a matéria da questão '{novaQuestao.Enunciado}'.");
-            Assert.IsNotNull(questaoExistente.Materia.Disciplina, $"Disciplina não carregada para a matéria da questão '{novaQuestao.Enunciado}'.");
-            Assert.AreEqual(novaQuestao.Materia.Disciplina.Id, questaoExistente.Materia.Disciplina.Id, $"Disciplina incorreta para a matéria da questão '{novaQuestao.Enunciado}'.");
-            Assert.AreEqual(novaQuestao.Materia.Disciplina.Nome, questaoExistente.Materia.Disciplina.Nome, $"Nome da disciplina incorreto para a matéria da questão '{novaQuestao.Enunciado}'.");
-        }
+        CollectionAssert.AreEquivalent(novasQuestoesOrganizadas, questoesExistentesOrganizadas);
     }
 }

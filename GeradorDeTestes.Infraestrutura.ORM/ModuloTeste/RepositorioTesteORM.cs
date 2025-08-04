@@ -95,6 +95,7 @@ public class RepositorioTesteORM : RepositorioBaseORM<Teste>, IRepositorioTeste
             .ThenInclude(q => q.Alternativas)
             .Include(t => t.QuantidadesPorMateria)
             .ThenInclude(qpm => qpm.Materia)
+            .OrderBy(t => t.DataCriacao)
             .ToList();
     }
 }

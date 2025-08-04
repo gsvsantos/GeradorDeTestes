@@ -14,6 +14,7 @@ public class RepositorioDisciplinaORM : RepositorioBaseORM<Disciplina>, IReposit
         return contexto.Disciplinas
             .Include(d => d.Materias)
             .Include(d => d.Testes)
+            .OrderBy(t => t.Nome)
             .ToList();
     }
 

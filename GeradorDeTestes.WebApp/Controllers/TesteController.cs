@@ -1,7 +1,6 @@
 ﻿using FluentResults;
 using GeradorDeTestes.Aplicacao.ModuloDisciplina;
 using GeradorDeTestes.Aplicacao.ModuloMateria;
-using GeradorDeTestes.Aplicacao.ModuloQuestao;
 using GeradorDeTestes.Aplicacao.ModuloTeste;
 using GeradorDeTestes.Dominio.ModuloDisciplina;
 using GeradorDeTestes.Dominio.ModuloMateria;
@@ -19,17 +18,14 @@ public class TesteController : Controller
 {
     private readonly DisciplinaAppService disciplinaAppService;
     private readonly MateriaAppService materiaAppService;
-    private readonly QuestaoAppService questaoAppService;
     private readonly TesteAppService testeAppService;
     private readonly GeradorPdfService geradorPdfService;
 
     public TesteController(DisciplinaAppService disciplinaAppService, MateriaAppService materiaAppService,
-        QuestaoAppService questaoAppService, TesteAppService testeAppService,
-        GeradorPdfService geradorPdfService)
+        TesteAppService testeAppService, GeradorPdfService geradorPdfService)
     {
         this.disciplinaAppService = disciplinaAppService;
         this.materiaAppService = materiaAppService;
-        this.questaoAppService = questaoAppService;
         this.testeAppService = testeAppService;
         this.geradorPdfService = geradorPdfService;
     }

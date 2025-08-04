@@ -10,10 +10,16 @@ public class RepositorioMateriaORM : RepositorioBaseORM<Materia>, IRepositorioMa
 
     public override List<Materia> SelecionarRegistros()
     {
-        return registros.Include(mate => mate.Questoes).Include(mate => mate.Disciplina).ToList();
+        return registros.Include(mate => mate.Questoes)
+            .Include(mate => mate.Disciplina)
+            .OrderBy(mate => mate.Nome)
+            .ToList();
     }
     public override Materia? SelecionarRegistroPorId(Guid idRegistro)
     {
-        return registros.Where(mate => mate.Id.Equals(idRegistro)).Include(mate => mate.Questoes).Include(mate => mate.Disciplina).FirstOrDefault();
+        return registros.Where(mate => mate.Id.Equals(idRegistro))
+            .Include(mate => mate.Questoes)
+            .Include(mate => mate.Disciplina)
+            .FirstOrDefault();
     }
 }

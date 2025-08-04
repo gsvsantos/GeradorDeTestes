@@ -44,8 +44,7 @@ public class RepositorioQuestaoORM : RepositorioBaseORM<Questao>, IRepositorioQu
             .ThenInclude(m => m.Disciplina)
             .Include(q => q.Alternativas)
             .Include(q => q.Testes)
-            .OrderBy(q => q.Materia.Serie)
-            .ThenBy(q => q.Enunciado)
+            .OrderBy(q => q.Enunciado)
             .ToList();
     }
 }

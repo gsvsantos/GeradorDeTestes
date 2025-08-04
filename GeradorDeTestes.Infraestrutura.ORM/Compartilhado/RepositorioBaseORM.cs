@@ -21,6 +21,11 @@ public class RepositorioBaseORM<T> where T : EntidadeBase<T>
 
     public void CadastrarMultiplosRegistros(IList<T> entidades)
     {
+        foreach (T ent in entidades)
+        {
+            ent.Id = Guid.NewGuid();
+        }
+
         registros.AddRange(entidades);
     }
 
