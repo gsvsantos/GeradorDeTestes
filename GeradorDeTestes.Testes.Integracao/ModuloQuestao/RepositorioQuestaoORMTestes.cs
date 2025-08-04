@@ -7,7 +7,7 @@ namespace GeradorDeTestes.Testes.Integracao.ModuloQuestao;
 
 [TestClass]
 [TestCategory("Testes de Integração de Questão")]
-public class RepositorioQuestaoORMTestes : TestFixture
+public sealed class RepositorioQuestaoORMTestes : TestFixture
 {
     private Disciplina disciplinaPadrao = null!;
     private Materia materiaPadrao = null!;
@@ -42,9 +42,9 @@ public class RepositorioQuestaoORMTestes : TestFixture
         Questao? questaoSelecionada = repositorioQuestaoORM.SelecionarRegistroPorId(novaQuestao.Id);
 
         Assert.IsNotNull(questaoSelecionada, "Não conseguiu selecionar a questão.");
-        Assert.AreEqual(novaQuestao, questaoSelecionada, "A questão selecionada não condiz com a questão cadastrada.");
+        Assert.AreEqual(novaQuestao, questaoSelecionada, "A questão selecionada não corresponde com a questão cadastrada.");
         Assert.AreEqual(disciplinaPadrao, questaoSelecionada.Materia.Disciplina, "A disciplina não corresponde com a disciplina da matéria cadastrada.");
-        Assert.AreEqual(materiaPadrao, questaoSelecionada.Materia, "A matéria da questão selecionada não condiz com a matéria cadastrada.");
+        Assert.AreEqual(materiaPadrao, questaoSelecionada.Materia, "A matéria da questão selecionada não corresponde com a matéria cadastrada.");
         Assert.AreEqual(EnumSerie.SetimoAnoFundamental, questaoSelecionada.Materia.Serie, "A série não corresponde com a série da matéria cadastrada.");
     }
 
@@ -74,8 +74,8 @@ public class RepositorioQuestaoORMTestes : TestFixture
 
         Assert.IsTrue(conseguiuEditar, "Não conseguiu editar a questão.");
         Assert.IsNotNull(questaoSelecionada, "Não conseguiu selecionar a questão.");
-        Assert.AreEqual(novaQuestao, questaoSelecionada, "A questão selecionada não condiz com a questão editada.");
-        Assert.AreEqual(questaoEditada.Materia, questaoSelecionada.Materia, "A matéria da questão selecionada não condiz com a questão editada.");
+        Assert.AreEqual(novaQuestao, questaoSelecionada, "A questão selecionada não corresponde com a questão editada.");
+        Assert.AreEqual(questaoEditada.Materia, questaoSelecionada.Materia, "A matéria da questão selecionada não corresponde com a questão editada.");
     }
 
     [TestMethod]

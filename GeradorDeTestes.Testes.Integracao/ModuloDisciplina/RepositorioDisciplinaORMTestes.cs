@@ -27,7 +27,7 @@ public sealed class RepositorioDisciplinaORMTestes : TestFixture
         Disciplina disciplinaSelecionada = repositorioDisciplinaORM.SelecionarRegistroPorId(novaDisciplina.Id)!;
 
         Assert.IsNotNull(disciplinaSelecionada, "Não conseguiu selecionar a disciplina.");
-        Assert.AreEqual(novaDisciplina, disciplinaSelecionada, "A disciplina selecionada não condiz com a disciplina cadastrada.");
+        Assert.AreEqual(novaDisciplina, disciplinaSelecionada, "A disciplina selecionada não corresponde com a disciplina cadastrada.");
     }
 
     [TestMethod]
@@ -52,7 +52,7 @@ public sealed class RepositorioDisciplinaORMTestes : TestFixture
 
         Assert.IsTrue(conseguiuEditar, "Não conseguiu editar a disciplina.");
         Assert.IsNotNull(disciplinaSelecionada, "Não conseguiu selecionar a disciplina.");
-        Assert.AreEqual(novaDisciplina, disciplinaSelecionada, "A disciplina selecionada não condiz com a disciplina editada.");
+        Assert.AreEqual(novaDisciplina, disciplinaSelecionada, "A disciplina selecionada não corresponde com a disciplina editada.");
     }
 
     [TestMethod]
@@ -105,7 +105,7 @@ public sealed class RepositorioDisciplinaORMTestes : TestFixture
             .OrderBy(n => n).ToList(),
             disciplinasExistentes.Select(d => d.Nome)
             .OrderBy(n => n).ToList(),
-            "Disciplinas selecionadas não condiz com as disciplinas cadastradas."
+            "Disciplinas selecionadas não corresponde com as disciplinas cadastradas."
             );
     }
 }
