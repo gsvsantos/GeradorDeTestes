@@ -27,10 +27,15 @@ public class GeradorDisciplinaGemini : IGeradorDisciplinas
 
     public GeradorDisciplinaGemini(IHttpClientFactory httpClientFactory, IConfiguration configuration)
     {
+        string? geminiKey = configuration["GEMINI_API_KEY"];
+
+        if (string.IsNullOrWhiteSpace(geminiKey))
+            throw new Exception("A variável GEMINI_API_KEY não foi fornecida.");
+
         _httpClient = httpClientFactory.CreateClient();
 
         _geminiEndpoint = string.Concat("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=",
-            configuration["GEMINI_API_KEY"]);
+            geminiKey);
         maxTentativas = int.Parse(configuration["GeradorDisciplinas:MaxTentativasIA"] ?? "5");
     }
 

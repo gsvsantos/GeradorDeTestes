@@ -13,8 +13,6 @@ using GeradorDeTestes.Infraestrutura.ORM.ModuloTeste;
 using GeradorDeTestes.WebApp.ActionFilters;
 using GeradorDeTestes.WebApp.DependencyInjection;
 using GeradorDeTestes.WebApp.ORM;
-using Microsoft.Data.SqlClient;
-using System.Data;
 
 namespace GeradorDeTestes.WebApp;
 
@@ -29,12 +27,6 @@ public class Program
             options.Filters.Add<ValidarModeloAttribute>();
             options.Filters.Add<LogarAcaoAttribute>();
         });
-        builder.Services.AddScoped<IDbConnection>(_ =>
-        {
-            string? connectionString = builder.Configuration["SQL_CONNECTION_STRING"];
-
-            return new SqlConnection(connectionString);
-        });
 
         builder.Services.AddScoped<IRepositorioDisciplina, RepositorioDisciplinaORM>();
         builder.Services.AddScoped<IRepositorioMateria, RepositorioMateriaORM>();
@@ -45,7 +37,7 @@ public class Program
         builder.Services.AddScoped<QuestaoAppService>();
         builder.Services.AddScoped<TesteAppService>();
         builder.Services.AddEntityFrameworkConfig(builder.Configuration);
-        builder.Services.AddSerilogConfig(builder.Logging);
+        builder.Services.AddSerilogConfig(builder.Logging, builder.Configuration);
         builder.Services.AddQuestPDFConfig();
         builder.Services.AddGeminiChatConfig();
 

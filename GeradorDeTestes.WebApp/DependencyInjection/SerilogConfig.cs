@@ -6,8 +6,13 @@ namespace GeradorDeTestes.WebApp.DependencyInjection;
 
 public static class SerilogConfig
 {
-    public static void AddSerilogConfig(this IServiceCollection services, ILoggingBuilder logging)
+    public static void AddSerilogConfig(this IServiceCollection services, ILoggingBuilder logging, IConfiguration configuration)
     {
+        string? licenseKey = configuration["NEWRELIC_LICENSE_KEY"];
+
+        if (string.IsNullOrWhiteSpace(licenseKey))
+            throw new Exception("A variável NEWRELIC_LICENSE_KEY não foi fornecida.");
+
         string caminhoAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
 
         string caminhoArquivo = Path.Combine(caminhoAppData, "eAgenda", "erro.log");
@@ -17,6 +22,11 @@ public static class SerilogConfig
             .Enrich.FromLogContext()
             .WriteTo.Console()
             .WriteTo.File(new CompactJsonFormatter(), caminhoArquivo, LogEventLevel.Error)
+            .WriteTo.NewRelicLogs(
+                endpointUrl: "https://log-api.newrelic.com/log/v1",
+                applicationName: "gerador-de-testes-app",
+                licenseKey: licenseKey
+            )
             .CreateLogger();
 
         logging.ClearProviders();
@@ -24,3 +34,4 @@ public static class SerilogConfig
         services.AddSerilog(Log.Logger);
     }
 }
+// 
