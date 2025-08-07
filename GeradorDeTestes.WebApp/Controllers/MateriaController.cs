@@ -6,6 +6,8 @@ using GeradorDeTestes.Dominio.ModuloMateria;
 using GeradorDeTestes.WebApp.Extensions;
 using GeradorDeTestes.WebApp.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Text.Json;
 
 namespace GeradorDeTestes.WebApp.Controllers;
 
@@ -33,18 +35,41 @@ public class MateriaController : Controller
 
         VisualizarMateriaViewModel visualizarVM = new(materias);
 
+        bool existeNotificacao = TempData.TryGetValue(nameof(NotificacaoViewModel), out object? valor);
+
+        if (existeNotificacao && valor is string jsonString)
+        {
+            NotificacaoViewModel? notificacaoVM = JsonSerializer.Deserialize<NotificacaoViewModel>(jsonString);
+
+            ViewData.Add(nameof(NotificacaoViewModel), notificacaoVM);
+        }
+
         return View(visualizarVM);
     }
 
     [HttpGet("cadastrar")]
     public IActionResult Cadastrar()
     {
-        Result<List<Disciplina>> resultadoDisciplinas = disciplinaAppService.SelecionarRegistros();
+        Result<List<Disciplina>> resultadosDisciplinas = disciplinaAppService.SelecionarRegistros();
 
-        if (resultadoDisciplinas.IsFailed)
+        if (resultadosDisciplinas.IsFailed)
+        {
+
+            foreach (IError erro in resultadosDisciplinas.Errors)
+            {
+                string notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                    erro.Message,
+                    erro.Reasons[0].Message
+                );
+
+                TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+                break;
+            }
+
             return RedirectToAction(nameof(Index));
+        }
 
-        List<Disciplina> disciplinas = resultadoDisciplinas.Value;
+        List<Disciplina> disciplinas = resultadosDisciplinas.Value;
 
         CadastrarMateriaViewModel cadastrarVM = new(disciplinas);
 
@@ -64,7 +89,20 @@ public class MateriaController : Controller
 
         if (resultadoCadastro.IsFailed)
         {
-            ModelState.AddModelError("ConflitoCadastro", resultadoCadastro.Errors[0].Message);
+            foreach (IError erro in resultadoCadastro.Errors)
+            {
+                if (erro.Metadata["TipoErro"].ToString() == "RegistroDuplicado")
+                {
+                    ModelState.AddModelError("ConflitoCadastro", erro.Reasons[0].Message);
+                    break;
+                }
+            }
+
+            Result<List<Disciplina>> resultadosDisciplinas = disciplinaAppService.SelecionarRegistros();
+
+            cadastrarVM.Disciplinas = resultadosDisciplinas.Value
+                .Select(d => new SelectListItem(d.Nome, d.Id.ToString()))
+                .ToList();
 
             return View(nameof(Cadastrar), cadastrarVM);
         }
@@ -78,16 +116,51 @@ public class MateriaController : Controller
         Result<Materia> resultadoMateria = materiaAppService.SelecionarRegistroPorId(id)!;
 
         if (resultadoMateria.IsFailed)
+        {
+            foreach (IError erro in resultadoMateria.Errors)
+            {
+                if (erro.Metadata["TipoErro"].ToString() == "RegistroNaoEncontrado")
+                {
+
+                    string notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                            erro.Message,
+                            erro.Reasons[0].Message
+                        );
+
+                    TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+                    break;
+                }
+                else
+                {
+                    return RedirectToAction("Erro", "Home");
+                }
+            }
+
             return RedirectToAction(nameof(Index));
+        }
 
         Materia materiaSelecionada = resultadoMateria.ValueOrDefault;
 
-        Result<List<Disciplina>> resultadoDisciplinas = disciplinaAppService.SelecionarRegistros();
+        Result<List<Disciplina>> resultadosDisciplinas = disciplinaAppService.SelecionarRegistros();
 
-        if (resultadoDisciplinas.IsFailed)
+        if (resultadosDisciplinas.IsFailed)
+        {
+
+            foreach (IError erro in resultadosDisciplinas.Errors)
+            {
+                string notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                    erro.Message,
+                    erro.Reasons[0].Message
+                );
+
+                TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+                break;
+            }
+
             return RedirectToAction(nameof(Index));
+        }
 
-        List<Disciplina> disciplinas = resultadoDisciplinas.Value;
+        List<Disciplina> disciplinas = resultadosDisciplinas.Value;
 
         EditarMateriaViewModel editarVM = new(materiaSelecionada, disciplinas);
 
@@ -107,9 +180,16 @@ public class MateriaController : Controller
 
         if (resultadoEdicao.IsFailed)
         {
-            ModelState.AddModelError("ConflitoEdicao", resultadoEdicao.Errors[0].Message);
+            foreach (IError erro in resultadoEdicao.Errors)
+            {
+                if (erro.Metadata["TipoErro"].ToString() == "RegistroDuplicado")
+                {
+                    ModelState.AddModelError("ConflitoEdicao", resultadoEdicao.Errors[0].Message);
+                    break;
+                }
+            }
 
-            return View(editarVM);
+            return View(nameof(Editar), editarVM);
         }
 
         return RedirectToAction(nameof(Index));
@@ -121,7 +201,29 @@ public class MateriaController : Controller
         Result<Materia> resultadoMateria = materiaAppService.SelecionarRegistroPorId(id)!;
 
         if (resultadoMateria.IsFailed)
+        {
+
+            foreach (IError erro in resultadoMateria.Errors)
+            {
+                if (erro.Metadata["TipoErro"].ToString() == "RegistroNaoEncontrado")
+                {
+
+                    string notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                            erro.Message,
+                            erro.Reasons[0].Message
+                        );
+
+                    TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+                    break;
+                }
+                else
+                {
+                    return RedirectToAction("Erro", "Home");
+                }
+            }
+
             return RedirectToAction(nameof(Index));
+        }
 
         Materia materiaSelecionada = resultadoMateria.ValueOrDefault;
 
@@ -137,22 +239,27 @@ public class MateriaController : Controller
 
         if (resultadoExclusao.IsFailed)
         {
-            ModelState.AddModelError("ConflitoExclusao", "Não é possível excluir a matéria pois ela possui questões associadas.");
-
-            Result<Materia> resultadoMateria = materiaAppService.SelecionarRegistroPorId(id)!;
-
-            Materia materiaSelecionada = resultadoMateria.ValueOrDefault;
-
-            ExcluirMateriaViewModel excluirVM = new()
+            foreach (IError erro in resultadoExclusao.Errors)
             {
-                Id = materiaSelecionada.Id,
-                Nome = materiaSelecionada.Nome
-            };
+                if (erro.Metadata["TipoErro"].ToString() == "RegistroVinculado")
+                {
 
-            return View(nameof(Excluir), excluirVM);
+                    string notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                            erro.Message,
+                            erro.Reasons[0].Message
+                        );
+
+                    TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+                    break;
+                }
+                else
+                {
+                    return RedirectToAction("Erro", "Home");
+                }
+            }
         }
 
-        return RedirectToAction("Index");
+        return RedirectToAction(nameof(Index));
     }
 
     [HttpGet("detalhes/{id:Guid}")]
@@ -161,7 +268,21 @@ public class MateriaController : Controller
         Result<Materia> resultadoMateria = materiaAppService.SelecionarRegistroPorId(id)!;
 
         if (resultadoMateria.IsFailed)
+        {
+
+            foreach (IError erro in resultadoMateria.Errors)
+            {
+                string notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                    erro.Message,
+                    erro.Reasons[0].Message
+                );
+
+                TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+                break;
+            }
+
             return RedirectToAction(nameof(Index));
+        }
 
         Materia materiaSelecionada = resultadoMateria.ValueOrDefault;
 

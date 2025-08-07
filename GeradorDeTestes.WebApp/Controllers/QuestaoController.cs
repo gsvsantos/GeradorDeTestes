@@ -42,6 +42,15 @@ public class QuestaoController : Controller
 
         VisualizarQuestoesViewModel visualizarVM = new(questoes);
 
+        bool existeNotificacao = TempData.TryGetValue(nameof(NotificacaoViewModel), out object? valor);
+
+        if (existeNotificacao && valor is string jsonString)
+        {
+            NotificacaoViewModel? notificacaoVM = JsonSerializer.Deserialize<NotificacaoViewModel>(jsonString);
+
+            ViewData.Add(nameof(NotificacaoViewModel), notificacaoVM);
+        }
+
         return View(visualizarVM);
     }
 
@@ -51,7 +60,21 @@ public class QuestaoController : Controller
         Result<List<Materia>> resultadosMaterias = materiaAppService.SelecionarRegistros();
 
         if (resultadosMaterias.IsFailed)
+        {
+
+            foreach (IError erro in resultadosMaterias.Errors)
+            {
+                string notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                    erro.Message,
+                    erro.Reasons[0].Message
+                );
+
+                TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+                break;
+            }
+
             return RedirectToAction(nameof(Index));
+        }
 
         List<Materia> materias = resultadosMaterias.Value;
 
@@ -73,7 +96,14 @@ public class QuestaoController : Controller
 
         if (resultadoCadastro.IsFailed)
         {
-            ModelState.AddModelError("ConflitoCadastro", resultadoCadastro.Errors[0].Message);
+            foreach (IError erro in resultadoCadastro.Errors)
+            {
+                if (erro.Metadata["TipoErro"].ToString() == "RegistroDuplicado")
+                {
+                    ModelState.AddModelError("ConflitoCadastro", erro.Reasons[0].Message);
+                    break;
+                }
+            }
 
             return View(nameof(Cadastrar), cadastrarVM);
         }
@@ -87,7 +117,27 @@ public class QuestaoController : Controller
         Result<Questao> resultadoQuestao = questaoAppService.SelecionarRegistroPorId(id)!;
 
         if (resultadoQuestao.IsFailed)
+        {
+            foreach (IError erro in resultadoQuestao.Errors)
+            {
+                if (erro.Metadata["TipoErro"].ToString() == "RegistroNaoEncontrado")
+                {
+                    string notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                            erro.Message,
+                            erro.Reasons[0].Message
+                        );
+
+                    TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+                    break;
+                }
+                else
+                {
+                    return RedirectToAction("Erro", "Home");
+                }
+            }
+
             return RedirectToAction(nameof(Index));
+        }
 
         Questao questaoSelecionada = resultadoQuestao.Value;
 
@@ -122,9 +172,16 @@ public class QuestaoController : Controller
 
         if (resultadoEdicao.IsFailed)
         {
-            ModelState.AddModelError("ConflitoEdicao", resultadoEdicao.Errors[0].Message);
+            foreach (IError erro in resultadoEdicao.Errors)
+            {
+                if (erro.Metadata["TipoErro"].ToString() == "RegistroDuplicado")
+                {
+                    ModelState.AddModelError("ConflitoEdicao", resultadoEdicao.Errors[0].Message);
+                    break;
+                }
+            }
 
-            return View(editarVM);
+            return View(nameof(Editar), editarVM);
         }
 
         return RedirectToAction(nameof(GerenciarAlternativas), new { id });
@@ -136,7 +193,28 @@ public class QuestaoController : Controller
         Result<Questao> resultadoQuestao = questaoAppService.SelecionarRegistroPorId(id)!;
 
         if (resultadoQuestao.IsFailed)
+        {
+            foreach (IError erro in resultadoQuestao.Errors)
+            {
+                if (erro.Metadata["TipoErro"].ToString() == "RegistroNaoEncontrado")
+                {
+
+                    string notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                            erro.Message,
+                            erro.Reasons[0].Message
+                        );
+
+                    TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+                    break;
+                }
+                else
+                {
+                    return RedirectToAction("Erro", "Home");
+                }
+            }
+
             return RedirectToAction(nameof(Index));
+        }
 
         Questao questaoSelecionada = resultadoQuestao.Value;
 
@@ -154,26 +232,50 @@ public class QuestaoController : Controller
 
         if (resultadoExclusao.IsFailed)
         {
-            ModelState.AddModelError("ConflitoExclusao", resultadoExclusao.Errors[0].Message);
+            foreach (IError erro in resultadoExclusao.Errors)
+            {
+                if (erro.Metadata["TipoErro"].ToString() == "RegistroVinculado")
+                {
 
-            Result<Questao> resultadoQuestao = questaoAppService.SelecionarRegistroPorId(id)!;
+                    string notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                            erro.Message,
+                            erro.Reasons[0].Message
+                        );
 
-            Questao questaoSelecionada = resultadoQuestao.Value;
-
-            ExcluirQuestaoViewModel excluirVM = new(
-                id,
-                questaoSelecionada.Enunciado);
-
-            return View(nameof(Excluir), excluirVM);
+                    TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+                    break;
+                }
+                else
+                {
+                    return RedirectToAction("Erro", "Home");
+                }
+            }
         }
 
-        return RedirectToAction("Index");
+        return RedirectToAction(nameof(Index));
     }
 
     [HttpGet, Route("/questoes/{id:guid}/detalhes")]
     public IActionResult Detalhes(Guid id)
     {
         Result<Questao> resultadoQuestao = questaoAppService.SelecionarRegistroPorId(id)!;
+
+        if (resultadoQuestao.IsFailed)
+        {
+
+            foreach (IError erro in resultadoQuestao.Errors)
+            {
+                string notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                    erro.Message,
+                    erro.Reasons[0].Message
+                );
+
+                TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+                break;
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
 
         Questao questaoSelecionada = resultadoQuestao.Value;
 
@@ -187,6 +289,23 @@ public class QuestaoController : Controller
     {
         Result<Questao> resultadoQuestao = questaoAppService.SelecionarRegistroPorId(id)!;
 
+        if (resultadoQuestao.IsFailed)
+        {
+
+            foreach (IError erro in resultadoQuestao.Errors)
+            {
+                string notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                    erro.Message,
+                    erro.Reasons[0].Message
+                );
+
+                TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+                break;
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
         Questao questaoSelecionada = resultadoQuestao.Value;
 
         List<Alternativa> alternativas = questaoSelecionada.Alternativas.ToList();
@@ -194,15 +313,6 @@ public class QuestaoController : Controller
         GerenciarAlternativasViewModel gerenciarAlternativasVM = new(
             questaoSelecionada,
             alternativas);
-
-        if (alternativas.Count < 2 || alternativas.Count > 4)
-            ModelState.AddModelError("ConflitoAlternativas", "A questão deve ter entre 2 e 4 alternativas.");
-
-        if (alternativas.Count(a => a.EstaCorreta) != 1)
-            ModelState.AddModelError("ConflitoAlternativas", "A questão deve ter exatamente uma alternativa correta.");
-
-        if (!ModelState.IsValid)
-            return View(gerenciarAlternativasVM);
 
         return View(gerenciarAlternativasVM);
     }
@@ -215,7 +325,11 @@ public class QuestaoController : Controller
 
         if (resultadoAdicaoAlternativa.IsFailed)
         {
-            ModelState.AddModelError("ConflitoAlternativas", resultadoAdicaoAlternativa.Errors[0].Message);
+            foreach (IError erro in resultadoAdicaoAlternativa.Errors)
+            {
+                ModelState.AddModelError("ConflitoAlternativas", erro.Reasons[0].Message);
+                break;
+            }
 
             Result<Questao> resultadoQuestao = questaoAppService.SelecionarRegistroPorId(id)!;
 
@@ -239,7 +353,11 @@ public class QuestaoController : Controller
 
         if (resultadoRemocaoAlternativa.IsFailed)
         {
-            ModelState.AddModelError("ConflitoAlternativas", resultadoRemocaoAlternativa.Errors[0].Message);
+            foreach (IError erro in resultadoRemocaoAlternativa.Errors)
+            {
+                ModelState.AddModelError("ConflitoAlternativas", erro.Reasons[0].Message);
+                break;
+            }
 
             Result<Questao> resultadoQuestao = questaoAppService.SelecionarRegistroPorId(id)!;
 
@@ -262,7 +380,11 @@ public class QuestaoController : Controller
 
         if (resultadoMarcacao.IsFailed)
         {
-            ModelState.AddModelError("ConflitoAlternativas", resultadoMarcacao.Errors[0].Message);
+            foreach (IError erro in resultadoMarcacao.Errors)
+            {
+                ModelState.AddModelError("ConflitoAlternativas", erro.Reasons[0].Message);
+                break;
+            }
 
             Result<Questao> resultadoQuestao = questaoAppService.SelecionarRegistroPorId(id)!;
 
@@ -285,7 +407,11 @@ public class QuestaoController : Controller
 
         if (resultadoFinalizacao.IsFailed)
         {
-            ModelState.AddModelError("ConflitoAlternativas", resultadoFinalizacao.Errors[0].Message);
+            foreach (IError erro in resultadoFinalizacao.Errors)
+            {
+                ModelState.AddModelError("ConflitoAlternativas", erro.Reasons[0].Message);
+                break;
+            }
 
             Result<Questao> resultadoQuestao = questaoAppService.SelecionarRegistroPorId(id)!;
 
