@@ -1,4 +1,5 @@
 ﻿using FluentResults;
+using GeradorDeTestes.Aplicacao.Compartilhado;
 using GeradorDeTestes.Aplicacao.ModuloDisciplina;
 using GeradorDeTestes.Dominio.Compartilhado;
 using GeradorDeTestes.Dominio.ModuloMateria;
@@ -29,7 +30,10 @@ public class MateriaAppService
         if (materias.Any(m => m.Nome.Equals(novaMateria.Nome)
         && m.Disciplina.Id.Equals(novaMateria.Disciplina.Id) && m.Serie.Equals(novaMateria.Serie)))
         {
-            return Result.Fail("Já existe uma matéria com este nome para a mesma disciplina e série.");
+            Error erro = ResultadosErro.RegistroDuplicadoErro(
+                "Já existe uma matéria com este nome para a mesma disciplina e série.");
+
+            return Result.Fail(erro);
         }
 
         try
@@ -47,6 +51,8 @@ public class MateriaAppService
                 "Ocorreu um erro durante o cadastro de {@ViewModel}.",
                 novaMateria
             );
+
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
 
         return Result.Ok();
@@ -59,7 +65,10 @@ public class MateriaAppService
         if (materias.Any(m => m.Nome.Equals(materiaEditada.Nome)
         && m.Disciplina.Id.Equals(materiaEditada.Disciplina) && m.Serie.Equals(materiaEditada.Serie) && m.Id != id))
         {
-            return Result.Fail("Já existe outra matéria com este nome para a mesma disciplina e série.");
+            Error erro = ResultadosErro.RegistroDuplicadoErro(
+                "Já existe uma matéria com este nome para a mesma disciplina e série.");
+
+            return Result.Fail(erro);
         }
 
         try
@@ -77,6 +86,8 @@ public class MateriaAppService
                 "Ocorreu um erro durante a edição de {@ViewModel}.",
                 materiaEditada
             );
+
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
 
         return Result.Ok();
@@ -91,7 +102,12 @@ public class MateriaAppService
             List<Questao> questoes = repositorioQuestao.SelecionarRegistros();
 
             if (questoes.Any(q => q.Materia.Id.Equals(id)))
-                return Result.Fail("Não é possível excluir a matéria pois ela possui questões associadas.");
+            {
+                Error erro = ResultadosErro.RegistroVinculadoErro(
+                    "Não é possível excluir a matéria pois ela possui questões associadas.");
+
+                return Result.Fail(erro);
+            }
 
             repositorioMateria.ExcluirRegistro(id);
 
@@ -109,7 +125,7 @@ public class MateriaAppService
                 id
             );
 
-            return Result.Fail("Ocorreu um erro inesperado ao tentar excluir a matéria.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
 
     }
@@ -121,7 +137,11 @@ public class MateriaAppService
             Materia materiaSelecionada = repositorioMateria.SelecionarRegistroPorId(id)!;
 
             if (materiaSelecionada is null)
-                return Result.Fail("Não foi possível obter o registro da matéria selecionada.");
+            {
+                Error erro = ResultadosErro.RegistroNaoEncontradoErro(id);
+
+                return Result.Fail(erro);
+            }
 
             return Result.Ok(materiaSelecionada);
         }
@@ -133,7 +153,7 @@ public class MateriaAppService
                 id
             );
 
-            return Result.Fail("Ocorreu um erro inesperado ao tentar obter a matéria.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 
@@ -150,9 +170,9 @@ public class MateriaAppService
             logger.LogError(
                 ex,
                 "Ocorreu um erro durante a seleção das matérias registradas."
-                );
+            );
 
-            return Result.Fail("Ocorreu um erro inesperado ao tentar obter as matérias.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 }

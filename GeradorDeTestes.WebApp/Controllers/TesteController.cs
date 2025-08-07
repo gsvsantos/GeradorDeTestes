@@ -10,6 +10,7 @@ using GeradorDeTestes.WebApp.Extensions;
 using GeradorDeTestes.WebApp.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Text.Json;
 
 namespace GeradorDeTestes.WebApp.Controllers;
 
@@ -50,6 +51,15 @@ public class TesteController : Controller
 
         VisualizarTestesViewModel visualizarVM = new(testes);
 
+        bool existeNotificacao = TempData.TryGetValue(nameof(NotificacaoViewModel), out object? valor);
+
+        if (existeNotificacao && valor is string jsonString)
+        {
+            NotificacaoViewModel? notificacaoVM = JsonSerializer.Deserialize<NotificacaoViewModel>(jsonString);
+
+            ViewData.Add(nameof(NotificacaoViewModel), notificacaoVM);
+        }
+
         return View(visualizarVM);
     }
 
@@ -57,6 +67,22 @@ public class TesteController : Controller
     public IActionResult Cadastrar()
     {
         Result<List<Disciplina>> resultadosDisciplinas = disciplinaAppService.SelecionarRegistros();
+
+        if (resultadosDisciplinas.IsFailed)
+        {
+            foreach (IError erro in resultadosDisciplinas.Errors)
+            {
+                string notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                    erro.Message,
+                    erro.Reasons[0].Message
+                );
+
+                TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+                break;
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
 
         List<Disciplina> disciplinas = resultadosDisciplinas.Value;
 
@@ -68,25 +94,34 @@ public class TesteController : Controller
     [HttpPost("cadastrar")]
     public IActionResult Cadastrar(CadastrarTesteViewModel cadastrarVM)
     {
-        Result<List<Disciplina>> resultadosDisciplinas = disciplinaAppService.SelecionarRegistros();
+        Result<Disciplina> resultadoDisciplina = disciplinaAppService.SelecionarRegistroPorId(cadastrarVM.DisciplinaId)!;
 
-        List<Disciplina> disciplinas = resultadosDisciplinas.Value;
+        Disciplina disciplinaSelecionada = resultadoDisciplina.ValueOrDefault;
 
-        Disciplina disciplina = disciplinas.FirstOrDefault(d => d.Id.Equals(cadastrarVM.DisciplinaId))!;
-
-        Teste novoTeste = cadastrarVM.ParaEntidade(disciplina);
+        Teste novoTeste = cadastrarVM.ParaEntidade(disciplinaSelecionada);
 
         Result resultadoCadastro = testeAppService.CadastrarRegistro(novoTeste);
 
         if (resultadoCadastro.IsFailed)
         {
-            ModelState.AddModelError("ConflitoCadastro", resultadoCadastro.Errors[0].Message);
-
-            cadastrarVM.Disciplinas = disciplinas.Select(d => new SelectListItem
+            foreach (IError erro in resultadoCadastro.Errors)
             {
-                Text = d.Nome,
-                Value = d.Id.ToString()
-            }).ToList();
+                if (erro.Metadata["TipoErro"].ToString() == "RegistroDuplicado")
+                {
+                    ModelState.AddModelError("ConflitoCadastro", erro.Reasons[0].Message);
+                    break;
+                }
+                else
+                {
+                    return RedirectToAction("Erro", "Home");
+                }
+            }
+
+            Result<List<Disciplina>> resultadosDisciplinas = disciplinaAppService.SelecionarRegistros();
+
+            cadastrarVM.Disciplinas = resultadosDisciplinas.Value
+                .Select(d => new SelectListItem(d.Nome, d.Id.ToString()))
+                .ToList();
 
             return View(cadastrarVM);
         }
@@ -103,14 +138,52 @@ public class TesteController : Controller
 
         if (resultadoGeracao.IsFailed)
         {
-            ModelState.AddModelError("ConflitoGeral", resultadoGeracao.Errors[0].Message);
-            return RedirectToAction("Index", "Home");
+            foreach (IError erro in resultadoGeracao.Errors)
+            {
+                if (erro.Metadata["TipoErro"].ToString() == "RegistroNaoEncontrado")
+                {
+                    string notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                            erro.Message,
+                            erro.Reasons[0].Message
+                        );
+
+                    TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+                    break;
+                }
+                else
+                {
+                    return RedirectToAction("Erro", "Home");
+                }
+            }
+
+            return RedirectToAction(nameof(Index));
         }
 
         Result<Teste> resultadoTeste = testeAppService.SelecionarRegistroPorId(id);
 
         if (resultadoTeste.IsFailed)
-            return RedirectToAction("Index", "Home");
+        {
+            foreach (IError erro in resultadoTeste.Errors)
+            {
+                if (erro.Metadata["TipoErro"].ToString() == "RegistroNaoEncontrado")
+                {
+
+                    string notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                            erro.Message,
+                            erro.Reasons[0].Message
+                        );
+
+                    TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+                    break;
+                }
+                else
+                {
+                    return RedirectToAction("Erro", "Home");
+                }
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
 
         Teste testeSelecionado = resultadoTeste.Value;
 
@@ -129,18 +202,38 @@ public class TesteController : Controller
     [HttpPost("gerar-teste")]
     public IActionResult GerarTeste(Guid id, FormGerarPostViewModel gerarTestePostVM)
     {
-        Result<Teste> resultadoTeste = testeAppService.SelecionarRegistroPorId(id);
-
-        if (resultadoTeste.IsFailed)
-            return RedirectToAction(nameof(Index));
-
-        Teste testeSelecionado = resultadoTeste.ValueOrDefault;
-
         Result resultadoFinalizacao = testeAppService.FinalizarTeste(id);
 
         if (resultadoFinalizacao.IsFailed)
         {
-            ModelState.AddModelError("ConflitoGeracao", resultadoFinalizacao.Errors[0].Message);
+            foreach (IError erro in resultadoFinalizacao.Errors)
+            {
+                if (erro.Metadata["TipoErro"].ToString() == "RegistroNaoEncontrado")
+                {
+
+                    string notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                            erro.Message,
+                            erro.Reasons[0].Message
+                        );
+
+                    TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+
+                    return RedirectToAction(nameof(Index));
+                }
+                else if (erro.Metadata["TipoErro"].ToString() == "QuantidadeQuestoes")
+                {
+                    ModelState.AddModelError("ConflitoGeracao", erro.Reasons[0].Message);
+                    break;
+                }
+                else
+                {
+                    return RedirectToAction("Erro", "Home");
+                }
+            }
+
+            Result<Teste> resultadoTeste = testeAppService.SelecionarRegistroPorId(id);
+
+            Teste testeSelecionado = resultadoTeste.ValueOrDefault;
 
             List<Materia> materias = materiaAppService.SelecionarRegistros().Value
                 .Where(m => m.Disciplina.Id.Equals(testeSelecionado.Disciplina.Id)
@@ -161,15 +254,30 @@ public class TesteController : Controller
 
         if (resultadoAdesao.IsFailed)
         {
+            foreach (IError erro in resultadoAdesao.Errors)
+            {
+                if (erro.Metadata["TipoErro"].ToString() == "RegistroNaoEncontrado")
+                {
+
+                    string notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                            erro.Message,
+                            erro.Reasons[0].Message
+                        );
+
+                    TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+
+                    return RedirectToAction(nameof(Index));
+                }
+                else
+                {
+                    ModelState.AddModelError("ConflitoGeracao", erro.Reasons[0].Message);
+                    break;
+                }
+            }
+
             Result<Teste> resultadoTeste = testeAppService.SelecionarRegistroPorId(id);
 
-            if (resultadoTeste.IsFailed)
-                return RedirectToAction(nameof(Index));
-
             Teste testeSelecionado = resultadoTeste.ValueOrDefault;
-
-            TempData["Erros"] = resultadoAdesao.Errors.Select(e => e.Message).ToList();
-            ModelState.AddModelError("ConflitoGeracao", resultadoAdesao.Errors[0].Message);
 
             List<Materia> materias = materiaAppService.SelecionarRegistros().Value
                 .Where(m => m.Disciplina.Id.Equals(testeSelecionado.Disciplina.Id)
@@ -190,7 +298,38 @@ public class TesteController : Controller
 
         if (resultadoRemocao.IsFailed)
         {
-            TempData["Erros"] = resultadoRemocao.Errors.Select(e => e.Message).ToList();
+            foreach (IError erro in resultadoRemocao.Errors)
+            {
+                if (erro.Metadata["TipoErro"].ToString() == "RegistroNaoEncontrado")
+                {
+
+                    string notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                            erro.Message,
+                            erro.Reasons[0].Message
+                        );
+
+                    TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+
+                    return RedirectToAction(nameof(Index));
+                }
+                else
+                {
+                    ModelState.AddModelError("ConflitoGeracao", erro.Reasons[0].Message);
+                    break;
+                }
+            }
+
+            Result<Teste> resultadoTeste = testeAppService.SelecionarRegistroPorId(id);
+
+            Teste testeSelecionado = resultadoTeste.ValueOrDefault;
+
+            List<Materia> materias = materiaAppService.SelecionarRegistros().Value
+                .Where(m => m.Disciplina.Id.Equals(testeSelecionado.Disciplina.Id)
+                && m.Serie.Equals(testeSelecionado.Serie)).ToList();
+
+            FormGerarViewModel formGerarVM = testeSelecionado.ParaGerarPostVM(materias, testeSelecionado.Materias);
+
+            return View(nameof(GerarTeste), formGerarVM);
         }
 
         return RedirectToAction(nameof(GerarTeste), new { id });
@@ -233,11 +372,30 @@ public class TesteController : Controller
     [HttpPost, Route("/testes/{id:guid}/definir-quantidade-questoes/{materiaId:guid}")]
     public IActionResult DefinirQuantidadeQuestoes(Guid id, Guid materiaId, DefinirQuantidadeQuestoesPostViewModel postVM)
     {
-        Result resultado = testeAppService.DefinirQuantidadeQuestoesPorMateria(id, materiaId, postVM.QuantidadeQuestoesMateria);
+        Result resultadoDefinicaoQuantidade = testeAppService.DefinirQuantidadeQuestoesPorMateria(id, materiaId, postVM.QuantidadeQuestoesMateria);
 
-        if (resultado.IsFailed)
+        if (resultadoDefinicaoQuantidade.IsFailed)
         {
-            ModelState.AddModelError("ConflitoQuantidadeQuestoesMateria", resultado.Errors[0].Message);
+            foreach (IError erro in resultadoDefinicaoQuantidade.Errors)
+            {
+                if (erro.Metadata["TipoErro"].ToString() == "RegistroNaoEncontrado")
+                {
+
+                    string notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                            erro.Message,
+                            erro.Reasons[0].Message
+                        );
+
+                    TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+
+                    return RedirectToAction(nameof(Index));
+                }
+                else
+                {
+                    ModelState.AddModelError("ConflitoQuantidadeQuestoesMateria", erro.Reasons[0].Message);
+                    break;
+                }
+            }
 
             Result<Teste> resultadoTeste = testeAppService.SelecionarRegistroPorId(id);
 
@@ -276,10 +434,31 @@ public class TesteController : Controller
     [HttpPost, Route("/testes/{id:guid}/aleatorizar-questoes")]
     public IActionResult AleatorizarQuestoes(Guid id)
     {
-        Result resultado = testeAppService.AtualizarQuestoes(id);
+        Result resultadoAtualizacao = testeAppService.AtualizarQuestoes(id);
 
-        if (resultado.IsFailed)
-            ModelState.AddModelError("ConflitoGeracao", resultado.Errors[0].Message);
+        if (resultadoAtualizacao.IsFailed)
+        {
+            foreach (IError erro in resultadoAtualizacao.Errors)
+            {
+                if (erro.Metadata["TipoErro"].ToString() == "RegistroNaoEncontrado")
+                {
+
+                    string notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                            erro.Message,
+                            erro.Reasons[0].Message
+                        );
+
+                    TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+
+                    return RedirectToAction(nameof(Index));
+                }
+                else
+                {
+                    ModelState.AddModelError("ConflitoGeracao", erro.Reasons[0].Message);
+                    break;
+                }
+            }
+        }
 
         Result<Teste> resultadoTeste = testeAppService.SelecionarRegistroPorId(id)!;
 
@@ -293,12 +472,32 @@ public class TesteController : Controller
     [HttpGet("gerar-provao")]
     public IActionResult GerarProvao(Guid id)
     {
-        Result<Teste> resultado = testeAppService.GerarQuestoesParaProvao(id);
+        Result<Teste> resultadoGeracao = testeAppService.GerarQuestoesParaProvao(id);
 
-        if (resultado.IsFailed)
+        if (resultadoGeracao.IsFailed)
+        {
+            foreach (IError erro in resultadoGeracao.Errors)
+            {
+                if (erro.Metadata["TipoErro"].ToString() == "RegistroNaoEncontrado")
+                {
+                    string notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                            erro.Message,
+                            erro.Reasons[0].Message
+                        );
+
+                    TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+                    break;
+                }
+                else
+                {
+                    return RedirectToAction("Erro", "Home");
+                }
+            }
+
             return RedirectToAction(nameof(Index));
+        }
 
-        Teste teste = resultado.Value;
+        Teste teste = resultadoGeracao.Value;
 
         List<Materia> materias = teste.Materias;
 
@@ -318,7 +517,30 @@ public class TesteController : Controller
 
         if (resultadoFinalizacao.IsFailed)
         {
-            ModelState.AddModelError("ConflitoGeracao", resultadoFinalizacao.Errors[0].Message);
+            foreach (IError erro in resultadoFinalizacao.Errors)
+            {
+                if (erro.Metadata["TipoErro"].ToString() == "RegistroNaoEncontrado")
+                {
+
+                    string notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                            erro.Message,
+                            erro.Reasons[0].Message
+                        );
+
+                    TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+
+                    return RedirectToAction(nameof(Index));
+                }
+                else if (erro.Metadata["TipoErro"].ToString() == "QuantidadeQuestoes")
+                {
+                    ModelState.AddModelError("ConflitoGeracao", erro.Reasons[0].Message);
+                    break;
+                }
+                else
+                {
+                    return RedirectToAction("Erro", "Home");
+                }
+            }
 
             List<Materia> materias = materiaAppService.SelecionarRegistros().Value
                 .Where(m => m.Disciplina.Id.Equals(testeSelecionado.Disciplina.Id) &&
@@ -347,7 +569,19 @@ public class TesteController : Controller
 
         if (resultadoDuplicacao.IsFailed)
         {
-            ModelState.AddModelError("ConflitoCadastro", resultadoDuplicacao.Errors[0].Message);
+            foreach (IError erro in resultadoDuplicacao.Errors)
+            {
+                if (erro.Metadata["TipoErro"].ToString() == "RegistroDuplicado")
+                {
+                    ModelState.AddModelError("ConflitoCadastro", erro.Reasons[0].Message);
+                    break;
+                }
+                else
+                {
+                    return RedirectToAction("Erro", "Home");
+                }
+            }
+
             return View(duplicarVM);
         }
 
@@ -364,7 +598,28 @@ public class TesteController : Controller
         Result<Teste> resultadoTeste = testeAppService.SelecionarRegistroPorId(id);
 
         if (resultadoTeste.IsFailed)
+        {
+            foreach (IError erro in resultadoTeste.Errors)
+            {
+                if (erro.Metadata["TipoErro"].ToString() == "RegistroNaoEncontrado")
+                {
+
+                    string notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                            erro.Message,
+                            erro.Reasons[0].Message
+                        );
+
+                    TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+                    break;
+                }
+                else
+                {
+                    return RedirectToAction("Erro", "Home");
+                }
+            }
+
             return RedirectToAction(nameof(Index));
+        }
 
         Teste testeSelecionado = resultadoTeste.ValueOrDefault;
 
@@ -380,7 +635,11 @@ public class TesteController : Controller
 
         if (resultadoExclusao.IsFailed)
         {
-            ModelState.AddModelError("ConflitoExclusao", resultadoExclusao.Errors[0].Message);
+            foreach (IError erro in resultadoExclusao.Errors)
+            {
+                ModelState.AddModelError("ConflitoExclusao", resultadoExclusao.Errors[0].Message);
+                break;
+            }
 
             Result<Teste> resultadoTeste = testeAppService.SelecionarRegistroPorId(id)!;
 
@@ -401,6 +660,23 @@ public class TesteController : Controller
     {
         Result<Teste> resultadoTeste = testeAppService.SelecionarRegistroPorId(id);
 
+        if (resultadoTeste.IsFailed)
+        {
+
+            foreach (IError erro in resultadoTeste.Errors)
+            {
+                string notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                    erro.Message,
+                    erro.Reasons[0].Message
+                );
+
+                TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+                break;
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
         Teste testeSelecionado = resultadoTeste.ValueOrDefault;
 
         DetalhesTesteViewModel detalhesTesteVM = testeSelecionado.ParaDetalhesTesteVM();
@@ -411,11 +687,28 @@ public class TesteController : Controller
     [HttpGet, Route("/testes/{id:guid}/detalhes-provao")]
     public IActionResult DetalhesProvao(Guid id)
     {
-        Result<Teste> resultadoTeste = testeAppService.SelecionarRegistroPorId(id);
+        Result<Teste> resultadoProvao = testeAppService.SelecionarRegistroPorId(id);
 
-        Teste testeSelecionado = resultadoTeste.ValueOrDefault;
+        if (resultadoProvao.IsFailed)
+        {
 
-        DetalhesProvaoViewModel detalhesProvaoVM = testeSelecionado.ParaDetalhesProvaoVM();
+            foreach (IError erro in resultadoProvao.Errors)
+            {
+                string notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                    erro.Message,
+                    erro.Reasons[0].Message
+                );
+
+                TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+                break;
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        Teste provaoSelecionado = resultadoProvao.ValueOrDefault;
+
+        DetalhesProvaoViewModel detalhesProvaoVM = provaoSelecionado.ParaDetalhesProvaoVM();
 
         return View(detalhesProvaoVM);
     }
@@ -423,11 +716,27 @@ public class TesteController : Controller
     [HttpGet, Route("/testes/{id:guid}/gerar-pdf")]
     public IActionResult GerarPdf(Guid id)
     {
-        Result<Teste> resultadoTeste = testeAppService.SelecionarRegistroPorId(id);
+        Result<Teste> resultado = testeAppService.SelecionarRegistroPorId(id);
 
-        Teste testeSelecionado = resultadoTeste.ValueOrDefault;
+        if (resultado.IsFailed)
+        {
+            foreach (IError erro in resultado.Errors)
+            {
+                string notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                    erro.Message,
+                    erro.Reasons[0].Message
+                );
 
-        byte[] pdfBytes = geradorPdfService.GerarPdfTeste(testeSelecionado);
+                TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+                break;
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        Teste registroSelecionado = resultado.ValueOrDefault;
+
+        byte[] pdfBytes = geradorPdfService.GerarPdfTeste(registroSelecionado);
 
         return File(pdfBytes, "application/pdf");
     }
@@ -435,11 +744,27 @@ public class TesteController : Controller
     [HttpGet, Route("/testes/{id:guid}/gerar-gabarito")]
     public IActionResult GerarGabaritoPdf(Guid id)
     {
-        Result<Teste> resultadoTeste = testeAppService.SelecionarRegistroPorId(id);
+        Result<Teste> resultado = testeAppService.SelecionarRegistroPorId(id);
 
-        Teste testeSelecionado = resultadoTeste.ValueOrDefault;
+        if (resultado.IsFailed)
+        {
+            foreach (IError erro in resultado.Errors)
+            {
+                string notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                    erro.Message,
+                    erro.Reasons[0].Message
+                );
 
-        byte[] pdfBytes = geradorPdfService.GerarPdfGabarito(testeSelecionado);
+                TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+                break;
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        Teste registroSelecionado = resultado.ValueOrDefault;
+
+        byte[] pdfBytes = geradorPdfService.GerarPdfGabarito(registroSelecionado);
 
         return File(pdfBytes, "application/pdf");
     }

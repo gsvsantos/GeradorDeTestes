@@ -32,6 +32,15 @@ public class DisciplinaController : Controller
             Registros = disciplinas.Select(d => d.ParaDetalhesVM()).ToList()
         };
 
+        bool existeNotificacao = TempData.TryGetValue(nameof(NotificacaoViewModel), out object? valor);
+
+        if (existeNotificacao && valor is string jsonString)
+        {
+            NotificacaoViewModel? notificacaoVM = JsonSerializer.Deserialize<NotificacaoViewModel>(jsonString);
+
+            ViewData.Add(nameof(NotificacaoViewModel), notificacaoVM);
+        }
+
         return View(visualizarVM);
     }
 
@@ -52,7 +61,14 @@ public class DisciplinaController : Controller
 
         if (resultadoCadastro.IsFailed)
         {
-            ModelState.AddModelError("ConflitoCadastro", resultadoCadastro.Errors[0].Message);
+            foreach (IError erro in resultadoCadastro.Errors)
+            {
+                if (erro.Metadata["TipoErro"].ToString() == "RegistroDuplicado")
+                {
+                    ModelState.AddModelError("ConflitoCadastro", erro.Reasons[0].Message);
+                    break;
+                }
+            }
 
             return View(nameof(Cadastrar), cadastrarVM);
         }
@@ -66,7 +82,28 @@ public class DisciplinaController : Controller
         Result<Disciplina> resultadoDisciplina = disciplinaAppService.SelecionarRegistroPorId(id)!;
 
         if (resultadoDisciplina.IsFailed)
+        {
+            foreach (IError erro in resultadoDisciplina.Errors)
+            {
+                if (erro.Metadata["TipoErro"].ToString() == "RegistroNaoEncontrado")
+                {
+
+                    string notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                            erro.Message,
+                            erro.Reasons[0].Message
+                        );
+
+                    TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+                    break;
+                }
+                else
+                {
+                    return RedirectToAction("Erro", "Home");
+                }
+            }
+
             return RedirectToAction(nameof(Index));
+        }
 
         Disciplina disciplinaSelecionada = resultadoDisciplina.ValueOrDefault;
 
@@ -88,7 +125,14 @@ public class DisciplinaController : Controller
 
         if (resultadoEdicao.IsFailed)
         {
-            ModelState.AddModelError("ConflitoEdicao", resultadoEdicao.Errors[0].Message);
+            foreach (IError erro in resultadoEdicao.Errors)
+            {
+                if (erro.Metadata["TipoErro"].ToString() == "RegistroDuplicado")
+                {
+                    ModelState.AddModelError("ConflitoEdicao", resultadoEdicao.Errors[0].Message);
+                    break;
+                }
+            }
 
             return View(nameof(Editar), editarVM);
         }
@@ -102,7 +146,28 @@ public class DisciplinaController : Controller
         Result<Disciplina> resultadoDisciplina = disciplinaAppService.SelecionarRegistroPorId(id)!;
 
         if (resultadoDisciplina.IsFailed)
+        {
+            foreach (IError erro in resultadoDisciplina.Errors)
+            {
+                if (erro.Metadata["TipoErro"].ToString() == "RegistroNaoEncontrado")
+                {
+
+                    string notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                            erro.Message,
+                            erro.Reasons[0].Message
+                        );
+
+                    TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+                    break;
+                }
+                else
+                {
+                    return RedirectToAction("Erro", "Home");
+                }
+            }
+
             return RedirectToAction(nameof(Index));
+        }
 
         Disciplina disciplinaSelecionada = resultadoDisciplina.ValueOrDefault;
 
@@ -122,19 +187,24 @@ public class DisciplinaController : Controller
 
         if (resultadoExclusao.IsFailed)
         {
-            Result<Disciplina> resultadoDisciplina = disciplinaAppService.SelecionarRegistroPorId(id)!;
-
-            Disciplina disciplinaSelecionada = resultadoDisciplina.ValueOrDefault;
-
-            ModelState.AddModelError("ConflitoExclusao", resultadoExclusao.Errors[0].Message);
-
-            ExcluirDisciplinaViewModel excluirVM = new()
+            foreach (IError erro in resultadoExclusao.Errors)
             {
-                Id = disciplinaSelecionada.Id,
-                Nome = disciplinaSelecionada.Nome
-            };
+                if (erro.Metadata["TipoErro"].ToString() == "RegistroVinculado")
+                {
 
-            return View(nameof(Excluir), excluirVM);
+                    string notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                            erro.Message,
+                            erro.Reasons[0].Message
+                        );
+
+                    TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+                    break;
+                }
+                else
+                {
+                    return RedirectToAction("Erro", "Home");
+                }
+            }
         }
 
         return RedirectToAction(nameof(Index));
@@ -146,7 +216,20 @@ public class DisciplinaController : Controller
         Result<Disciplina> resultadoDisciplina = disciplinaAppService.SelecionarRegistroPorId(id)!;
 
         if (resultadoDisciplina.IsFailed)
+        {
+            foreach (IError erro in resultadoDisciplina.Errors)
+            {
+                string notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                    erro.Message,
+                    erro.Reasons[0].Message
+                );
+
+                TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+                break;
+            }
+
             return RedirectToAction(nameof(Index));
+        }
 
         Disciplina disciplinaSelecionda = resultadoDisciplina.ValueOrDefault;
 
@@ -166,17 +249,11 @@ public class DisciplinaController : Controller
     [HttpPost("gerar-disciplinas/primeira-etapa")]
     public async Task<IActionResult> PrimeiraEtapaGerar(PrimeiraEtapaGerarDisciplinasViewModel primeiraEtapaVM)
     {
-        Result<List<Disciplina>> resultado = await disciplinaAppService.GerarDisciplinas(primeiraEtapaVM.QuantidadeDisciplinas);
+        Result<List<Disciplina>> resultadoGeracao = await disciplinaAppService.GerarDisciplinas(primeiraEtapaVM.QuantidadeDisciplinas);
 
-        if (resultado.Value.Count == 0)
+        if (resultadoGeracao.IsFailed)
         {
-            TempData["ConflitoGeracao"] = "Nenhuma nova disciplina foi gerada. Tente novamente.";
-            return RedirectToAction(nameof(PrimeiraEtapaGerar));
-        }
-
-        if (resultado.IsFailed)
-        {
-            foreach (IError? erro in resultado.Errors)
+            foreach (IError erro in resultadoGeracao.Errors)
             {
                 string notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
                     erro.Message,
@@ -190,7 +267,7 @@ public class DisciplinaController : Controller
             return RedirectToAction(nameof(Index));
         }
 
-        SegundaEtapaGerarDisciplinasViewModel segundaEtapavm = new(resultado.Value);
+        SegundaEtapaGerarDisciplinasViewModel segundaEtapavm = new(resultadoGeracao.Value);
 
         string jsonString = JsonSerializer.Serialize(segundaEtapavm);
 
@@ -221,10 +298,21 @@ public class DisciplinaController : Controller
 
         foreach (Disciplina disciplina in disciplinasGeradas)
         {
-            Result resultado = disciplinaAppService.CadastrarRegistro(disciplina);
+            Result resultadoCadastro = disciplinaAppService.CadastrarRegistro(disciplina);
 
-            if (resultado.IsFailed)
+            if (resultadoCadastro.IsFailed)
+            {
+                foreach (IError erro in resultadoCadastro.Errors)
+                {
+                    if (erro.Metadata["TipoErro"].ToString() == "RegistroDuplicado")
+                    {
+                        ModelState.AddModelError("ConflitoCadastro", erro.Reasons[0].Message);
+                        break;
+                    }
+                }
+
                 return View(nameof(PrimeiraEtapaGerar));
+            }
         }
 
         return RedirectToAction(nameof(Index));

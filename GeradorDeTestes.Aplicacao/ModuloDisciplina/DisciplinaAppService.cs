@@ -1,4 +1,5 @@
 ﻿using FluentResults;
+using GeradorDeTestes.Aplicacao.Compartilhado;
 using GeradorDeTestes.Dominio.Compartilhado;
 using GeradorDeTestes.Dominio.ModuloDisciplina;
 using GeradorDeTestes.Dominio.ModuloMateria;
@@ -33,7 +34,12 @@ public class DisciplinaAppService
         List<Disciplina> disciplinas = repositorioDisciplina.SelecionarRegistros();
 
         if (disciplinas.Any(d => d.Nome.Equals(novaDisciplina.Nome)))
-            return Result.Fail("Já existe uma disciplina com este nome.");
+        {
+            Error erro = ResultadosErro.RegistroDuplicadoErro(
+                "Já existe uma disciplina com este nome.");
+
+            return Result.Fail(erro);
+        }
 
         try
         {
@@ -50,6 +56,8 @@ public class DisciplinaAppService
                 "Ocorreu um erro durante o cadastro de {@ViewModel}.",
                 novaDisciplina
             );
+
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
 
         return Result.Ok();
@@ -60,7 +68,12 @@ public class DisciplinaAppService
         List<Disciplina> disciplinas = repositorioDisciplina.SelecionarRegistros();
 
         if (disciplinas.Any(d => d.Nome.Equals(disciplinaEditada.Nome) && d.Id != id))
-            return Result.Fail("Já existe uma disciplina com este nome.");
+        {
+            Error erro = ResultadosErro.RegistroDuplicadoErro(
+                "Já existe uma disciplina com este nome.");
+
+            return Result.Fail(erro);
+        }
 
         try
         {
@@ -77,6 +90,8 @@ public class DisciplinaAppService
                 "Ocorreu um erro durante a edição de {@ViewModel}.",
                 disciplinaEditada
             );
+
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
 
         return Result.Ok();
@@ -92,10 +107,27 @@ public class DisciplinaAppService
 
             List<Teste> testes = repositorioTeste.SelecionarRegistros();
 
-            if (materias.Any(m => m.Disciplina.Id == id) ||
-                testes.Any(t => t.Disciplina.Id == id))
+            if (materias.Any(m => m.Disciplina.Id.Equals(id) &&
+                testes.Any(t => t.Disciplina.Id.Equals(id))))
             {
-                return Result.Fail("Não é possível excluir: há matérias ou testes vinculados.");
+                Error erro = ResultadosErro.RegistroVinculadoErro(
+                    $"Não foi possível excluir a disciplina '{disciplinaSelecionada.Nome}' pois ela está vinculada a matérias e testes.");
+
+                return Result.Fail(erro);
+            }
+            else if (materias.Any(m => m.Disciplina.Id.Equals(id)))
+            {
+                Error erro = ResultadosErro.RegistroVinculadoErro(
+                    $"Não foi possível excluir a disciplina '{disciplinaSelecionada.Nome}' pois ela está vinculada a matérias.");
+
+                return Result.Fail(erro);
+            }
+            else if (testes.Any(t => t.Disciplina.Id.Equals(id)))
+            {
+                Error erro = ResultadosErro.RegistroVinculadoErro(
+                    $"Não foi possível excluir a disciplina '{disciplinaSelecionada.Nome}' pois ela está vinculada a testes.");
+
+                return Result.Fail(erro);
             }
 
             repositorioDisciplina.ExcluirRegistro(id);
@@ -114,7 +146,7 @@ public class DisciplinaAppService
                 id
             );
 
-            return Result.Fail("Ocorreu um erro inesperado ao tentar excluir a disciplina.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 
@@ -125,7 +157,11 @@ public class DisciplinaAppService
             Disciplina disciplinaSelecionada = repositorioDisciplina.SelecionarRegistroPorId(id)!;
 
             if (disciplinaSelecionada is null)
-                return Result.Fail("Não foi possível obter o registro da disciplina selecionada.");
+            {
+                Error erro = ResultadosErro.RegistroNaoEncontradoErro(id);
+
+                return Result.Fail(erro);
+            }
 
             return Result.Ok(disciplinaSelecionada);
         }
@@ -137,7 +173,7 @@ public class DisciplinaAppService
                 id
             );
 
-            return Result.Fail("Ocorreu um erro inesperado ao tentar obter a disciplina.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 
@@ -156,7 +192,7 @@ public class DisciplinaAppService
                 "Ocorreu um erro durante a seleção das disciplinas registradas."
             );
 
-            return Result.Fail("Ocorreu um erro inesperado ao tentar obter as disciplinas.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 
@@ -168,6 +204,14 @@ public class DisciplinaAppService
 
             List<Disciplina> disciplinasGeradas = await geradorDisciplinas.GerarDisciplinasAsync(quantidade, disciplinas);
 
+            if (disciplinasGeradas.Count == 0)
+            {
+                Error erro = ResultadosErro.NenhumRegistroGeradoErro(
+                    "Nenhuma nova disciplina foi gerada. Tente novamente.");
+
+                return Result.Fail(erro);
+            }
+
             return Result.Ok(disciplinasGeradas);
         }
         catch (Exception ex)
@@ -177,7 +221,7 @@ public class DisciplinaAppService
                 "Ocorreu um erro durante a geração das disciplinas."
             );
 
-            return Result.Fail("Ocorreu um erro durante a geração das disciplinas");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 }

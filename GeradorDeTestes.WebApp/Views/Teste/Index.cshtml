@@ -1,7 +1,9 @@
 ﻿@model VisualizarTestesViewModel
 
 @{
-    ViewBag.Titulo = "Visualização de Testes";
+	ViewBag.Titulo = "Visualização de Testes";
+
+	NotificacaoViewModel? notificacao = ViewData[nameof(NotificacaoViewModel)] as NotificacaoViewModel;
 }
 
 <div class="d-grid d-lg-flex flex-wrap gap-2 w-50 align-items-center">
@@ -16,6 +18,15 @@
 </div>
 
 <hr class="border border-white opacity-25" />
+
+@if (notificacao is not null)
+{
+	<div class="alert alert-danger alert-dismissible fade show my-3" role="alert">
+		<h6>@notificacao.Titulo</h6>
+		@notificacao.Mensagem
+		<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+	</div>
+}
 
 <div class="row g-2">
     @if (!Model.Registros.Any())

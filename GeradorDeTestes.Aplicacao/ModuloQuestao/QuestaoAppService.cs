@@ -1,4 +1,5 @@
 ﻿using FluentResults;
+using GeradorDeTestes.Aplicacao.Compartilhado;
 using GeradorDeTestes.Aplicacao.ModuloDisciplina;
 using GeradorDeTestes.Dominio.Compartilhado;
 using GeradorDeTestes.Dominio.ModuloMateria;
@@ -11,18 +12,16 @@ public class QuestaoAppService
 {
     private readonly IGeradorQuestoes geradorQuestoes;
     private readonly IUnitOfWork unitOfWork;
-    private readonly IRepositorioMateria repositorioMateria;
     private readonly IRepositorioQuestao repositorioQuestao;
     private readonly IRepositorioTeste repositorioTeste;
     private readonly ILogger<DisciplinaAppService> logger;
 
     public QuestaoAppService(IGeradorQuestoes geradorQuestoes, IUnitOfWork unitOfWork,
-        IRepositorioMateria repositorioMateria, IRepositorioQuestao repositorioQuestao,
-        IRepositorioTeste repositorioTeste, ILogger<DisciplinaAppService> logger)
+        IRepositorioQuestao repositorioQuestao, IRepositorioTeste repositorioTeste,
+        ILogger<DisciplinaAppService> logger)
     {
         this.geradorQuestoes = geradorQuestoes;
         this.unitOfWork = unitOfWork;
-        this.repositorioMateria = repositorioMateria;
         this.repositorioQuestao = repositorioQuestao;
         this.repositorioTeste = repositorioTeste;
         this.logger = logger;
@@ -35,7 +34,10 @@ public class QuestaoAppService
         if (questoes.Any(q => q.Enunciado.Equals(novaQuestao.Enunciado)
         && q.Materia.Id.Equals(novaQuestao.Materia.Id)))
         {
-            return Result.Fail("Já existe uma questão com este enunciado para a mesma matéria.");
+            Error erro = ResultadosErro.RegistroDuplicadoErro(
+                "Já existe uma questão com este enunciado para a mesma matéria.");
+
+            return Result.Fail(erro);
         }
 
         try
@@ -53,6 +55,8 @@ public class QuestaoAppService
                 "Ocorreu um erro durante o cadastro de {@ViewModel}.",
                 novaQuestao
             );
+
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
 
         return Result.Ok();
@@ -65,7 +69,10 @@ public class QuestaoAppService
         if (questoes.Any(q => q.Enunciado.Equals(questaoEditada.Enunciado)
         && q.Materia.Id.Equals(questaoEditada.Materia.Id) && q.Id != id))
         {
-            return Result.Fail("Já existe uma questão com este enunciado para a mesma matéria.");
+            Error erro = ResultadosErro.RegistroDuplicadoErro(
+                "Já existe uma questão com este enunciado para a mesma matéria.");
+
+            return Result.Fail(erro);
         }
 
         try
@@ -83,6 +90,8 @@ public class QuestaoAppService
                 "Ocorreu um erro durante a edição de {@ViewModel}.",
                 questaoEditada
             );
+
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
 
         return Result.Ok();
@@ -98,9 +107,11 @@ public class QuestaoAppService
 
             if (testes.Any(t => t.Questoes.Any(q => q.Id.Equals(id))))
             {
-                return Result.Fail("Não é possível excluir a questão pois ela está vinculada a testes.");
-            }
+                Error erro = ResultadosErro.RegistroVinculadoErro(
+                    "Não é possível excluir a questão pois ela está vinculada a testes.");
 
+                return Result.Fail(erro);
+            }
 
             repositorioQuestao.ExcluirRegistro(id);
 
@@ -118,7 +129,7 @@ public class QuestaoAppService
                 id
             );
 
-            return Result.Fail("Ocorreu um erro inesperado ao tentar excluir a questão.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 
@@ -129,7 +140,11 @@ public class QuestaoAppService
             Questao questaoSelecionada = repositorioQuestao.SelecionarRegistroPorId(id)!;
 
             if (questaoSelecionada is null)
-                return Result.Fail("Não foi possível obter o registro da questão selecionada.");
+            {
+                Error erro = ResultadosErro.RegistroNaoEncontradoErro(id);
+
+                return Result.Fail(erro);
+            }
 
             return Result.Ok(questaoSelecionada);
         }
@@ -139,9 +154,9 @@ public class QuestaoAppService
                 ex,
                 "Ocorreu um erro durante a seleção da questão {Id}.",
                 id
-                );
+            );
 
-            return Result.Fail("Ocorreu um erro inesperado ao tentar obter a questão.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 
@@ -158,9 +173,9 @@ public class QuestaoAppService
             logger.LogError(
                 ex,
                 "Ocorreu um erro durante a seleção das questões registradas."
-                );
+            );
 
-            return Result.Fail("Ocorreu um erro inesperado ao tentar obter as questões.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 
@@ -177,9 +192,9 @@ public class QuestaoAppService
             logger.LogError(
                 ex,
                 "Ocorreu um erro durante a seleção das questões antigas não finalizadas."
-                );
+            );
 
-            return Result.Fail("Ocorreu um erro inesperado ao tentar obter as questões antigas.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 
@@ -196,9 +211,9 @@ public class QuestaoAppService
             logger.LogError(
                 ex,
                 "Ocorreu um erro durante a seleção das questões não finalizadas."
-                );
+            );
 
-            return Result.Fail("Ocorreu um erro inesperado ao tentar obter as questões não finalizadas.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 
@@ -221,30 +236,7 @@ public class QuestaoAppService
                 "Ocorreu um erro durante a remoção das questões."
             );
 
-            return Result.Fail("Ocorreu um erro inesperado ao tentar remover as questões.");
-        }
-    }
-
-    public Result<Alternativa> SelecionarAlternativa(Questao questao, Guid idAlternativa)
-    {
-        try
-        {
-            Alternativa alternativaSelecionada = repositorioQuestao.SelecionarAlternativa(questao, idAlternativa)!;
-
-            if (alternativaSelecionada is null)
-                return Result.Fail("Não foi possível obter o registro da alternativa selecionada.");
-
-            return Result.Ok(alternativaSelecionada);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(
-                ex,
-                "Ocorreu um erro durante a seleção da alternativa {Id}.",
-                idAlternativa
-                );
-
-            return Result.Fail("Ocorreu um erro inesperado ao tentar obter a alternativa.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 
@@ -252,20 +244,40 @@ public class QuestaoAppService
     {
         try
         {
-            Questao questao = repositorioQuestao.SelecionarRegistroPorId(idQuestao)!;
+            Questao questaoSelecionada = repositorioQuestao.SelecionarRegistroPorId(idQuestao)!;
+
+            if (questaoSelecionada is null)
+            {
+                Error erro = ResultadosErro.RegistroNaoEncontradoErro(idQuestao);
+
+                return Result.Fail(erro);
+            }
 
             if (string.IsNullOrWhiteSpace(textoAlternativa))
-                return Result.Fail("O texto da alternativa é obrigatório.");
+            {
+                Error erro = ResultadosErro.TextoAlternativaObrigatorioErro(
+                    "O texto da alternativa é obrigatório.");
 
-            if (questao.Alternativas.Count >= 4)
-                return Result.Fail("A questão já possui o máximo de 4 alternativas.");
+                return Result.Fail(erro);
+            }
+            else if (questaoSelecionada.Alternativas.Any(a => a.Texto.Equals(textoAlternativa)))
+            {
+                Error erro = ResultadosErro.AlternativaDuplicadaErro(
+                    "Essa alternativa já foi inserida.");
 
-            if (questao.Alternativas.Any(a => a.Texto.Equals(textoAlternativa)))
-                return Result.Fail("Essa alternativa já foi inserida.");
+                return Result.Fail(erro);
+            }
+            else if (questaoSelecionada.Alternativas.Count >= 4)
+            {
+                Error erro = ResultadosErro.AlternativasErro(
+                    "A questão já possui o máximo de 4 alternativas.");
 
-            Alternativa novaAlternativa = new Alternativa(textoAlternativa, questao);
+                return Result.Fail(erro);
+            }
 
-            questao.AderirAlternativa(novaAlternativa);
+            Alternativa novaAlternativa = new(textoAlternativa, questaoSelecionada);
+
+            questaoSelecionada.AderirAlternativa(novaAlternativa);
 
             unitOfWork.Commit();
 
@@ -277,9 +289,10 @@ public class QuestaoAppService
 
             logger.LogError(ex,
                 "Erro ao adicionar alternativa à questão {Id}",
-                idQuestao);
+                idQuestao
+            );
 
-            return Result.Fail("Erro ao adicionar alternativa.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 
@@ -287,14 +300,25 @@ public class QuestaoAppService
     {
         try
         {
-            Questao questao = repositorioQuestao.SelecionarRegistroPorId(idQuestao)!;
+            Questao questaoSelecionada = repositorioQuestao.SelecionarRegistroPorId(idQuestao)!;
 
-            Alternativa? alternativa = repositorioQuestao.SelecionarAlternativa(questao, idAlternativa)!;
+            if (questaoSelecionada is null)
+            {
+                Error erro = ResultadosErro.RegistroNaoEncontradoErro(idQuestao);
+
+                return Result.Fail(erro);
+            }
+
+            Alternativa? alternativa = repositorioQuestao.SelecionarAlternativa(questaoSelecionada, idAlternativa)!;
 
             if (alternativa is null)
-                return Result.Fail("Alternativa não encontrada.");
+            {
+                Error erro = ResultadosErro.AlternativaNaoEncontradaErro(idAlternativa);
 
-            questao.RemoverAlternativa(alternativa);
+                return Result.Fail(erro);
+            }
+
+            questaoSelecionada.RemoverAlternativa(alternativa);
 
             unitOfWork.Commit();
 
@@ -306,28 +330,37 @@ public class QuestaoAppService
 
             logger.LogError(ex,
                 "Erro ao remover alternativa da questão {Id}",
-                idQuestao);
+                idQuestao
+            );
 
-            return Result.Fail("Erro ao remover alternativa.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 
-    public Result MarcarAlternativaCorreta(Guid idQuestao, Guid idAlternativaCorreta)
+    public Result MarcarAlternativaCorreta(Guid idQuestao, Guid idAlternativa)
     {
         try
         {
-            Questao questao = repositorioQuestao.SelecionarRegistroPorId(idQuestao)!;
+            Questao questaoSelecionada = repositorioQuestao.SelecionarRegistroPorId(idQuestao)!;
 
-            if (questao == null)
-                return Result.Fail("Questão não encontrada.");
+            if (questaoSelecionada is null)
+            {
+                Error erro = ResultadosErro.RegistroNaoEncontradoErro(idQuestao);
 
-            Alternativa? alternativa = questao.Alternativas.FirstOrDefault(a => a.Id == idAlternativaCorreta);
+                return Result.Fail(erro);
+            }
+
+            Alternativa? alternativa = questaoSelecionada.Alternativas.FirstOrDefault(a => a.Id.Equals(idAlternativa));
 
             if (alternativa is null)
-                return Result.Fail("Alternativa não encontrada.");
+            {
+                Error erro = ResultadosErro.AlternativaNaoEncontradaErro(idAlternativa);
 
-            foreach (Alternativa a in questao.Alternativas)
-                a.EstaCorreta = a.Id == idAlternativaCorreta;
+                return Result.Fail(erro);
+            }
+
+            foreach (Alternativa a in questaoSelecionada.Alternativas)
+                a.EstaCorreta = a.Id == idAlternativa;
 
             unitOfWork.Commit();
 
@@ -339,28 +372,41 @@ public class QuestaoAppService
 
             logger.LogError(ex,
                 "Erro ao marcar alternativa correta da questão {Id}",
-                idQuestao);
+                idQuestao
+            );
 
-            return Result.Fail("Erro ao marcar alternativa correta.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 
-    public Result FinalizarQuestao(Guid idQuestao)
+    public Result FinalizarQuestao(Guid id)
     {
         try
         {
-            Questao questao = repositorioQuestao.SelecionarRegistroPorId(idQuestao)!;
+            Questao questaoSelecionada = repositorioQuestao.SelecionarRegistroPorId(id)!;
 
-            if (questao == null)
-                return Result.Fail("Questão não encontrada.");
+            if (questaoSelecionada is null)
+            {
+                Error erro = ResultadosErro.RegistroNaoEncontradoErro(id);
 
-            if (questao.Alternativas.Count < 2 || questao.Alternativas.Count > 4)
-                return Result.Fail("A questão deve ter entre 2 e 4 alternativas.");
+                return Result.Fail(erro);
+            }
+            else if (questaoSelecionada.Alternativas.Count < 2 || questaoSelecionada.Alternativas.Count > 4)
+            {
+                Error erro = ResultadosErro.AlternativasErro(
+                    "A questão deve ter entre 2 e 4 alternativas.");
 
-            if (questao.Alternativas.Count(a => a.EstaCorreta) != 1)
-                return Result.Fail("A questão deve ter exatamente uma alternativa correta.");
+                return Result.Fail(erro);
+            }
+            else if (questaoSelecionada.Alternativas.Count(a => a.EstaCorreta) != 1)
+            {
+                Error erro = ResultadosErro.AlternativasErro(
+                    "A questão deve ter exatamente uma alternativa correta.");
 
-            questao.Finalizado = true;
+                return Result.Fail(erro);
+            }
+
+            questaoSelecionada.Finalizado = true;
 
             unitOfWork.Commit();
 
@@ -372,9 +418,10 @@ public class QuestaoAppService
 
             logger.LogError(ex,
                 "Erro ao finalizar a questão {Id}",
-                idQuestao);
+                id
+            );
 
-            return Result.Fail("Erro ao finalizar a questão.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 
@@ -394,7 +441,7 @@ public class QuestaoAppService
                 materiaSelecionada
             );
 
-            return Result.Fail("Ocorreu um erro durante a geração de questões da matéria");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 
@@ -420,7 +467,7 @@ public class QuestaoAppService
                 "Ocorreu um erro durante o cadastro das questões geradas."
             );
 
-            return Result.Fail("Ocorreu um erro durante o cadastro das questões geradas.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 }

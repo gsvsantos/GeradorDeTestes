@@ -1,4 +1,5 @@
 ﻿using FluentResults;
+using GeradorDeTestes.Aplicacao.Compartilhado;
 using GeradorDeTestes.Aplicacao.ModuloDisciplina;
 using GeradorDeTestes.Dominio.Compartilhado;
 using GeradorDeTestes.Dominio.ModuloMateria;
@@ -31,7 +32,12 @@ public class TesteAppService
         List<Teste> testes = repositorioTeste.SelecionarRegistros();
 
         if (testes.Any(t => t.Titulo.Equals(novoTeste.Titulo)))
-            return Result.Fail("Já existe um teste com este título.");
+        {
+            Error erro = ResultadosErro.RegistroDuplicadoErro(
+                "Já existe um teste com este título.");
+
+            return Result.Fail(erro);
+        }
 
         try
         {
@@ -48,6 +54,8 @@ public class TesteAppService
                 "Ocorreu um erro durante o cadastro de {@ViewModel}.",
                 novoTeste
             );
+
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
 
         return Result.Ok();
@@ -60,7 +68,12 @@ public class TesteAppService
             List<Teste> testes = repositorioTeste.SelecionarRegistros();
 
             if (testes.Any(t => t.Titulo.Equals(novoTitulo)))
-                return Result.Fail("Já existe um teste com este título.");
+            {
+                Error erro = ResultadosErro.RegistroDuplicadoErro(
+                    "Já existe um teste com este título.");
+
+                return Result.Fail(erro);
+            }
 
             Teste testeOriginal = repositorioTeste.SelecionarRegistroPorId(id)!;
 
@@ -92,8 +105,14 @@ public class TesteAppService
         catch (Exception ex)
         {
             unitOfWork.Rollback();
-            logger.LogError(ex, "Erro ao duplicar o teste {Id}", id);
-            return Result.Fail("Erro ao duplicar o teste.");
+
+            logger.LogError(
+                ex,
+                "Erro ao duplicar o teste {Id}",
+                id
+                );
+
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 
@@ -104,14 +123,22 @@ public class TesteAppService
             Teste testeSelecionado = repositorioTeste.SelecionarRegistroPorId(id)!;
 
             if (testeSelecionado is null)
-                return Result.Fail("Não foi possível obter o registro do teste selecionado.");
+            {
+                Error erro = ResultadosErro.RegistroNaoEncontradoErro(id);
 
-            Materia materia = repositorioMateria.SelecionarRegistroPorId(materiaId)!;
+                return Result.Fail(erro);
+            }
 
-            if (materia is null)
-                return Result.Fail("Não foi possível obter o registro da matéria selecionada.");
+            Materia materiaSelecionada = repositorioMateria.SelecionarRegistroPorId(materiaId)!;
 
-            testeSelecionado.AderirMateria(materia);
+            if (materiaSelecionada is null)
+            {
+                Error erro = ResultadosErro.RegistroNaoEncontradoErro(materiaId);
+
+                return Result.Fail(erro);
+            }
+
+            testeSelecionado.AderirMateria(materiaSelecionada);
 
             repositorioTeste.AtualizarRegistro(testeSelecionado);
 
@@ -123,9 +150,13 @@ public class TesteAppService
         {
             unitOfWork.Rollback();
 
-            logger.LogError(ex, "Erro ao adicionar matéria {MateriaId} ao teste {Id}", materiaId, id);
+            logger.LogError(
+                ex,
+                "Erro ao adicionar matéria {MateriaId} ao teste {Id}",
+                materiaId, id
+            );
 
-            return Result.Fail("Erro ao adicionar matéria ao teste.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 
@@ -136,16 +167,24 @@ public class TesteAppService
             Teste testeSelecionado = repositorioTeste.SelecionarRegistroPorId(id)!;
 
             if (testeSelecionado is null)
-                return Result.Fail("Não foi possível obter o registro do teste selecionado.");
+            {
+                Error erro = ResultadosErro.RegistroNaoEncontradoErro(id);
 
-            Materia materia = repositorioMateria.SelecionarRegistroPorId(materiaId)!;
+                return Result.Fail(erro);
+            }
 
-            if (materia is null)
-                return Result.Fail("Não foi possível obter o registro da matéria selecionada.");
+            Materia materiaSelecionada = repositorioMateria.SelecionarRegistroPorId(materiaId)!;
 
-            testeSelecionado.RemoverMateria(materia);
-            testeSelecionado.Questoes.RemoveAll(q => q.Materia.Id == materia.Id);
-            testeSelecionado.QuantidadesPorMateria.RemoveAll(qpm => qpm.Materia.Id == materia.Id);
+            if (materiaSelecionada is null)
+            {
+                Error erro = ResultadosErro.RegistroNaoEncontradoErro(materiaId);
+
+                return Result.Fail(erro);
+            }
+
+            testeSelecionado.RemoverMateria(materiaSelecionada);
+            testeSelecionado.Questoes.RemoveAll(q => q.Materia.Id == materiaSelecionada.Id);
+            testeSelecionado.QuantidadesPorMateria.RemoveAll(qpm => qpm.Materia.Id == materiaSelecionada.Id);
 
             repositorioTeste.AtualizarRegistro(testeSelecionado);
 
@@ -157,9 +196,13 @@ public class TesteAppService
         {
             unitOfWork.Rollback();
 
-            logger.LogError(ex, "Erro ao remover matéria {MateriaId} do teste {Id}", materiaId, id);
+            logger.LogError(
+                ex,
+                "Erro ao remover matéria {MateriaId} do teste {Id}",
+                materiaId, id
+            );
 
-            return Result.Fail("Erro ao remover matéria do teste.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 
@@ -170,12 +213,20 @@ public class TesteAppService
             Teste testeSelecionado = repositorioTeste.SelecionarRegistroPorId(id)!;
 
             if (testeSelecionado is null)
-                return Result.Fail("Não foi possível obter o registro do teste selecionado.");
+            {
+                Error erro = ResultadosErro.RegistroNaoEncontradoErro(id);
+
+                return Result.Fail(erro);
+            }
 
             Materia materiaSelecionada = repositorioMateria.SelecionarRegistroPorId(materiaId)!;
 
             if (materiaSelecionada is null)
-                return Result.Fail("Não foi possível obter o registro da matéria selecionada.");
+            {
+                Error erro = ResultadosErro.RegistroNaoEncontradoErro(materiaId);
+
+                return Result.Fail(erro);
+            }
 
             TesteMateriaQuantidade? objComQuantidade = testeSelecionado.QuantidadesPorMateria
                 .FirstOrDefault(x => x.Materia.Id.Equals(materiaId));
@@ -187,10 +238,19 @@ public class TesteAppService
             int novaQuantidadeTotal = quantidadeTotalQuestoes - quantidadeAnterior + novaQuantidade;
 
             if (novaQuantidade > materiaSelecionada.Questoes.Count)
-                return Result.Fail("A quantidade inserida é maior do que a quantidade de questões da matéria.");
+            {
+                Error erro = ResultadosErro.QuantidadeQuestoesErro(
+                    "A quantidade inserida é maior do que a quantidade de questões da matéria.");
 
-            if (novaQuantidadeTotal > testeSelecionado.QuantidadeQuestoes)
-                return Result.Fail($"A quantidade inserida ultrapassa o limite de questões do teste! Atual: {quantidadeTotalQuestoes}/{testeSelecionado.QuantidadeQuestoes}");
+                return Result.Fail(erro);
+            }
+            else if (novaQuantidadeTotal > testeSelecionado.QuantidadeQuestoes)
+            {
+                Error erro = ResultadosErro.QuantidadeQuestoesErro(
+                    $"A quantidade inserida ultrapassa o limite de questões do teste! Atual: {quantidadeTotalQuestoes}/{testeSelecionado.QuantidadeQuestoes}");
+
+                return Result.Fail(erro);
+            }
 
             if (novaQuantidade == 0 && objComQuantidade is not null)
             {
@@ -225,12 +285,14 @@ public class TesteAppService
         {
             unitOfWork.Rollback();
 
-            logger.LogError(ex,
+            logger.LogError(
+                ex,
                 "Erro ao definir quantidade de questões para a matéria {MateriaId} no teste {TesteId}",
                 materiaId,
-                id);
+                id
+            );
 
-            return Result.Fail("Erro ao definir quantidade de questões.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 
@@ -241,7 +303,11 @@ public class TesteAppService
             Teste testeSelecionado = repositorioTeste.SelecionarRegistroPorId(id)!;
 
             if (testeSelecionado is null)
-                return Result.Fail("Não foi possível obter o registro do teste selecionado.");
+            {
+                Error erro = ResultadosErro.RegistroNaoEncontradoErro(id);
+
+                return Result.Fail(erro);
+            }
 
             List<Guid> materiasSelecionadas = testeSelecionado.QuantidadesPorMateria
                 .Where(q => q.QuantidadeQuestoes > 0)
@@ -280,11 +346,13 @@ public class TesteAppService
         {
             unitOfWork.Rollback();
 
-            logger.LogError(ex,
+            logger.LogError(
+                ex,
                 "Erro ao gerar questões para o teste {Id}",
-                id);
+                id
+            );
 
-            return Result.Fail("Erro ao gerar questões.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 
@@ -295,7 +363,11 @@ public class TesteAppService
             Teste testeSelecionado = repositorioTeste.SelecionarRegistroPorId(id)!;
 
             if (testeSelecionado is null)
-                return Result.Fail("Não foi possível obter o registro do teste selecionado.");
+            {
+                Error erro = ResultadosErro.RegistroNaoEncontradoErro(id);
+
+                return Result.Fail(erro);
+            }
 
             List<Materia> materias = repositorioMateria.SelecionarRegistros()
                 .Where(m => m.Disciplina.Id == testeSelecionado.Disciplina.Id && m.Serie == testeSelecionado.Serie)
@@ -338,23 +410,32 @@ public class TesteAppService
         catch (Exception ex)
         {
             unitOfWork.Rollback();
-            return Result.Fail(new Error("Erro ao gerar provão: " + ex.Message));
+
+            logger.LogError(
+                ex,
+                "Erro ao gerar provão {Message}",
+                ex.Message
+            );
+
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 
     public Result AtualizarQuestoes(Guid id)
     {
-        Result<Teste> testeResult = SelecionarRegistroPorId(id);
+        Teste testeSelecionado = repositorioTeste.SelecionarRegistroPorId(id)!;
 
-        if (testeResult.IsFailed)
-            return Result.Fail(testeResult.Errors.First().Message);
+        if (testeSelecionado is null)
+        {
+            Error erro = ResultadosErro.RegistroNaoEncontradoErro(id);
 
-        Teste teste = testeResult.Value;
+            return Result.Fail(erro);
+        }
 
-        if (teste.EhProvao)
+        if (testeSelecionado.EhProvao)
             return GerarQuestoesAutomaticamente(id);
 
-        if (teste.Questoes.Count != 0)
+        if (testeSelecionado.Questoes.Count != 0)
             return EmbaralharQuestoes(id);
 
         return GerarQuestoesAutomaticamente(id);
@@ -367,7 +448,11 @@ public class TesteAppService
             Teste testeSelecionado = repositorioTeste.SelecionarRegistroPorId(id)!;
 
             if (testeSelecionado is null)
-                return Result.Fail("Não foi possível obter o registro do teste selecionado.");
+            {
+                Error erro = ResultadosErro.RegistroNaoEncontradoErro(id);
+
+                return Result.Fail(erro);
+            }
 
             LimparQuestoesEQuantidades(testeSelecionado);
 
@@ -407,7 +492,7 @@ public class TesteAppService
                 "Erro ao gerar questões automaticamente para o teste {Id}",
                 id);
 
-            return Result.Fail("Erro ao gerar questões automaticamente.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 
@@ -418,7 +503,11 @@ public class TesteAppService
             Teste testeSelecionado = repositorioTeste.SelecionarRegistroPorId(id)!;
 
             if (testeSelecionado is null)
-                return Result.Fail("Não foi possível obter o registro do teste selecionado.");
+            {
+                Error erro = ResultadosErro.RegistroNaoEncontradoErro(id);
+
+                return Result.Fail(erro);
+            }
 
             if (testeSelecionado.EhProvao)
                 return EmbaralharQuestoesParaProvao(testeSelecionado);
@@ -429,11 +518,13 @@ public class TesteAppService
         {
             unitOfWork.Rollback();
 
-            logger.LogError(ex,
+            logger.LogError(
+                ex,
                 "Erro ao embaralhar questões para o teste {Id}",
-                id);
+                id
+            );
 
-            return Result.Fail("Erro ao embaralhar questões.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 
@@ -444,7 +535,11 @@ public class TesteAppService
             Teste testeSelecionado = repositorioTeste.SelecionarRegistroPorId(id)!;
 
             if (testeSelecionado is null)
-                return Result.Fail("Não foi possível obter o registro do teste selecionado.");
+            {
+                Error erro = ResultadosErro.RegistroNaoEncontradoErro(id);
+
+                return Result.Fail(erro);
+            }
 
             repositorioTeste.ExcluirRegistro(id);
 
@@ -456,11 +551,13 @@ public class TesteAppService
         {
             unitOfWork.Rollback();
 
-            logger.LogError(ex,
+            logger.LogError(
+                ex,
                 "Erro ao excluir o teste {Id}",
-                id);
+                id
+            );
 
-            return Result.Fail("Erro ao excluir o teste.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 
@@ -471,7 +568,11 @@ public class TesteAppService
             Teste testeSelecionado = repositorioTeste.SelecionarRegistroPorId(id)!;
 
             if (testeSelecionado is null)
-                return Result.Fail("Não foi possível obter o registro do teste selecionado.");
+            {
+                Error erro = ResultadosErro.RegistroNaoEncontradoErro(id);
+
+                return Result.Fail(erro);
+            }
 
             return Result.Ok(testeSelecionado);
         }
@@ -481,9 +582,9 @@ public class TesteAppService
                 ex,
                 "Ocorreu um erro durante a seleção do teste {Id}.",
                 id
-                );
+            );
 
-            return Result.Fail("Ocorreu um erro inesperado ao tentar obter o teste.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 
@@ -500,9 +601,9 @@ public class TesteAppService
             logger.LogError(
                 ex,
                 "Ocorreu um erro durante a seleção dos testes registrados."
-                );
+            );
 
-            return Result.Fail("Ocorreu um erro inesperado ao tentar obter os testes.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 
@@ -519,9 +620,9 @@ public class TesteAppService
             logger.LogError(
                 ex,
                 "Ocorreu um erro durante a seleção dos testes antigos não finalizados."
-                );
+            );
 
-            return Result.Fail("Ocorreu um erro inesperado ao tentar obter os testes antigos.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 
@@ -538,9 +639,9 @@ public class TesteAppService
             logger.LogError(
                 ex,
                 "Ocorreu um erro durante a seleção dos testes não finalizados."
-                );
+            );
 
-            return Result.Fail("Ocorreu um erro inesperado ao tentar obter os testes não finalizados.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 
@@ -563,7 +664,7 @@ public class TesteAppService
                 "Ocorreu um erro durante a remoção dos testes."
             );
 
-            return Result.Fail("Ocorreu um erro inesperado ao tentar remover os testes.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 
@@ -574,10 +675,19 @@ public class TesteAppService
             Teste testeSelecionado = repositorioTeste.SelecionarRegistroPorId(id)!;
 
             if (testeSelecionado is null)
-                return Result.Fail("Não foi possível obter o registro do teste selecionado.");
+            {
+                Error erro = ResultadosErro.RegistroNaoEncontradoErro(id);
+
+                return Result.Fail(erro);
+            }
 
             if (testeSelecionado.Questoes.Count < testeSelecionado.QuantidadeQuestoes)
-                return Result.Fail("O teste ainda não tem todas as questões necessárias.");
+            {
+                Error erro = ResultadosErro.QuantidadeQuestoesErro(
+                    "O teste ainda não tem todas as questões necessárias.");
+
+                return Result.Fail(erro);
+            }
 
             testeSelecionado.Finalizado = true;
 
@@ -590,8 +700,13 @@ public class TesteAppService
         catch (Exception ex)
         {
             unitOfWork.Rollback();
-            logger.LogError(ex, "Erro ao finalizar o teste {Id}", id);
-            return Result.Fail("Erro ao finalizar o teste.");
+            logger.LogError(
+                ex,
+                "Erro ao finalizar o teste {Id}",
+                id
+            );
+
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 
@@ -678,7 +793,6 @@ public class TesteAppService
             .Distinct()
             .ToHashSet();
 
-        // Remove matérias que não têm nenhuma questão associada
         teste.Materias.RemoveAll(m => !idsMateriasComQuestoes.Contains(m.Id));
         teste.QuantidadesPorMateria.RemoveAll(qpm => !idsMateriasComQuestoes.Contains(qpm.Materia.Id));
     }
