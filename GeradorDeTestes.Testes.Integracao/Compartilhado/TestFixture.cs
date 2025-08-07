@@ -31,8 +31,10 @@ public abstract class TestFixture
     {
         container = new PostgreSqlBuilder()
             .WithImage("postgres:16")
-            .WithName("testes-geradordetestes-postgres")
-            .WithDatabase("GeradorDeTestesDbTest")
+            .WithName("gerador-de-testes-testesdb")
+            .WithDatabase("GeradorDeTestesDbTestes")
+            .WithUsername("postgres")
+            .WithPassword("postgres")
             .WithPortBinding(5434, 5432)
             .WithCleanUp(true)
             .Build();
