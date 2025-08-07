@@ -13,11 +13,13 @@ public class MapeadorTesteMateriaQuantidadeORM : IEntityTypeConfiguration<TesteM
 
         builder.HasOne(qmp => qmp.Materia)
                .WithMany()
+               .HasForeignKey(qmp => qmp.MateriaId)
                .OnDelete(DeleteBehavior.Restrict)
                .IsRequired();
 
-        builder.HasOne(qpm => qpm.Teste)
+        builder.HasOne(qmp => qmp.Teste)
                .WithMany(t => t.QuantidadesPorMateria)
+               .HasForeignKey(qmp => qmp.TesteId)
                .OnDelete(DeleteBehavior.Cascade)
                .IsRequired();
 

@@ -64,7 +64,9 @@ public class MapeadorTesteORM : IEntityTypeConfiguration<Teste>
             .OnDelete(DeleteBehavior.Cascade));
 
         builder.HasMany(t => t.QuantidadesPorMateria)
-            .WithOne()
-            .OnDelete(DeleteBehavior.Cascade);
+            .WithOne(qmp => qmp.Teste)
+            .HasForeignKey(qmp => qmp.TesteId)
+            .OnDelete(DeleteBehavior.Cascade)
+            .IsRequired();
     }
 }

@@ -1,12 +1,11 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace GeradorDeTestes.Infraestrutura.ORM.Migrations
 {
     /// <inheritdoc />
-    public partial class Add_Configs_With_Fixed_Relations : Migration
+    public partial class Fix_CorrigeRelacionamentos : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

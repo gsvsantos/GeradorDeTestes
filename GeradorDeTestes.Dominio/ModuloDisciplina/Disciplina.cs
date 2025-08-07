@@ -1,5 +1,6 @@
 ﻿using GeradorDeTestes.Dominio.Compartilhado;
 using GeradorDeTestes.Dominio.ModuloMateria;
+using GeradorDeTestes.Dominio.ModuloQuestao;
 using GeradorDeTestes.Dominio.ModuloTeste;
 
 namespace GeradorDeTestes.Dominio.ModuloDisciplina;
@@ -33,6 +34,24 @@ public class Disciplina : EntidadeBase<Disciplina>
     public void RemoverTeste(Teste teste)
     {
         Testes.Remove(teste);
+    }
+
+    public List<Questao> ObterQuestoesAleatorias(int quantidadeQuestoes, EnumSerie serie)
+    {
+        List<Questao> questoesRelacionadas = new List<Questao>();
+
+        foreach (Materia mat in Materias)
+        {
+            if (mat.Serie.Equals(serie))
+                questoesRelacionadas.AddRange(mat.Questoes);
+        }
+
+        Random random = new Random();
+
+        return questoesRelacionadas
+            .OrderBy(q => random.Next())
+            .Take(quantidadeQuestoes)
+            .ToList();
     }
 
     public override void AtualizarRegistro(Disciplina registroEditado)

@@ -21,6 +21,14 @@ public class Materia : EntidadeBase<Materia>
     }
     protected Materia() { }
 
+    public void AderirQuestoes(List<Questao> questoes)
+    {
+        if (Questoes.Any(questoes.Contains))
+            return;
+
+        Questoes.AddRange(questoes);
+    }
+
     public void AderirQuestao(Questao questao)
     {
         Questoes.Add(questao);
