@@ -1,3 +1,4 @@
+using FizzWare.NBuilder;
 using FluentResults;
 using GeradorDeTestes.Aplicacao.ModuloDisciplina;
 using GeradorDeTestes.Dominio.Compartilhado;
@@ -206,5 +207,60 @@ public class DisciplinaAppServiceTestes
         Assert.IsNotNull(resultadoEdicao);
         Assert.AreEqual("Ocorreu um erro interno no servidor.", mensagemErro);
         Assert.IsTrue(resultadoEdicao.IsFailed);
+    }
+
+    [TestMethod]
+    public void Excluir_Disciplina_Sem_Relacao_Deve_Retornar_Sucesso()
+    {
+        // Arrange - cenário feliz até o final, disciplina sem relações.
+        Disciplina novaDisciplina = Builder<Disciplina>.CreateNew().Build();
+
+        repositorioMateriaMock.Setup(r => r.SelecionarRegistros())
+            .Returns(new List<Materia>());
+
+        repositorioTesteMock.Setup(r => r.SelecionarRegistros())
+            .Returns(new List<Teste>());
+
+        // Act
+        Result resultadoExclusao = disciplinaAppService.ExcluirRegistro(novaDisciplina.Id);
+
+        // Assert - efeitos e contrato.
+        repositorioDisciplinaMock.Verify(r => r.ExcluirRegistro(novaDisciplina.Id), Times.Once);
+        unitOfWorkMock.Verify(u => u.Commit(), Times.Once);
+
+        Assert.IsNotNull(resultadoExclusao);
+        Assert.IsTrue(resultadoExclusao.IsSuccess);
+    }
+
+    [TestMethod]
+    public void Excluir_Disciplina_Com_Relacao_Deve_Retornar_Falha()
+    {
+        // Arrange - disciplina contém duas relações.
+        Disciplina novaDisciplina = Builder<Disciplina>.CreateNew().Build();
+
+        Materia novaMateria = Builder<Materia>.CreateNew().With(m => m.Disciplina = novaDisciplina).Build();
+        Teste novoTeste = Builder<Teste>.CreateNew().With(t => t.Disciplina = novaDisciplina).Build();
+
+        repositorioDisciplinaMock
+            .Setup(r => r.SelecionarRegistroPorId(novaDisciplina.Id))
+            .Returns(novaDisciplina);
+
+        repositorioMateriaMock.Setup(r => r.SelecionarRegistros())
+            .Returns(new List<Materia> { novaMateria });
+
+        repositorioTesteMock.Setup(r => r.SelecionarRegistros())
+            .Returns(new List<Teste> { novoTeste });
+
+        // Act
+        Result resultadoExclusao = disciplinaAppService.ExcluirRegistro(novaDisciplina.Id);
+
+        // Assert - efeitos e contrato.
+        repositorioDisciplinaMock.Verify(r => r.ExcluirRegistro(It.IsAny<Guid>()), Times.Never);
+
+        string mensagemErro = resultadoExclusao.Errors[0].Message;
+
+        Assert.IsNotNull(resultadoExclusao);
+        Assert.IsTrue(resultadoExclusao.IsFailed);
+        Assert.AreEqual("Registro Vinculado", mensagemErro);
     }
 }
