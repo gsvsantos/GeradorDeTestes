@@ -2,7 +2,7 @@ using GeradorDeTestes.Dominio.ModuloDisciplina;
 using GeradorDeTestes.Dominio.ModuloMateria;
 using GeradorDeTestes.Dominio.ModuloQuestao;
 
-namespace GeradorDeTestes.Testes.Unidades;
+namespace GeradorDeTestes.Testes.Unidades.ModuloDisciplina;
 
 [TestClass]
 [TestCategory("Testes de Unidade de Disciplina")]
@@ -47,7 +47,7 @@ public class DisciplinaTestes
 
         materiaQuatroOperacoes.AderirQuestoes([
             new ("Quanto é 2 + 2?", materiaQuatroOperacoes),
-            new ("Quanto é 53 + 38?", materiaQuatroOperacoes),
+            new ("Quanto é 53 - 38?", materiaQuatroOperacoes),
             new ("Quanto é 985 + 15?", materiaQuatroOperacoes),
             new ("Quanto é 9 / 3?", materiaQuatroOperacoes),
             new ("Quanto é 30 * 15?", materiaQuatroOperacoes)

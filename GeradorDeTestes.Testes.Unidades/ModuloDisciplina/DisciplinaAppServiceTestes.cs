@@ -10,7 +10,7 @@ using Moq;
 namespace GeradorDeTestes.Testes.Unidades;
 
 [TestClass]
-[TestCategory("Testes de Unidade de Disciplina")]
+[TestCategory("Testes de Unidade de DisciplinaAppService")]
 public class DisciplinaAppServiceTestes
 {
     private DisciplinaAppService disciplinaAppService;
@@ -45,73 +45,166 @@ public class DisciplinaAppServiceTestes
     [TestMethod]
     public void Cadastrar_Disciplina_Deve_Retornar_Sucesso()
     {
-        // Arrange
+        // Arrange - não existe disciplinas existentes com o mesmo nome.
         Disciplina novaDisciplina = new("Matemática");
 
         repositorioDisciplinaMock
             .Setup(r => r.SelecionarRegistros())
             .Returns(new List<Disciplina>());
 
-        // Act
-        Result resultado = disciplinaAppService.CadastrarRegistro(novaDisciplina);
+        // Act - executa o contrato público do serviço.
+        Result resultadoCadastro = disciplinaAppService.CadastrarRegistro(novaDisciplina);
 
-        // Assert
+        // Assert — efeitos e contrato.
         repositorioDisciplinaMock.Verify(r => r.CadastrarRegistro(novaDisciplina), Times.Once);
         unitOfWorkMock.Verify(u => u.Commit(), Times.Once);
 
-        Assert.IsNotNull(resultado);
-        Assert.IsTrue(resultado.IsSuccess);
+        Assert.IsNotNull(resultadoCadastro);
+        Assert.IsTrue(resultadoCadastro.IsSuccess);
     }
 
     [TestMethod]
     public void Cadastrar_Disciplina_Duplicada_Deve_Retornar_Falha()
     {
-        // Arrange
-        Disciplina novaDisciplina = new("Matemática");
-
+        // Arrange — já existe disciplina com o mesmo nome.
         repositorioDisciplinaMock
             .Setup(r => r.SelecionarRegistros())
             .Returns(new List<Disciplina> { new("Matemática") });
 
-        // Act
-        Result resultado = disciplinaAppService.CadastrarRegistro(novaDisciplina);
+        Disciplina novaDisciplina = new("Matemática");
 
-        // Assert
+        // Act
+        Result resultadoCadastro = disciplinaAppService.CadastrarRegistro(novaDisciplina);
+
+        // Assert — efeitos e contrato.
         repositorioDisciplinaMock.Verify(r => r.CadastrarRegistro(It.IsAny<Disciplina>()), Times.Never);
         unitOfWorkMock.Verify(u => u.Commit(), Times.Never);
 
-        Assert.IsNotNull(resultado);
-        Assert.IsTrue(resultado.IsFailed);
-        Assert.AreEqual("Registro Duplicado", resultado.Errors[0].Message);
+        Assert.IsNotNull(resultadoCadastro);
+        Assert.IsTrue(resultadoCadastro.IsFailed);
+        Assert.AreEqual("Registro Duplicado", resultadoCadastro.Errors[0].Message);
     }
 
     [TestMethod]
     public void Cadastrar_Disciplina_Com_Excecao_Lancada_Deve_Retornar_Falha()
     {
+        // Arrange - cenário feliz até tentar persistir/commitar.
         Disciplina novaDisciplina = new("Matemática");
 
         repositorioDisciplinaMock
             .Setup(r => r.SelecionarRegistros())
             .Returns(new List<Disciplina>());
 
+        // Simula exceção na persistência.
         repositorioDisciplinaMock?
             .Setup(r => r.CadastrarRegistro(novaDisciplina))
             .Throws(new Exception("Erro inesperado"));
 
+        // E/ou exceção no commit.
         unitOfWorkMock
             .Setup(r => r.Commit())
             .Throws(new Exception("Erro no cadastro."));
 
-        Result resultado = disciplinaAppService.CadastrarRegistro(novaDisciplina);
+        // Act
+        Result resultadoCadastro = disciplinaAppService.CadastrarRegistro(novaDisciplina);
 
+        // Assert — efeitos e contrato.
         unitOfWorkMock.Verify(u => u.Rollback(), Times.Once());
 
-        Assert.IsNotNull(resultado);
+        string mensagemErro = resultadoCadastro.Errors[0].Message;
 
-        string mensagemErro = resultado.Errors[0].Message;
-
+        Assert.IsNotNull(resultadoCadastro);
         Assert.AreEqual("Ocorreu um erro interno no servidor.", mensagemErro);
+        Assert.IsTrue(resultadoCadastro.IsFailed);
+    }
 
-        Assert.IsTrue(resultado.IsFailed);
+    [TestMethod]
+    public void Editar_Disciplina_Deve_Retornar_Sucesso()
+    {
+        // Arrange — existe uma disciplina previamente cadastrada.
+        Disciplina novaDisciplina = new("mate matíca");
+
+        repositorioDisciplinaMock
+            .Setup(r => r.SelecionarRegistros())
+            .Returns(new List<Disciplina> { novaDisciplina });
+
+        // Nova versão (editar nome). Importante: manter o Id da entidade alvo.
+        Disciplina disciplinaEditada = new("Matemática") { Id = Guid.NewGuid() };
+
+        // Act
+        Result resultadoEdicao = disciplinaAppService.EditarRegistro(novaDisciplina.Id, disciplinaEditada);
+
+        // Assert — efeitos e contrato.
+        repositorioDisciplinaMock.Verify(r => r.EditarRegistro(novaDisciplina.Id, disciplinaEditada), Times.Once);
+        unitOfWorkMock.Verify(u => u.Commit(), Times.Once);
+
+        Assert.IsNotNull(resultadoEdicao);
+        Assert.IsTrue(resultadoEdicao.IsSuccess);
+    }
+
+    [TestMethod]
+    public void Editar_Disciplina_Duplicada_Deve_Retornar_Falha()
+    {
+        Disciplina novaDisciplina = new("mate matíca") { Id = Guid.NewGuid() };
+
+        // Arrange — existe duas disciplinas previamente cadastradas, uma com o mesmo nome da nova.
+        List<Disciplina> disciplinasExistentes = new() {
+            novaDisciplina,
+            new("Matemática") { Id = Guid.NewGuid() }
+        };
+
+        repositorioDisciplinaMock
+            .Setup(r => r.SelecionarRegistros())
+            .Returns(disciplinasExistentes);
+
+        // Nova versão para tentar editar o nome do alvo. Importante: manter o Id da entidade alvo.
+        Disciplina disciplinaEditada = new("Matemática") { Id = Guid.NewGuid() };
+
+        // Act
+        Result resultadoEdicao = disciplinaAppService.EditarRegistro(novaDisciplina.Id, disciplinaEditada);
+
+        // Assert — efeitos e contrato.
+        repositorioDisciplinaMock.Verify(r => r.EditarRegistro(novaDisciplina.Id, disciplinaEditada), Times.Never);
+        unitOfWorkMock.Verify(u => u.Commit(), Times.Never);
+
+        Assert.IsNotNull(resultadoEdicao);
+        Assert.IsTrue(resultadoEdicao.IsFailed);
+        Assert.AreEqual("Registro Duplicado", resultadoEdicao.Errors[0].Message);
+    }
+
+    [TestMethod]
+    public void Editar_Disciplina_Com_Excecao_Lancada_Deve_Retornar_Falha()
+    {
+        // Arrange - cenário feliz até tentar persistir/commitar.
+        Disciplina novaDisciplina = new("mate matíca");
+
+        repositorioDisciplinaMock
+            .Setup(r => r.SelecionarRegistros())
+            .Returns(new List<Disciplina> { novaDisciplina });
+
+        // Nova versão (editar nome). Importante: manter o Id da entidade alvo.
+        Disciplina disciplinaEditada = new("Matemática") { Id = Guid.NewGuid() };
+
+        // Simula exceção na persistência.
+        repositorioDisciplinaMock?
+            .Setup(r => r.EditarRegistro(novaDisciplina.Id, disciplinaEditada))
+            .Throws(new Exception("Erro inesperado"));
+
+        // E/ou exceção no commit.
+        unitOfWorkMock
+            .Setup(r => r.Commit())
+            .Throws(new Exception("Erro na edição."));
+
+        // Act
+        Result resultadoEdicao = disciplinaAppService.EditarRegistro(novaDisciplina.Id, disciplinaEditada);
+
+        // Assert - efeito e contrato.
+        unitOfWorkMock.Verify(u => u.Rollback(), Times.Once());
+
+        string mensagemErro = resultadoEdicao.Errors[0].Message;
+
+        Assert.IsNotNull(resultadoEdicao);
+        Assert.AreEqual("Ocorreu um erro interno no servidor.", mensagemErro);
+        Assert.IsTrue(resultadoEdicao.IsFailed);
     }
 }
