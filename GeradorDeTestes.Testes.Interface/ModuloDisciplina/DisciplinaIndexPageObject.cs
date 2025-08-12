@@ -1,5 +1,4 @@
-﻿using GeradorDeTestes.Testes.Interface.Compartilhado;
-using OpenQA.Selenium;
+﻿using OpenQA.Selenium;
 
 namespace GeradorDeTestes.Testes.Interface.ModuloDisciplina;
 public class DisciplinaIndexPageObject

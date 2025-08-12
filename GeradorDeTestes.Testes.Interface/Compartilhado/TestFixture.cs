@@ -7,7 +7,7 @@ namespace GeradorDeTestes.Testes.InterfaceE2E.Compartilhado;
 [TestClass]
 public abstract class TestFixture
 {
-    protected GeradorDeTestesDbContext dbContext;
+    protected static GeradorDeTestesDbContext dbContext;
     protected static IWebDriver driver;
     protected static string enderecoBase = "https://localhost:7194";
     private static string connectionString = "Host=localhost;Port=5432;Database=GeradorDeTestesDb;Username=postgres;Password=@GStavo02!;";
@@ -30,7 +30,7 @@ public abstract class TestFixture
 
     private static void InicializarWebDriver()
     {
-        driver = new ChromeDriver();
+        driver = EsconderChrome(false);
     }
 
     private static void EncerrarWebDriver()
@@ -49,5 +49,20 @@ public abstract class TestFixture
         dbContext.Disciplinas.RemoveRange(dbContext.Disciplinas);
 
         dbContext.SaveChanges();
+    }
+
+    private static ChromeDriver EsconderChrome(bool value)
+    {
+        if (value)
+        {
+            ChromeOptions options = new();
+            options.AddArgument("--headless");
+
+            return new ChromeDriver(options);
+        }
+        else
+        {
+            return new ChromeDriver();
+        }
     }
 }

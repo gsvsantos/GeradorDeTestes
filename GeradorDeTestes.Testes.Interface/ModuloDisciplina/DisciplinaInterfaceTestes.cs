@@ -64,9 +64,8 @@ public sealed class DisciplinaInterfaceTestes : TestFixture
 
         // Act
         discipinaIndex
-            .IrPara(enderecoBase)
             .ClickExcluir()
-            .ClickSubmitExclusao();
+            .ClickSubmit();
 
         // Assert
 
