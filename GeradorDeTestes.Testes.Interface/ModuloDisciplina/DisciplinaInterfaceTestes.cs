@@ -1,6 +1,5 @@
-﻿using GeradorDeTestes.Testes.InterfaceE2E.Compartilhado;
-using OpenQA.Selenium;
-using System.Collections.ObjectModel;
+﻿using GeradorDeTestes.Testes.Interface.ModuloDisciplina;
+using GeradorDeTestes.Testes.InterfaceE2E.Compartilhado;
 
 namespace GeradorDeTestes.Testes.InterfaceE2E.ModuloDisciplina;
 
@@ -12,47 +11,65 @@ public sealed class DisciplinaInterfaceTestes : TestFixture
     public void Deve_Cadastrar_Disciplina_Corretamente()
     {
         // Arrange
-        driver.Navigate().GoToUrl(Path.Combine(enderecoBase, "disciplinas"));
+        DisciplinaIndexPageObject discipinaIndex = new(driver);
 
-        IWebElement elemento = driver.FindElement(By.CssSelector("a[data-se=btnCadastrar]"));
-
-        elemento.Click();
+        discipinaIndex
+            .IrPara(enderecoBase);
 
         // Act
-        driver.FindElement(By.Id("Nome")).SendKeys("Matemática");
-
-        driver.FindElement(By.CssSelector("button[type='submit']")).Click();
+        discipinaIndex
+            .ClickCadastrar()
+            .PreencherNome("Matemática")
+            .ClickSubmit();
 
         // Assert
-        ReadOnlyCollection<IWebElement> elementosCard = driver.FindElements(By.CssSelector(".card"));
-
-        Assert.AreEqual(1, elementosCard.Count);
+        Assert.IsTrue(discipinaIndex.ContemDisciplina("Matemática"));
     }
 
     [TestMethod]
     public void Deve_Editar_Disciplina_Corretamente()
     {
         // Arrange
-        driver.Navigate().GoToUrl(Path.Combine(enderecoBase, "disciplinas"));
+        DisciplinaIndexPageObject discipinaIndex = new(driver);
 
-        IWebElement elemento = driver.FindElement(By.CssSelector("a[data-se=btnCadastrar]"));
-
-        elemento.Click();
-        driver.FindElement(By.Id("Nome")).SendKeys("Matemática");
-
-        driver.FindElement(By.CssSelector("button[type='submit']")).Click();
-
-        driver.FindElement(By.CssSelector(".card"))
-            .FindElement(By.CssSelector("a[title='Editar Disciplina']")).Click();
+        discipinaIndex
+            .IrPara(enderecoBase)
+            .ClickCadastrar()
+            .PreencherNome("Matemática")
+            .ClickSubmit();
 
         // Act
-        driver.FindElement(By.Id("Nome")).SendKeys(" Editada");
-
-        driver.FindElement(By.CssSelector("button[type='submit']")).Click();
+        discipinaIndex
+            .IrPara(enderecoBase)
+            .ClickEditar()
+            .PreencherNome("Matemática Editada")
+            .ClickSubmit();
 
         // Assert
-        bool conseguiuEditar = driver.PageSource.Contains("Matemática Editada");
 
-        Assert.IsTrue(conseguiuEditar);
+        Assert.IsTrue(discipinaIndex.ContemDisciplina("Matemática Editada"));
+    }
+
+    [TestMethod]
+    public void Deve_Excluir_Disciplina_Corretamente()
+    {
+        // Arrange
+        DisciplinaIndexPageObject discipinaIndex = new(driver);
+
+        discipinaIndex
+            .IrPara(enderecoBase)
+            .ClickCadastrar()
+            .PreencherNome("Matemática")
+            .ClickSubmit();
+
+        // Act
+        discipinaIndex
+            .IrPara(enderecoBase)
+            .ClickExcluir()
+            .ClickSubmitExclusao();
+
+        // Assert
+
+        Assert.IsFalse(discipinaIndex.ContemDisciplina("Matemática"));
     }
 }
