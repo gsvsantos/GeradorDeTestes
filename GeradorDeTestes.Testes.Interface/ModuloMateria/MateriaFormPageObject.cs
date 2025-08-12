@@ -1,4 +1,5 @@
-﻿using OpenQA.Selenium;
+﻿using GeradorDeTestes.Testes.Interface.ModuloDisciplina;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 
 namespace GeradorDeTestes.Testes.Interface.ModuloMateria;
@@ -60,6 +61,15 @@ public class MateriaFormPageObject
     public MateriaIndexPageObject ClickSubmit()
     {
         wait.Until(d => d.FindElement(By.CssSelector("button[type='submit']"))).Click();
+
+        return new(driver);
+    }
+
+    public DisciplinaIndexPageObject ClickSubmitExcluir()
+    {
+        wait.Until(d => d.FindElement(By.CssSelector("button[type='submit']"))).Click();
+
+        wait.Until(d => d.FindElements(By.CssSelector(".card")).Count == 0);
 
         return new(driver);
     }

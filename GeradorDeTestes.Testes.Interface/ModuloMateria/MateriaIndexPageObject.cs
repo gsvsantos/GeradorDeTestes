@@ -18,6 +18,8 @@ public class MateriaIndexPageObject
     {
         driver.Navigate().GoToUrl(Path.Combine(enderecoBase, "materias"));
 
+        wait.Until(d => d.FindElement(By.CssSelector("a[data-se='btnCadastrar']")).Displayed);
+
         return this;
     }
 
@@ -30,14 +32,14 @@ public class MateriaIndexPageObject
 
     public MateriaFormPageObject ClickEditar()
     {
-        driver.FindElement(By.CssSelector(".card a[title='Editar Disciplina']")).Click();
+        driver.FindElement(By.CssSelector(".card a[title='Editar Matéria']")).Click();
 
         return new(driver);
     }
 
     public MateriaFormPageObject ClickExcluir()
     {
-        driver.FindElement(By.CssSelector(".card a[title='Excluir Disciplina']")).Click();
+        driver.FindElement(By.CssSelector(".card a[title='Excluir Matéria']")).Click();
 
         return new(driver);
     }

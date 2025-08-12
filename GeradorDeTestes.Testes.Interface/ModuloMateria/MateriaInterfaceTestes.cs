@@ -90,7 +90,7 @@ public class MateriaInterfaceTestes : TestFixture
         // Act
         materiaIndex
             .ClickExcluir()
-            .ClickSubmit();
+            .ClickSubmitExcluir();
 
         // Assert
         Assert.IsFalse(materiaIndex.ContemMateria("Quatro Operações"));

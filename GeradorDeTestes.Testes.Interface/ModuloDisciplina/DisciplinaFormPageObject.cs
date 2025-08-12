@@ -30,4 +30,13 @@ public class DisciplinaFormPageObject
 
         return new(driver);
     }
+
+    public DisciplinaIndexPageObject ClickSubmitExcluir()
+    {
+        wait.Until(d => d.FindElement(By.CssSelector("button[type='submit']"))).Click();
+
+        wait.Until(d => d.FindElements(By.CssSelector(".card")).Count == 0);
+
+        return new(driver);
+    }
 }

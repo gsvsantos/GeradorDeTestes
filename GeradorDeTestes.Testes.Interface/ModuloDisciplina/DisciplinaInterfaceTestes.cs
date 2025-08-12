@@ -40,7 +40,6 @@ public sealed class DisciplinaInterfaceTestes : TestFixture
 
         // Act
         discipinaIndex
-            .IrPara(enderecoBase)
             .ClickEditar()
             .PreencherNome("Matemática Editada")
             .ClickSubmit();
@@ -65,7 +64,7 @@ public sealed class DisciplinaInterfaceTestes : TestFixture
         // Act
         discipinaIndex
             .ClickExcluir()
-            .ClickSubmit();
+            .ClickSubmitExcluir();
 
         // Assert
 
