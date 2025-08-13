@@ -129,8 +129,8 @@ public class DisciplinaAppServiceTestes
             .Setup(r => r.SelecionarRegistros())
             .Returns(new List<Disciplina> { novaDisciplina });
 
-        // Nova versão (editar nome). Importante: manter o Id da entidade alvo.
-        Disciplina disciplinaEditada = new("Matemática") { Id = Guid.NewGuid() };
+        // Nova versão (editar nome).
+        Disciplina disciplinaEditada = new("Matemática");
 
         // Act
         Result resultadoEdicao = disciplinaAppService.EditarRegistro(novaDisciplina.Id, disciplinaEditada);
@@ -148,18 +148,19 @@ public class DisciplinaAppServiceTestes
     {
         Disciplina novaDisciplina = new("mate matíca") { Id = Guid.NewGuid() };
 
-        // Arrange — existe duas disciplinas previamente cadastradas, uma com o mesmo nome da nova.
-        List<Disciplina> disciplinasExistentes = new() {
+        // Arrange — existe duas disciplinas previamente cadastradas, uma terá o mesmo nome da editada.
+        List<Disciplina> disciplinasExistentes = new()
+        {
             novaDisciplina,
-            new("Matemática") { Id = Guid.NewGuid() }
+            new("Matemática")
         };
 
         repositorioDisciplinaMock
             .Setup(r => r.SelecionarRegistros())
             .Returns(disciplinasExistentes);
 
-        // Nova versão para tentar editar o nome do alvo. Importante: manter o Id da entidade alvo.
-        Disciplina disciplinaEditada = new("Matemática") { Id = Guid.NewGuid() };
+        // Nova versão para tentar editar o nome do alvo.
+        Disciplina disciplinaEditada = new("Matemática");
 
         // Act
         Result resultadoEdicao = disciplinaAppService.EditarRegistro(novaDisciplina.Id, disciplinaEditada);
@@ -183,8 +184,8 @@ public class DisciplinaAppServiceTestes
             .Setup(r => r.SelecionarRegistros())
             .Returns(new List<Disciplina> { novaDisciplina });
 
-        // Nova versão (editar nome). Importante: manter o Id da entidade alvo.
-        Disciplina disciplinaEditada = new("Matemática") { Id = Guid.NewGuid() };
+        // Nova versão (editar nome).
+        Disciplina disciplinaEditada = new("Matemática");
 
         // Simula exceção na persistência.
         repositorioDisciplinaMock?

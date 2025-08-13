@@ -63,7 +63,7 @@ public class MateriaAppService
         List<Materia> materias = repositorioMateria.SelecionarRegistros();
 
         if (materias.Any(m => m.Nome.Equals(materiaEditada.Nome)
-        && m.Disciplina.Id.Equals(materiaEditada.Disciplina) && m.Serie.Equals(materiaEditada.Serie) && m.Id != id))
+        && m.Disciplina.Id.Equals(materiaEditada.Disciplina.Id) && m.Serie.Equals(materiaEditada.Serie) && m.Id != id))
         {
             Error erro = ResultadosErro.RegistroDuplicadoErro(
                 "Já existe uma matéria com este nome para a mesma disciplina e série.");
