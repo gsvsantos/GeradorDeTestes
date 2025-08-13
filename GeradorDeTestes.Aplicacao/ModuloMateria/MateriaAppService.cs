@@ -1,6 +1,5 @@
 ﻿using FluentResults;
 using GeradorDeTestes.Aplicacao.Compartilhado;
-using GeradorDeTestes.Aplicacao.ModuloDisciplina;
 using GeradorDeTestes.Dominio.Compartilhado;
 using GeradorDeTestes.Dominio.ModuloMateria;
 using GeradorDeTestes.Dominio.ModuloQuestao;
@@ -12,10 +11,10 @@ public class MateriaAppService
     private readonly IUnitOfWork unitOfWork;
     private readonly IRepositorioMateria repositorioMateria;
     private readonly IRepositorioQuestao repositorioQuestao;
-    private readonly ILogger<DisciplinaAppService> logger;
+    private readonly ILogger<MateriaAppService> logger;
 
     public MateriaAppService(IUnitOfWork unitOfWork, IRepositorioMateria repositorioMateria,
-        IRepositorioQuestao repositorioQuestao, ILogger<DisciplinaAppService> logger)
+        IRepositorioQuestao repositorioQuestao, ILogger<MateriaAppService> logger)
     {
         this.unitOfWork = unitOfWork;
         this.repositorioMateria = repositorioMateria;

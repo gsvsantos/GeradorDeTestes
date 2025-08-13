@@ -1,6 +1,5 @@
 using FizzWare.NBuilder;
 using FluentResults;
-using GeradorDeTestes.Aplicacao.ModuloDisciplina;
 using GeradorDeTestes.Aplicacao.ModuloMateria;
 using GeradorDeTestes.Dominio.Compartilhado;
 using GeradorDeTestes.Dominio.ModuloDisciplina;
@@ -21,7 +20,7 @@ public class MateriaAppServiceTestes
     private Mock<IUnitOfWork> unitOfWorkMock;
     private Mock<IRepositorioMateria> repositorioMateriaMock;
     private Mock<IRepositorioQuestao> repositorioQuestaoMock;
-    private Mock<ILogger<DisciplinaAppService>> loggerMock;
+    private Mock<ILogger<MateriaAppService>> loggerMock;
 
     [TestInitialize]
     public void Setup()
@@ -29,7 +28,7 @@ public class MateriaAppServiceTestes
         unitOfWorkMock = new Mock<IUnitOfWork>();
         repositorioMateriaMock = new Mock<IRepositorioMateria>();
         repositorioQuestaoMock = new Mock<IRepositorioQuestao>();
-        loggerMock = new Mock<ILogger<DisciplinaAppService>>();
+        loggerMock = new Mock<ILogger<MateriaAppService>>();
 
         materiaAppService = new MateriaAppService(
             unitOfWorkMock.Object,
