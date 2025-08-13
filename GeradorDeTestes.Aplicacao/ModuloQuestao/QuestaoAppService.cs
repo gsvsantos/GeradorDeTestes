@@ -1,6 +1,5 @@
 ﻿using FluentResults;
 using GeradorDeTestes.Aplicacao.Compartilhado;
-using GeradorDeTestes.Aplicacao.ModuloDisciplina;
 using GeradorDeTestes.Dominio.Compartilhado;
 using GeradorDeTestes.Dominio.ModuloMateria;
 using GeradorDeTestes.Dominio.ModuloQuestao;
@@ -14,11 +13,11 @@ public class QuestaoAppService
     private readonly IUnitOfWork unitOfWork;
     private readonly IRepositorioQuestao repositorioQuestao;
     private readonly IRepositorioTeste repositorioTeste;
-    private readonly ILogger<DisciplinaAppService> logger;
+    private readonly ILogger<QuestaoAppService> logger;
 
     public QuestaoAppService(IGeradorQuestoes geradorQuestoes, IUnitOfWork unitOfWork,
         IRepositorioQuestao repositorioQuestao, IRepositorioTeste repositorioTeste,
-        ILogger<DisciplinaAppService> logger)
+        ILogger<QuestaoAppService> logger)
     {
         this.geradorQuestoes = geradorQuestoes;
         this.unitOfWork = unitOfWork;
