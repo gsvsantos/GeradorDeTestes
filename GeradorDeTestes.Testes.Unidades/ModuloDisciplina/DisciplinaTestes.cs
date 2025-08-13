@@ -45,21 +45,21 @@ public class DisciplinaTestes
             EnumSerie.SetimoAnoFundamental
         );
 
-        materiaQuatroOperacoes.AderirQuestoes([
+        materiaQuatroOperacoes.AderirQuestoes(new(){
             new ("Quanto é 2 + 2?", materiaQuatroOperacoes),
             new ("Quanto é 53 - 38?", materiaQuatroOperacoes),
             new ("Quanto é 985 + 15?", materiaQuatroOperacoes),
             new ("Quanto é 9 / 3?", materiaQuatroOperacoes),
             new ("Quanto é 30 * 15?", materiaQuatroOperacoes)
-        ]);
+        });
 
-        materiaFracoes.AderirQuestoes([
+        materiaFracoes.AderirQuestoes(new(){
             new ("Qual é a fração que representa a metade de uma pizza?", materiaFracoes),
             new ("Qual fração representa três partes de um total de quatro partes iguais?", materiaFracoes),
             new ("Qual é o resultado da soma: 1/4 + 1/4?", materiaFracoes),
             new ("Qual é a fração equivalente a 2/4?", materiaFracoes),
             new ("Se você tem uma barra de chocolate dividida em 8 pedaços e come 3, qual fração representa o que você comeu?", materiaFracoes)
-        ]);
+        });
 
         disciplina.AderirMateria(materiaQuatroOperacoes);
         disciplina.AderirMateria(materiaFracoes);
@@ -68,7 +68,10 @@ public class DisciplinaTestes
         List<Questao> questoesSorteadas = disciplina.ObterQuestoesAleatorias(10, EnumSerie.SetimoAnoFundamental);
 
         // Assert
-        List<Questao> questoesEsperadas = [.. materiaQuatroOperacoes.Questoes, .. materiaFracoes.Questoes];
+        List<Questao> questoesEsperadas = new(
+            materiaQuatroOperacoes.Questoes
+                .Concat(materiaFracoes.Questoes)
+        );
 
         Assert.AreEqual(10, questoesSorteadas.Count);
         CollectionAssert.IsSubsetOf(questoesSorteadas, questoesEsperadas);
