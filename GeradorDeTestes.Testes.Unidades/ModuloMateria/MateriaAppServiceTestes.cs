@@ -49,8 +49,8 @@ public class MateriaAppServiceTestes
 
         Result resultadoCadastro = materiaAppService.CadastrarRegistro(novaMateria);
 
-        repositorioMateriaMock.Verify(r => r.CadastrarRegistro(novaMateria), Times.Once());
-        unitOfWorkMock.Verify(u => u.Commit(), Times.Once());
+        repositorioMateriaMock.Verify(r => r.CadastrarRegistro(novaMateria), Times.Once);
+        unitOfWorkMock.Verify(u => u.Commit(), Times.Once);
 
         Assert.IsNotNull(resultadoCadastro);
         Assert.IsTrue(resultadoCadastro.IsSuccess);
@@ -67,8 +67,8 @@ public class MateriaAppServiceTestes
 
         Result resultadoCadastro = materiaAppService.CadastrarRegistro(novaMateria);
 
-        repositorioMateriaMock.Verify(r => r.CadastrarRegistro(It.IsAny<Materia>()), Times.Never());
-        unitOfWorkMock.Verify(u => u.Commit(), Times.Never());
+        repositorioMateriaMock.Verify(r => r.CadastrarRegistro(It.IsAny<Materia>()), Times.Never);
+        unitOfWorkMock.Verify(u => u.Commit(), Times.Never);
 
         Assert.IsNotNull(resultadoCadastro);
         Assert.IsTrue(resultadoCadastro.IsFailed);
@@ -94,7 +94,7 @@ public class MateriaAppServiceTestes
 
         Result resultadoCadastro = materiaAppService.CadastrarRegistro(novaMateria);
 
-        unitOfWorkMock.Verify(u => u.Rollback(), Times.Once());
+        unitOfWorkMock.Verify(u => u.Rollback(), Times.Once);
 
         string mensagemErro = resultadoCadastro.Errors[0].Message;
 
@@ -116,7 +116,7 @@ public class MateriaAppServiceTestes
 
         Result resultadoEdicao = materiaAppService.EditarRegistro(novaMateria.Id, materiaEditada);
 
-        repositorioMateriaMock.Verify(r => r.EditarRegistro(novaMateria.Id, materiaEditada), Times.Once());
+        repositorioMateriaMock.Verify(r => r.EditarRegistro(novaMateria.Id, materiaEditada), Times.Once);
         unitOfWorkMock.Verify(u => u.Commit(), Times.Once);
 
         Assert.IsNotNull(resultadoEdicao);
@@ -142,7 +142,7 @@ public class MateriaAppServiceTestes
 
         Result resultadoEdicao = materiaAppService.EditarRegistro(novaMateria.Id, materiaEditada);
 
-        repositorioMateriaMock.Verify(r => r.EditarRegistro(novaMateria.Id, materiaEditada), Times.Never());
+        repositorioMateriaMock.Verify(r => r.EditarRegistro(novaMateria.Id, materiaEditada), Times.Never);
         unitOfWorkMock.Verify(u => u.Commit(), Times.Never);
 
         Assert.IsNotNull(resultadoEdicao);
@@ -174,7 +174,7 @@ public class MateriaAppServiceTestes
         Result resultadoEdicao = materiaAppService.EditarRegistro(novaMateria.Id, materiaEditada);
 
         // Assert - efeito e contrato.
-        unitOfWorkMock.Verify(u => u.Rollback(), Times.Once());
+        unitOfWorkMock.Verify(u => u.Rollback(), Times.Once);
 
         string mensagemErro = resultadoEdicao.Errors[0].Message;
 
@@ -221,7 +221,7 @@ public class MateriaAppServiceTestes
         Result resultadoExclusao = materiaAppService.ExcluirRegistro(novaMateria.Id);
 
         // Assert - efeitos e contrato.
-        repositorioMateriaMock.Verify(r => r.ExcluirRegistro(It.IsAny<Guid>()), Times.Never);
+        repositorioMateriaMock.Verify(r => r.ExcluirRegistro(novaMateria.Id), Times.Never);
 
         string mensagemErro = resultadoExclusao.Errors[0].Message;
 

@@ -73,7 +73,7 @@ public class DisciplinaTestes
                 .Concat(materiaFracoes.Questoes)
         );
 
-        Assert.AreEqual(10, questoesSorteadas.Count);
+        Assert.AreEqual(questoesSorteadas.Count, questoesEsperadas.Count);
         CollectionAssert.IsSubsetOf(questoesSorteadas, questoesEsperadas);
     }
 }

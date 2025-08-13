@@ -21,24 +21,9 @@ public class Disciplina : EntidadeBase<Disciplina>
         Materias.Add(materia);
     }
 
-    public void RemoverMateria(Materia materia)
-    {
-        Materias.Remove(materia);
-    }
-
-    public void AderirTeste(Teste teste)
-    {
-        Testes.Add(teste);
-    }
-
-    public void RemoverTeste(Teste teste)
-    {
-        Testes.Remove(teste);
-    }
-
     public List<Questao> ObterQuestoesAleatorias(int quantidadeQuestoes, EnumSerie serie)
     {
-        List<Questao> questoesRelacionadas = new List<Questao>();
+        List<Questao> questoesRelacionadas = new();
 
         foreach (Materia mat in Materias)
         {
@@ -46,10 +31,10 @@ public class Disciplina : EntidadeBase<Disciplina>
                 questoesRelacionadas.AddRange(mat.Questoes);
         }
 
-        Random random = new Random();
+        Random random = new();
 
         return questoesRelacionadas
-            .OrderBy(q => random.Next())
+            .OrderBy(_ => random.Next())
             .Take(quantidadeQuestoes)
             .ToList();
     }

@@ -36,24 +36,6 @@ public class Questao : EntidadeBase<Questao>
         Alternativas.Remove(alternativa);
     }
 
-    public void AderirTeste(Teste teste)
-    {
-        Testes.Add(teste);
-    }
-
-    public void RemoverTeste(Teste teste)
-    {
-        Testes.Remove(teste);
-    }
-
-    public bool EstaCompleta()
-    {
-        bool temMinimoDuas = Alternativas.Count >= 2;
-        bool temUmaCorreta = Alternativas.Count(a => a.EstaCorreta) == 1;
-
-        return temMinimoDuas && temUmaCorreta;
-    }
-
     public override void AtualizarRegistro(Questao registroEditado)
     {
         Materia = registroEditado.Materia;

@@ -110,7 +110,7 @@ public class DisciplinaAppServiceTestes
         Result resultadoCadastro = disciplinaAppService.CadastrarRegistro(novaDisciplina);
 
         // Assert — efeitos e contrato.
-        unitOfWorkMock.Verify(u => u.Rollback(), Times.Once());
+        unitOfWorkMock.Verify(u => u.Rollback(), Times.Once);
 
         string mensagemErro = resultadoCadastro.Errors[0].Message;
 
@@ -188,7 +188,7 @@ public class DisciplinaAppServiceTestes
         Disciplina disciplinaEditada = new("Matemática");
 
         // Simula exceção na persistência.
-        repositorioDisciplinaMock?
+        repositorioDisciplinaMock
             .Setup(r => r.EditarRegistro(novaDisciplina.Id, disciplinaEditada))
             .Throws(new Exception("Erro inesperado"));
 
@@ -201,13 +201,13 @@ public class DisciplinaAppServiceTestes
         Result resultadoEdicao = disciplinaAppService.EditarRegistro(novaDisciplina.Id, disciplinaEditada);
 
         // Assert - efeito e contrato.
-        unitOfWorkMock.Verify(u => u.Rollback(), Times.Once());
+        unitOfWorkMock.Verify(u => u.Rollback(), Times.Once);
 
         string mensagemErro = resultadoEdicao.Errors[0].Message;
 
         Assert.IsNotNull(resultadoEdicao);
-        Assert.AreEqual("Ocorreu um erro interno no servidor.", mensagemErro);
         Assert.IsTrue(resultadoEdicao.IsFailed);
+        Assert.AreEqual("Ocorreu um erro interno no servidor.", mensagemErro);
     }
 
     [TestMethod]
