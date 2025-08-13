@@ -18,6 +18,13 @@ public class Questao : EntidadeBase<Questao>
         Enunciado = enunciado;
         Materia = materia;
     }
+    public void AderirAlternativas(List<Alternativa> alternativas)
+    {
+        if (Alternativas.Any(alternativas.Contains))
+            return;
+
+        Alternativas.AddRange(alternativas);
+    }
 
     public void AderirAlternativa(Alternativa alternativa)
     {

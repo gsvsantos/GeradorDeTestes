@@ -30,18 +30,39 @@ public class MateriaTestes
     {
         materia = new("Quatro Operações", disciplinaPadrao, EnumSerie.QuartoAnoFundamental);
 
-        materia.AderirQuestoes([
+        List<Questao> novasQuestoes = new(){
             new ("Quanto é 2 + 2?", materia),
             new ("Quanto é 53 - 38?", materia),
             new ("Quanto é 985 + 15?", materia),
             new ("Quanto é 9 / 3?", materia),
             new ("Quanto é 30 * 15?", materia)
-        ]);
+            };
 
-        List<Questao> questoesEsperadas = [.. materia.Questoes];
+        materia.AderirQuestoes(novasQuestoes);
+
+        List<Questao> questoesEsperadas = novasQuestoes;
         List<Questao> questoesDaMateria = materia.Questoes;
 
         Assert.AreEqual(questoesDaMateria.Count, questoesEsperadas.Count);
         CollectionAssert.IsSubsetOf(questoesDaMateria, questoesEsperadas);
+    }
+
+    [TestMethod]
+    public void Deve_RemoverQuestao_Da_Materia_Corretamente()
+    {
+        materia = new("Quatro Operações", disciplinaPadrao, EnumSerie.QuartoAnoFundamental);
+
+        Questao questao = new("Quanto é 53 - 38?", materia);
+
+        materia.AderirQuestao(questao);
+
+        List<Questao> questoesMateriaAposAderir = materia.Questoes.ToList();
+
+        materia.RemoverQuestao(questao);
+
+        List<Questao> questoesMateriaAposRemover = materia.Questoes.ToList();
+
+        Assert.AreNotEqual(questoesMateriaAposAderir.Count, questoesMateriaAposRemover.Count);
+        CollectionAssert.IsNotSubsetOf(questoesMateriaAposAderir, questoesMateriaAposRemover);
     }
 }
