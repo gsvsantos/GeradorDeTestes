@@ -47,9 +47,4 @@ public class DisciplinaIndexPageObject
 
         return new(driver);
     }
-
-    public bool ContemDisciplina(string nome)
-    {
-        return driver.PageSource.Contains(nome);
-    }
 }

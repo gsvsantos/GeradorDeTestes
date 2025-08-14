@@ -19,10 +19,6 @@ public abstract class TestFixture
         ConfigurarTabelas(dbContext);
 
         driver = InicializarWebDriver();
-        driver.Manage().Cookies.DeleteAllCookies();
-        driver.Manage().Timeouts().ImplicitWait = TimeSpan.Zero;
-        driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(60);
-        driver.Manage().Timeouts().AsynchronousJavaScript = TimeSpan.FromSeconds(30);
     }
 
     [TestCleanup]
@@ -33,14 +29,13 @@ public abstract class TestFixture
 
     private IWebDriver InicializarWebDriver()
     {
-        return EsconderChrome(true);
+        return ConfigurarChrome();
     }
 
     private void EncerrarWebDriver()
     {
         driver.Quit();
         driver.Dispose();
-        dbContext.Dispose();
     }
 
     private void ConfigurarTabelas(GeradorDeTestesDbContext dbContext)
@@ -55,13 +50,13 @@ public abstract class TestFixture
         dbContext.SaveChanges();
     }
 
-    private IWebDriver EsconderChrome(bool value)
+    private static IWebDriver ConfigurarChrome()
     {
-        ChromeOptions options = new();
-        options.AcceptInsecureCertificates = true;
-        options.PageLoadStrategy = PageLoadStrategy.Normal;
+        bool esconderChrome = true;
 
-        if (value)
+        ChromeOptions options = new();
+
+        if (esconderChrome)
             options.AddArgument("--headless=new");
 
         return new ChromeDriver(options);

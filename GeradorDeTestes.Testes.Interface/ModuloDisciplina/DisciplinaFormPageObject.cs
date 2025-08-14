@@ -17,6 +17,11 @@ public class DisciplinaFormPageObject
 
     public DisciplinaFormPageObject PreencherNome(string nome)
     {
+        wait.Until(d =>
+            d.FindElement(By.Id("Nome")).Displayed &&
+            d.FindElement(By.Id("Nome")).Enabled
+        );
+
         IWebElement nomeInput = driver.FindElement(By.Id("Nome"));
         nomeInput.Clear();
         nomeInput.SendKeys(nome);
@@ -41,5 +46,10 @@ public class DisciplinaFormPageObject
         wait.Until(d => !d.PageSource.Contains(nome));
 
         return new(driver);
+    }
+
+    public bool ContemDisciplina(string nome)
+    {
+        return driver.PageSource.Contains(nome);
     }
 }

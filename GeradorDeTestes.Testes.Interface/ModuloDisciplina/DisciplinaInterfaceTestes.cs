@@ -17,13 +17,15 @@ public sealed class DisciplinaInterfaceTestes : TestFixture
             .IrPara(enderecoBase);
 
         // Act
-        discipinaIndex
-            .ClickCadastrar()
+        DisciplinaFormPageObject disciplinaForm = discipinaIndex
+            .ClickCadastrar();
+
+        disciplinaForm
             .PreencherNome("Matemática")
             .ClickSubmit();
 
         // Assert
-        Assert.IsTrue(discipinaIndex.ContemDisciplina("Matemática"));
+        Assert.IsTrue(disciplinaForm.ContemDisciplina("Matemática"));
     }
 
     [TestMethod]
@@ -39,14 +41,17 @@ public sealed class DisciplinaInterfaceTestes : TestFixture
             .ClickSubmit();
 
         // Act
-        discipinaIndex
-            .ClickEditar()
+        DisciplinaFormPageObject disciplinaForm = new DisciplinaIndexPageObject(driver)
+            .IrPara(enderecoBase)
+            .ClickEditar();
+
+        disciplinaForm
             .PreencherNome("Matemática Editada")
             .ClickSubmit();
 
         // Assert
 
-        Assert.IsTrue(discipinaIndex.ContemDisciplina("Matemática Editada"));
+        Assert.IsTrue(disciplinaForm.ContemDisciplina("Matemática Editada"));
     }
 
     [TestMethod]
@@ -62,12 +67,15 @@ public sealed class DisciplinaInterfaceTestes : TestFixture
             .ClickSubmit();
 
         // Act
-        discipinaIndex
-            .ClickExcluir()
+        DisciplinaFormPageObject disciplinaForm = new DisciplinaIndexPageObject(driver)
+            .IrPara(enderecoBase)
+            .ClickExcluir();
+
+        disciplinaForm
             .ClickSubmitExcluir("Matemática");
 
         // Assert
 
-        Assert.IsFalse(discipinaIndex.ContemDisciplina("Matemática"));
+        Assert.IsFalse(disciplinaForm.ContemDisciplina("Matemática"));
     }
 }

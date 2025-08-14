@@ -1,8 +1,7 @@
 using GeradorDeTestes.Testes.Interface.ModuloDisciplina;
-using GeradorDeTestes.Testes.Interface.ModuloMateria;
 using GeradorDeTestes.Testes.InterfaceE2E.Compartilhado;
 
-namespace GeradorDeTestes.Testes.Interface;
+namespace GeradorDeTestes.Testes.Interface.ModuloMateria;
 
 [TestClass]
 [TestCategory("Testes de Interface de Matéria")]
@@ -14,11 +13,9 @@ public class MateriaInterfaceTestes : TestFixture
         // Arrange
         DisciplinaIndexPageObject discipinaIndex = new(driver);
 
-        DisciplinaFormPageObject disciplinaForm = discipinaIndex
+        discipinaIndex
             .IrPara(enderecoBase)
-            .ClickCadastrar();
-
-        disciplinaForm
+            .ClickCadastrar()
             .PreencherNome("Matemática")
             .ClickSubmit();
 
@@ -43,26 +40,24 @@ public class MateriaInterfaceTestes : TestFixture
         // Arrange
         DisciplinaIndexPageObject discipinaIndex = new(driver);
 
-        DisciplinaFormPageObject disciplinaForm = discipinaIndex
+        discipinaIndex
             .IrPara(enderecoBase)
-            .ClickCadastrar();
-
-        disciplinaForm
+            .ClickCadastrar()
             .PreencherNome("Matemática")
             .ClickSubmit();
 
-        MateriaFormPageObject materiaForm = new MateriaIndexPageObject(driver)
-            .IrPara(enderecoBase)
-            .ClickCadastrar();
+        MateriaIndexPageObject materiaIndex = new MateriaIndexPageObject(driver);
 
-        materiaForm
+        materiaIndex
+            .IrPara(enderecoBase)
+            .ClickCadastrar()
             .PreencherNome("Quatro Operações")
             .SelecionarDisciplina("Matemática")
             .SelecionarSerie("4º ano do Ensino Fundamental")
             .ClickSubmit();
 
         // Act
-        materiaForm = new MateriaIndexPageObject(driver)
+        MateriaFormPageObject materiaForm = new MateriaIndexPageObject(driver)
             .IrPara(enderecoBase)
             .ClickEditar();
 
@@ -82,26 +77,24 @@ public class MateriaInterfaceTestes : TestFixture
         // Arrange
         DisciplinaIndexPageObject discipinaIndex = new(driver);
 
-        DisciplinaFormPageObject disciplinaForm = discipinaIndex
+        discipinaIndex
             .IrPara(enderecoBase)
-            .ClickCadastrar();
-
-        disciplinaForm
+            .ClickCadastrar()
             .PreencherNome("Matemática")
             .ClickSubmit();
 
-        MateriaFormPageObject materiaForm = new MateriaIndexPageObject(driver)
-            .IrPara(enderecoBase)
-            .ClickCadastrar();
+        MateriaIndexPageObject materiaIndex = new MateriaIndexPageObject(driver);
 
-        materiaForm
+        materiaIndex
+            .IrPara(enderecoBase)
+            .ClickCadastrar()
             .PreencherNome("Quatro Operações")
             .SelecionarDisciplina("Matemática")
             .SelecionarSerie("4º ano do Ensino Fundamental")
             .ClickSubmit();
 
         // Act
-        materiaForm = new MateriaIndexPageObject(driver)
+        MateriaFormPageObject materiaForm = new MateriaIndexPageObject(driver)
             .IrPara(enderecoBase)
             .ClickExcluir();
 
