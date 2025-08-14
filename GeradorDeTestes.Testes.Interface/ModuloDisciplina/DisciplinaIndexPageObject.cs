@@ -16,8 +16,9 @@ public class DisciplinaIndexPageObject
 
     public DisciplinaIndexPageObject IrPara(string enderecoBase)
     {
-        driver.Navigate().GoToUrl(Path.Combine(enderecoBase, "disciplinas"));
+        driver.Navigate().GoToUrl(new Uri(new Uri(enderecoBase.TrimEnd('/') + "/"), "disciplinas"));
 
+        wait.Until(d => d.Url.Contains("/disciplinas", StringComparison.OrdinalIgnoreCase));
         wait.Until(d => d.FindElement(By.CssSelector("a[data-se='btnCadastrar']")).Displayed);
 
         return this;
@@ -25,21 +26,24 @@ public class DisciplinaIndexPageObject
 
     public DisciplinaFormPageObject ClickCadastrar()
     {
-        driver.FindElement(By.CssSelector("a[data-se='btnCadastrar']")).Click();
+        wait.Until(d => d.FindElement(By.CssSelector("a[data-se='btnCadastrar']"))).Click();
+        wait.Until(d => d.FindElement(By.CssSelector("form")).Displayed);
 
         return new(driver);
     }
 
     public DisciplinaFormPageObject ClickEditar()
     {
-        driver.FindElement(By.CssSelector(".card a[title='Editar Disciplina']")).Click();
+        wait.Until(d => d.FindElement(By.CssSelector(".card a[title='Editar Disciplina']"))).Click();
+        wait.Until(d => d.FindElement(By.CssSelector("form")).Displayed);
 
         return new(driver);
     }
 
     public DisciplinaFormPageObject ClickExcluir()
     {
-        driver.FindElement(By.CssSelector(".card a[title='Excluir Disciplina']")).Click();
+        wait.Until(d => d.FindElement(By.CssSelector(".card a[title='Excluir Disciplina']"))).Click();
+        wait.Until(d => d.FindElement(By.CssSelector("form")).Displayed);
 
         return new(driver);
     }

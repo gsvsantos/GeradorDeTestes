@@ -14,86 +14,102 @@ public class MateriaInterfaceTestes : TestFixture
         // Arrange
         DisciplinaIndexPageObject discipinaIndex = new(driver);
 
-        discipinaIndex
+        DisciplinaFormPageObject disciplinaForm = discipinaIndex
             .IrPara(enderecoBase)
-            .ClickCadastrar()
+            .ClickCadastrar();
+
+        disciplinaForm
             .PreencherNome("Matemática")
             .ClickSubmit();
 
         // Act
-        MateriaIndexPageObject materiaIndex = new MateriaIndexPageObject(driver)
-            .IrPara(enderecoBase);
+        MateriaFormPageObject materiaForm = new MateriaIndexPageObject(driver)
+            .IrPara(enderecoBase)
+            .ClickCadastrar();
 
-        materiaIndex
-            .ClickCadastrar()
+        materiaForm
             .PreencherNome("Quatro Operações")
             .SelecionarDisciplina("Matemática")
             .SelecionarSerie("4º ano do Ensino Fundamental")
             .ClickSubmit();
 
         // Assert
-        Assert.IsTrue(materiaIndex.ContemMateria("Quatro Operações"));
+        Assert.IsTrue(materiaForm.ContemMateria("Quatro Operações"));
     }
 
     [TestMethod]
     public void Deve_Editar_Materia_Corretamente()
     {
         // Arrange
-        new DisciplinaIndexPageObject(driver!)
-           .IrPara(enderecoBase)
-           .ClickCadastrar()
-           .PreencherNome("Matemática")
-           .ClickSubmit();
+        DisciplinaIndexPageObject discipinaIndex = new(driver);
 
-        MateriaIndexPageObject materiaIndex = new MateriaIndexPageObject(driver!)
-            .IrPara(enderecoBase);
+        DisciplinaFormPageObject disciplinaForm = discipinaIndex
+            .IrPara(enderecoBase)
+            .ClickCadastrar();
 
-        materiaIndex
-            .ClickCadastrar()
+        disciplinaForm
+            .PreencherNome("Matemática")
+            .ClickSubmit();
+
+        MateriaFormPageObject materiaForm = new MateriaIndexPageObject(driver)
+            .IrPara(enderecoBase)
+            .ClickCadastrar();
+
+        materiaForm
             .PreencherNome("Quatro Operações")
             .SelecionarDisciplina("Matemática")
             .SelecionarSerie("4º ano do Ensino Fundamental")
             .ClickSubmit();
 
         // Act
-        materiaIndex
-            .ClickEditar()
+        materiaForm = new MateriaIndexPageObject(driver)
+            .IrPara(enderecoBase)
+            .ClickEditar();
+
+        materiaForm
             .PreencherNome("Quatro Operações Editada")
             .SelecionarDisciplina("Matemática")
             .SelecionarSerie("4º ano do Ensino Fundamental")
             .ClickSubmit();
 
         // Assert
-        Assert.IsTrue(materiaIndex.ContemMateria("Quatro Operações Editada"));
+        Assert.IsTrue(materiaForm.ContemMateria("Quatro Operações Editada"));
     }
 
     [TestMethod]
     public void Deve_Excluir_Materia_Corretamente()
     {
         // Arrange
-        new DisciplinaIndexPageObject(driver!)
+        DisciplinaIndexPageObject discipinaIndex = new(driver);
+
+        DisciplinaFormPageObject disciplinaForm = discipinaIndex
             .IrPara(enderecoBase)
-            .ClickCadastrar()
+            .ClickCadastrar();
+
+        disciplinaForm
             .PreencherNome("Matemática")
             .ClickSubmit();
 
-        MateriaIndexPageObject materiaIndex = new MateriaIndexPageObject(driver!)
-            .IrPara(enderecoBase);
+        MateriaFormPageObject materiaForm = new MateriaIndexPageObject(driver)
+            .IrPara(enderecoBase)
+            .ClickCadastrar();
 
-        materiaIndex
-            .ClickCadastrar()
+        materiaForm
             .PreencherNome("Quatro Operações")
             .SelecionarDisciplina("Matemática")
             .SelecionarSerie("4º ano do Ensino Fundamental")
             .ClickSubmit();
 
         // Act
-        materiaIndex
-            .ClickExcluir()
-            .ClickSubmitExcluir();
+        materiaForm = new MateriaIndexPageObject(driver)
+            .IrPara(enderecoBase)
+            .ClickExcluir();
+
+        materiaForm
+            .ClickSubmitExcluir("Quatro Operações");
 
         // Assert
-        Assert.IsFalse(materiaIndex.ContemMateria("Quatro Operações"));
+        Assert.IsFalse(materiaForm.ContemMateria("Quatro Operações"));
 
     }
 }

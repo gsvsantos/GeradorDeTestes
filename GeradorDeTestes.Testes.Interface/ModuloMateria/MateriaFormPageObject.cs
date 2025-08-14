@@ -1,5 +1,4 @@
-﻿using GeradorDeTestes.Testes.Interface.ModuloDisciplina;
-using OpenQA.Selenium;
+﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 
 namespace GeradorDeTestes.Testes.Interface.ModuloMateria;
@@ -61,16 +60,24 @@ public class MateriaFormPageObject
     public MateriaIndexPageObject ClickSubmit()
     {
         wait.Until(d => d.FindElement(By.CssSelector("button[type='submit']"))).Click();
+        wait.Until(d => d.Url.Contains("/materias", StringComparison.OrdinalIgnoreCase));
+        wait.Until(d => d.FindElement(By.CssSelector("a[data-se='btnCadastrar']")).Displayed);
 
         return new(driver);
     }
 
-    public DisciplinaIndexPageObject ClickSubmitExcluir()
+    public MateriaIndexPageObject ClickSubmitExcluir(string nome)
     {
         wait.Until(d => d.FindElement(By.CssSelector("button[type='submit']"))).Click();
-
-        wait.Until(d => d.FindElements(By.CssSelector(".card")).Count == 0);
+        wait.Until(d => d.Url.Contains("/materias", StringComparison.OrdinalIgnoreCase));
+        wait.Until(d => d.FindElement(By.CssSelector("a[data-se='btnCadastrar']")).Displayed);
+        wait.Until(d => !d.PageSource.Contains(nome));
 
         return new(driver);
+    }
+
+    public bool ContemMateria(string nome)
+    {
+        return driver.PageSource.Contains(nome);
     }
 }

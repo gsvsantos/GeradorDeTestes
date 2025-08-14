@@ -16,8 +16,9 @@ public class MateriaIndexPageObject
 
     public MateriaIndexPageObject IrPara(string enderecoBase)
     {
-        driver.Navigate().GoToUrl(Path.Combine(enderecoBase, "materias"));
+        driver.Navigate().GoToUrl(new Uri(new Uri(enderecoBase.TrimEnd('/') + "/"), "materias"));
 
+        wait.Until(d => d.Url.Contains("/materias", StringComparison.OrdinalIgnoreCase));
         wait.Until(d => d.FindElement(By.CssSelector("a[data-se='btnCadastrar']")).Displayed);
 
         return this;
@@ -25,27 +26,28 @@ public class MateriaIndexPageObject
 
     public MateriaFormPageObject ClickCadastrar()
     {
-        driver.FindElement(By.CssSelector("a[data-se='btnCadastrar']")).Click();
+        wait.Until(d => d.FindElement(By.CssSelector("a[data-se='btnCadastrar']"))).Click();
+
+        wait.Until(d => d.FindElement(By.CssSelector("form")).Displayed);
 
         return new(driver);
     }
 
     public MateriaFormPageObject ClickEditar()
     {
-        driver.FindElement(By.CssSelector(".card a[title='Editar Matéria']")).Click();
+        wait.Until(d => d.FindElement(By.CssSelector(".card a[title='Editar Matéria']"))).Click();
+
+        wait.Until(d => d.FindElement(By.CssSelector("form")).Displayed);
 
         return new(driver);
     }
 
     public MateriaFormPageObject ClickExcluir()
     {
-        driver.FindElement(By.CssSelector(".card a[title='Excluir Matéria']")).Click();
+        wait.Until(d => d.FindElement(By.CssSelector(".card a[title='Excluir Matéria']"))).Click();
+
+        wait.Until(d => d.FindElement(By.CssSelector("form")).Displayed);
 
         return new(driver);
-    }
-
-    public bool ContemMateria(string nome)
-    {
-        return driver.PageSource.Contains(nome);
     }
 }

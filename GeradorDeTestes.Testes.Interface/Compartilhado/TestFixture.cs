@@ -7,19 +7,22 @@ namespace GeradorDeTestes.Testes.InterfaceE2E.Compartilhado;
 [TestClass]
 public abstract class TestFixture
 {
-    protected static GeradorDeTestesDbContext dbContext;
-    protected static IWebDriver driver;
-    protected static string enderecoBase = "https://localhost:7194";
-    private static string connectionString = "Host=localhost;Port=5432;Database=GeradorDeTestesDb;Username=postgres;Password=@GStavo02!;";
+    protected GeradorDeTestesDbContext dbContext;
+    protected IWebDriver driver;
+    protected string enderecoBase = "https://localhost:7194";
+    private string connectionString = "Host=localhost;Port=5432;Database=GeradorDeTestesDb;Username=postgres;Password=SenhaSuperSecreta;";
 
     [TestInitialize]
     public void ConfigurarTestes()
     {
         dbContext = TesteDbContextFactory.CriarDbContext(connectionString);
-
         ConfigurarTabelas(dbContext);
 
-        InicializarWebDriver();
+        driver = InicializarWebDriver();
+        driver.Manage().Cookies.DeleteAllCookies();
+        driver.Manage().Timeouts().ImplicitWait = TimeSpan.Zero;
+        driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(60);
+        driver.Manage().Timeouts().AsynchronousJavaScript = TimeSpan.FromSeconds(30);
     }
 
     [TestCleanup]
@@ -28,18 +31,19 @@ public abstract class TestFixture
         EncerrarWebDriver();
     }
 
-    private static void InicializarWebDriver()
+    private IWebDriver InicializarWebDriver()
     {
-        driver = EsconderChrome(false);
+        return EsconderChrome(true);
     }
 
-    private static void EncerrarWebDriver()
+    private void EncerrarWebDriver()
     {
         driver.Quit();
         driver.Dispose();
+        dbContext.Dispose();
     }
 
-    private static void ConfigurarTabelas(GeradorDeTestesDbContext dbContext)
+    private void ConfigurarTabelas(GeradorDeTestesDbContext dbContext)
     {
         dbContext.Database.EnsureCreated();
 
@@ -51,18 +55,15 @@ public abstract class TestFixture
         dbContext.SaveChanges();
     }
 
-    private static ChromeDriver EsconderChrome(bool value)
+    private IWebDriver EsconderChrome(bool value)
     {
-        if (value)
-        {
-            ChromeOptions options = new();
-            options.AddArgument("--headless");
+        ChromeOptions options = new();
+        options.AcceptInsecureCertificates = true;
+        options.PageLoadStrategy = PageLoadStrategy.Normal;
 
-            return new ChromeDriver(options);
-        }
-        else
-        {
-            return new ChromeDriver();
-        }
+        if (value)
+            options.AddArgument("--headless=new");
+
+        return new ChromeDriver(options);
     }
 }

@@ -27,15 +27,18 @@ public class DisciplinaFormPageObject
     public DisciplinaIndexPageObject ClickSubmit()
     {
         wait.Until(d => d.FindElement(By.CssSelector("button[type='submit']"))).Click();
+        wait.Until(d => d.Url.Contains("/disciplinas", StringComparison.OrdinalIgnoreCase));
+        wait.Until(d => d.FindElement(By.CssSelector("a[data-se='btnCadastrar']")).Displayed);
 
         return new(driver);
     }
 
-    public DisciplinaIndexPageObject ClickSubmitExcluir()
+    public DisciplinaIndexPageObject ClickSubmitExcluir(string nome)
     {
         wait.Until(d => d.FindElement(By.CssSelector("button[type='submit']"))).Click();
-
-        wait.Until(d => d.FindElements(By.CssSelector(".card")).Count == 0);
+        wait.Until(d => d.Url.Contains("/disciplinas", StringComparison.OrdinalIgnoreCase));
+        wait.Until(d => d.FindElement(By.CssSelector("a[data-se='btnCadastrar']")).Displayed);
+        wait.Until(d => !d.PageSource.Contains(nome));
 
         return new(driver);
     }
