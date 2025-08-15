@@ -9,6 +9,7 @@ public abstract class ResultadosErro
             .CausedBy(mensagemErro)
             .WithMetadata("TipoErro", "RegistroDuplicado");
     }
+
     public static Error RegistroVinculadoErro(string mensagemErro)
     {
         return new Error("Registro Vinculado")
@@ -63,6 +64,20 @@ public abstract class ResultadosErro
         return new Error("Alternativa Não Encontrada")
             .CausedBy("Não foi possível obter a alternativa ID: " + idAlternativa.ToString())
             .WithMetadata("TipoErro", "AlternativaNaoEncontrada");
+    }
+
+    public static Error DisciplinaESerieSemMateriasErro(string mensagemErro)
+    {
+        return new Error("Disciplina E Série Sem Matérias")
+            .CausedBy(mensagemErro)
+            .WithMetadata("TipoErro", "DisciplinaESerieSemMaterias");
+    }
+
+    public static Error MateriaSemQuestoesErro(string mensagemErro)
+    {
+        return new Error("Matéria Sem Questões")
+            .CausedBy(mensagemErro)
+            .WithMetadata("TipoErro", "MateriaSemQuestoes");
     }
 
     public static Error QuantidadeQuestoesErro(string mensagemErro)

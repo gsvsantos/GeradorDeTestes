@@ -28,12 +28,33 @@ public class TesteAppService
 
     public Result CadastrarRegistro(Teste novoTeste)
     {
+        List<Materia> materias = repositorioMateria.SelecionarRegistros();
         List<Teste> testes = repositorioTeste.SelecionarRegistros();
 
         if (testes.Any(t => t.Titulo.Equals(novoTeste.Titulo)))
         {
             Error erro = ResultadosErro.RegistroDuplicadoErro(
                 "Já existe um teste com este título.");
+
+            return Result.Fail(erro);
+        }
+
+        List<Materia> materiasSelecionadas = materias
+            .Where(m => m.Disciplina.Equals(novoTeste.Disciplina) && m.Serie.Equals(novoTeste.Serie))
+            .ToList();
+
+        if (materiasSelecionadas.Count == 0)
+        {
+            Error erro = ResultadosErro.DisciplinaESerieSemMateriasErro(
+                "A disciplina/série selecionadas não contêm matérias.");
+
+            return Result.Fail(erro);
+        }
+
+        if (materiasSelecionadas.All(m => m.Questoes == null || m.Questoes.Count < 1))
+        {
+            Error erro = ResultadosErro.MateriaSemQuestoesErro(
+                "Essa disciplina/série não possui matérias com questões.");
 
             return Result.Fail(erro);
         }

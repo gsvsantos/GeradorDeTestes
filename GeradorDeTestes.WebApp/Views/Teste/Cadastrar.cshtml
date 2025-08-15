@@ -39,9 +39,9 @@
                     <div class="form-group d-grid mt-2">
                         <label class="form-label fs-5" asp-for="Serie">Serie:</label>
                         <select class="form-select" id="selectSerie" asp-for="Serie" asp-items="@Html.GetEnumSelectList<EnumSerie>()">
-                            <option value="" disabled selected>Selecione uma Matéria</option>
+                            <option value="" disabled selected>Selecione uma Série</option>
                         </select>
-                        <span class="text-danger d-block mt-2" asp-validation-for="DisciplinaId"></span>
+                        <span class="text-danger d-block mt-2" asp-validation-for="Serie"></span>
                     </div>
 
                     <div class="form-group d-grid mt-2">

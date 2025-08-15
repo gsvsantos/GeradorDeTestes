@@ -106,7 +106,7 @@ public class TesteController : Controller
         {
             foreach (IError erro in resultadoCadastro.Errors)
             {
-                if (erro.Metadata["TipoErro"].ToString() == "RegistroDuplicado")
+                if (!string.IsNullOrWhiteSpace(erro.Metadata["TipoErro"].ToString()))
                 {
                     ModelState.AddModelError("ConflitoCadastro", erro.Reasons[0].Message);
                     break;
