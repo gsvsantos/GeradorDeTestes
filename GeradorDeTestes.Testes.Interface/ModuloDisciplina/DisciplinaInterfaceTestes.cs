@@ -1,5 +1,5 @@
-﻿using GeradorDeTestes.Testes.Interface.ModuloDisciplina;
-using GeradorDeTestes.Testes.InterfaceE2E.Compartilhado;
+﻿using GeradorDeTestes.Testes.Interface.Compartilhado;
+using GeradorDeTestes.Testes.Interface.ModuloDisciplina;
 
 namespace GeradorDeTestes.Testes.InterfaceE2E.ModuloDisciplina;
 

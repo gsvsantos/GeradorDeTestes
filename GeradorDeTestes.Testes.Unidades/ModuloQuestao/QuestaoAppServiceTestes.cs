@@ -17,7 +17,6 @@ public class QuestaoAppServiceTestes
     private QuestaoAppService questaoAppService;
     private Materia materiaPadrao = new("Subtração", new("Matemática"), EnumSerie.QuartoAnoFundamental);
 
-
     private Mock<IGeradorQuestoes> geradorQuestoesMock;
     private Mock<IUnitOfWork> unitOfWorkMock;
     private Mock<IRepositorioQuestao> repositorioQuestaoMock;

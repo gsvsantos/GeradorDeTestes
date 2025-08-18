@@ -16,7 +16,7 @@ public class MateriaIndexPageObject
 
     public MateriaIndexPageObject IrPara(string enderecoBase)
     {
-        driver.Navigate().GoToUrl(new Uri(new Uri(enderecoBase.TrimEnd('/') + "/"), "materias"));
+        driver.Navigate().GoToUrl($"{enderecoBase.TrimEnd('/')}/materias");
 
         wait.Until(d => d.Url.Contains("/materias", StringComparison.OrdinalIgnoreCase));
         wait.Until(d => d.FindElement(By.CssSelector("a[data-se='btnCadastrar']")).Displayed);

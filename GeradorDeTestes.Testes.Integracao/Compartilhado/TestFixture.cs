@@ -33,7 +33,7 @@ public abstract class TestFixture
             .WithName("gerador-de-testes-testesdb")
             .WithDatabase("GeradorDeTestesDbTestes")
             .WithUsername("postgres")
-            .WithPassword("postgres")
+            .WithPassword("SenhaSuperSecreta")
             .WithPortBinding(5434, 5432)
             .WithCleanUp(true)
             .Build();

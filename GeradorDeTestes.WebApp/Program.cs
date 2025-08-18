@@ -6,6 +6,7 @@ using GeradorDeTestes.Dominio.ModuloDisciplina;
 using GeradorDeTestes.Dominio.ModuloMateria;
 using GeradorDeTestes.Dominio.ModuloQuestao;
 using GeradorDeTestes.Dominio.ModuloTeste;
+using GeradorDeTestes.Infraestrutura.ORM.Compartilhado;
 using GeradorDeTestes.Infraestrutura.ORM.ModuloDisciplina;
 using GeradorDeTestes.Infraestrutura.ORM.ModuloMateria;
 using GeradorDeTestes.Infraestrutura.ORM.ModuloQuestao;
@@ -40,6 +41,8 @@ public class Program
         builder.Services.AddSerilogConfig(builder.Logging, builder.Configuration);
         builder.Services.AddQuestPDFConfig();
         builder.Services.AddGeminiChatConfig();
+        builder.Services.AddHealthChecks()
+            .AddDbContextCheck<GeradorDeTestesDbContext>();
 
         WebApplication app = builder.Build();
 
@@ -65,6 +68,7 @@ public class Program
 
         app.UseRouting();
         app.MapDefaultControllerRoute();
+        app.MapHealthChecks("/health");
 
         app.Run();
     }

@@ -16,7 +16,7 @@ public class DisciplinaIndexPageObject
 
     public DisciplinaIndexPageObject IrPara(string enderecoBase)
     {
-        driver.Navigate().GoToUrl(new Uri(new Uri(enderecoBase.TrimEnd('/') + "/"), "disciplinas"));
+        driver.Navigate().GoToUrl($"{enderecoBase.TrimEnd('/')}/disciplinas");
 
         wait.Until(d => d.Url.Contains("/disciplinas", StringComparison.OrdinalIgnoreCase));
         wait.Until(d => d.FindElement(By.CssSelector("a[data-se='btnCadastrar']")).Displayed);

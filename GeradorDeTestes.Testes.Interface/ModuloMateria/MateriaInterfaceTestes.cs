@@ -1,5 +1,5 @@
+using GeradorDeTestes.Testes.Interface.Compartilhado;
 using GeradorDeTestes.Testes.Interface.ModuloDisciplina;
-using GeradorDeTestes.Testes.InterfaceE2E.Compartilhado;
 
 namespace GeradorDeTestes.Testes.Interface.ModuloMateria;
 
