@@ -27,6 +27,14 @@ public class Teste : EntidadeBase<Teste>
         QuantidadeQuestoes = quantidadeQuestoes;
     }
 
+    public void AderirQuestoes(List<Questao> questoes)
+    {
+        if (Questoes.Any(questoes.Contains))
+            return;
+
+        Questoes.AddRange(questoes);
+    }
+
     public void AderirQuestao(Questao questao)
     {
         if (!Questoes.Any(q => q.Id == questao.Id))
