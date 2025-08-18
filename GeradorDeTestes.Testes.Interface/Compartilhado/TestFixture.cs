@@ -7,7 +7,6 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Remote;
 using Testcontainers.PostgreSql;
-using INetwork = DotNet.Testcontainers.Networks.INetwork;
 
 namespace GeradorDeTestes.Testes.Interface.Compartilhado;
 
@@ -28,6 +27,7 @@ public abstract class TestFixture
     private readonly static int seleniumPort = 4444;
 
     private static IConfiguration configuracao;
+    private static DotNet.Testcontainers.Networks.INetwork? rede;
 
     [AssemblyInitialize]
     public static async Task ConfigurarTestes(TestContext _)
@@ -37,22 +37,22 @@ public abstract class TestFixture
             .AddEnvironmentVariables()
             .Build();
 
-        INetwork rede = new NetworkBuilder()
-            .WithName(Guid.NewGuid().ToString())
+        rede = new NetworkBuilder()
+            .WithName(Guid.NewGuid().ToString("D"))
             .WithCleanUp(true)
             .Build();
 
-        await InicializarBancoDadosAsync(rede);
+        await InicializarBancoDadosAsync();
 
-        await InicializarAplicacaoAsync(rede);
+        await InicializarAplicacaoAsync();
 
-        await InicializarWebDriverAsync(rede);
+        await InicializarWebDriverAsync();
     }
 
     [AssemblyCleanup]
     public static async Task EncerrarTestes()
     {
-        await EncerrarWebDriverAsync();
+        EncerrarWebDriverAsync();
 
         await EncerrarAplicacaoAsync();
 
@@ -82,7 +82,7 @@ public abstract class TestFixture
         dbContext.SaveChanges();
     }
 
-    private static async Task InicializarBancoDadosAsync(INetwork rede)
+    private static async Task InicializarBancoDadosAsync()
     {
         dbContainer = new PostgreSqlBuilder()
             .WithImage("postgres:16")
@@ -103,7 +103,7 @@ public abstract class TestFixture
         await dbContainer.StartAsync();
     }
 
-    private static async Task InicializarAplicacaoAsync(INetwork rede)
+    private static async Task InicializarAplicacaoAsync()
     {
         // Configura image via dockerfile
         IFutureDockerImage image = new ImageFromDockerfileBuilder()
@@ -143,7 +143,7 @@ public abstract class TestFixture
         enderecoBase = $"http://{appContainer.Name}:{appPort}";
     }
 
-    private static async Task InicializarWebDriverAsync(INetwork rede)
+    private static async Task InicializarWebDriverAsync()
     {
         seleniumContainer = new ContainerBuilder()
             .WithImage("selenium/standalone-chrome:nightly")
@@ -171,19 +171,13 @@ public abstract class TestFixture
     private static async Task EncerrarBancoDadosAsync()
     {
         if (dbContainer is not null)
-        {
-            await dbContainer.StopAsync();
             await dbContainer.DisposeAsync();
-        }
     }
 
     private static async Task EncerrarAplicacaoAsync()
     {
         if (appContainer is not null)
-        {
-            await appContainer.StopAsync();
             await appContainer.DisposeAsync();
-        }
     }
 
     private static async Task EncerrarWebDriverAsync()

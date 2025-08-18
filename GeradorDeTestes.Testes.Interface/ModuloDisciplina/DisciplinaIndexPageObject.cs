@@ -27,7 +27,6 @@ public class DisciplinaIndexPageObject
     public DisciplinaFormPageObject ClickCadastrar()
     {
         wait.Until(d => d.FindElement(By.CssSelector("a[data-se='btnCadastrar']"))).Click();
-        wait.Until(d => d.FindElement(By.CssSelector("form")).Displayed);
 
         return new(driver);
     }
@@ -35,7 +34,6 @@ public class DisciplinaIndexPageObject
     public DisciplinaFormPageObject ClickEditar()
     {
         wait.Until(d => d.FindElement(By.CssSelector(".card a[title='Editar Disciplina']"))).Click();
-        wait.Until(d => d.FindElement(By.CssSelector("form")).Displayed);
 
         return new(driver);
     }
@@ -43,7 +41,6 @@ public class DisciplinaIndexPageObject
     public DisciplinaFormPageObject ClickExcluir()
     {
         wait.Until(d => d.FindElement(By.CssSelector(".card a[title='Excluir Disciplina']"))).Click();
-        wait.Until(d => d.FindElement(By.CssSelector("form")).Displayed);
 
         return new(driver);
     }
