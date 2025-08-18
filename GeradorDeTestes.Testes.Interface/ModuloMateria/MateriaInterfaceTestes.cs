@@ -1,3 +1,4 @@
+using GeradorDeTestes.Dominio.ModuloMateria;
 using GeradorDeTestes.Testes.Interface.Compartilhado;
 using GeradorDeTestes.Testes.Interface.ModuloDisciplina;
 
@@ -27,7 +28,7 @@ public class MateriaInterfaceTestes : TestFixture
         materiaForm
             .PreencherNome("Quatro Operações")
             .SelecionarDisciplina("Matemática")
-            .SelecionarSerie("4º ano do Ensino Fundamental")
+            .SelecionarSerie(EnumSerie.QuartoAnoFundamental)
             .ClickSubmit();
 
         // Assert
@@ -53,7 +54,7 @@ public class MateriaInterfaceTestes : TestFixture
             .ClickCadastrar()
             .PreencherNome("Quatro Operações")
             .SelecionarDisciplina("Matemática")
-            .SelecionarSerie("4º ano do Ensino Fundamental")
+            .SelecionarSerie(EnumSerie.QuartoAnoFundamental)
             .ClickSubmit();
 
         // Act
@@ -64,7 +65,7 @@ public class MateriaInterfaceTestes : TestFixture
         materiaForm
             .PreencherNome("Quatro Operações Editada")
             .SelecionarDisciplina("Matemática")
-            .SelecionarSerie("4º ano do Ensino Fundamental")
+            .SelecionarSerie(EnumSerie.QuartoAnoFundamental)
             .ClickSubmit();
 
         // Assert
@@ -90,7 +91,7 @@ public class MateriaInterfaceTestes : TestFixture
             .ClickCadastrar()
             .PreencherNome("Quatro Operações")
             .SelecionarDisciplina("Matemática")
-            .SelecionarSerie("4º ano do Ensino Fundamental")
+            .SelecionarSerie(EnumSerie.QuartoAnoFundamental)
             .ClickSubmit();
 
         // Act

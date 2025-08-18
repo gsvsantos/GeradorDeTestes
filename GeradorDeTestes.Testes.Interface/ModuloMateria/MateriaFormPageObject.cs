@@ -1,4 +1,5 @@
-﻿using OpenQA.Selenium;
+﻿using GeradorDeTestes.Dominio.ModuloMateria;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 
 namespace GeradorDeTestes.Testes.Interface.ModuloMateria;
@@ -43,7 +44,7 @@ public class MateriaFormPageObject
         return this;
     }
 
-    public MateriaFormPageObject SelecionarSerie(string serie)
+    public MateriaFormPageObject SelecionarSerie(EnumSerie serie)
     {
         wait.Until(d =>
             d.FindElement(By.Id("Serie")).Displayed &&
@@ -52,7 +53,9 @@ public class MateriaFormPageObject
 
         SelectElement selectSerie = new(driver.FindElement(By.Id("Serie")));
 
-        selectSerie.SelectByText(serie);
+        wait.Until(_ => selectSerie.Options.Count > 1);
+
+        selectSerie.SelectByValue(((int)serie).ToString());
 
         return this;
     }

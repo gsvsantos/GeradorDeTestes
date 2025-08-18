@@ -42,7 +42,7 @@
 
                     <div class="form-group d-grid mt-2">
                         <label asp-for="Serie" class="form-label">Série/Ano:</label>
-                        <select asp-for="Serie" class="form-control" asp-items="@Html.GetEnumSelectList<EnumSerie>()" class="form-control">
+                        <select asp-for="Serie" class="form-control" asp-items="@Html.GetEnumSelectList<EnumSerie>()">
                             <option value="" selected disabled>Selecione a Série/Ano</option>
                         </select>
                         <span asp-validation-for="Serie" class="text-danger d-block mt-2"></span>
