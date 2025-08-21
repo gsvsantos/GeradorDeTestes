@@ -7,12 +7,12 @@
     ViewBag.Titulo = "Registro de Usuário";
 }
 
-<div class="row justify-content-center align-items-center">
-    <div class="col-sm-10 col-md-8 col-xl-5">
-        <div class="card shadow-sm rounded-4 border-0 mt-3">
-            <div class="card-body p-4 p-md-5">
+<div class="d-flex flex-wrap justify-content-between my-5 gap-1">
+    <div class="col-12 col-md-6 align-self-center m-auto">
+        <div class="card rounded-4 border-0">
+            <div class="card-body cor-padrao p-md-4">
                 <div class="d-flex justify-content-between align-items-center mb-5">
-                    <h3 class="fw-bold text-primary mb-0">Controle de Cinema</h3>
+                    <h3 class="fw-bold mb-0">Teste, Logo Avalie</h3>
 
                     <span class="fs-4 fw-normal">Registro</span>
                 </div>
@@ -47,20 +47,18 @@
                     </div>
 
                     <div class="form-group d-flex align-items-center justify-content-end gap-3 mt-5">
-                        <a asp-action="Login">Já tenho uma conta</a>
-                        <button type="submit" class="btn btn-primary rounded-3 px-5">Confirmar</button>
+                        <a class="botao botao-outline rounded-4 px-5" asp-action="Login">
+                            <i class="bi bi-person-up"></i>
+                            Já tenho uma conta
+                        </a>
+                        <button type="submit" class="botao rounded-4 px-5">
+                            <i class="bi bi-box-arrow-in-right"></i>
+                            Confirmar
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
-
-        <p class="text-center text-muted small mt-3 mb-0">
-            © @DateTime.Now.Year Controle de Cinema
-        </p>
-    </div>
-    <div class="col-10 col-lg order-0 order-lg-1 mx-auto text-end">
-        <img src="~/images/registro.svg" alt="Autenticação" class="img-fluid" />
-        <a class="text-decoration-none" href="https://storyset.com/people" target="_blank">Ilustrações de pessoas por <strong>Storyset</strong></a>
     </div>
 </div>
 

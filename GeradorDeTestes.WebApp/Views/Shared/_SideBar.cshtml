@@ -105,15 +105,27 @@
             </ul>
         </li>
     </ul>
-    <div class="dropdown">
-        <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="bi bi-person-circle-fill"></i>
-            @User.Identity?.Name
+    <div class="sidebar-user dropdown d-flex justify-content-end">
+        <button class="botao dropdown-toggle w-100 d-flex align-items-center gap-2"
+                type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <span>
+                <i class="bi bi-person-circle" aria-hidden="true"></i>
+            </span>
+            <span class="text-truncate">@User.Identity?.Name</span>
         </button>
-        <ul class="dropdown-menu">
+
+        <ul class="dropdown-menu dropdown-menu-dark user-dropdown shadow">
+@*          <li>
+                <a class="dropdown-item d-flex align-items-center gap-2" href="#">
+                    <i class="bi bi-person-gear"></i> #placeholder
+                </a>
+            </li>
+            <li><hr class="dropdown-divider"></li> *@
             <li>
-                <form asp-controller="Autenticacao" asp-action="Logout" method="post">
-                    <button class="dropdown-item" type="submit">Logout</button>
+                <form class="px-2" asp-controller="Autenticacao" asp-action="Logout" method="post">
+                    <button class="dropdown-item text-danger d-flex align-items-center gap-2" type="submit">
+                        <i class="bi bi-box-arrow-right"></i> Sair
+                    </button>
                 </form>
             </li>
         </ul>

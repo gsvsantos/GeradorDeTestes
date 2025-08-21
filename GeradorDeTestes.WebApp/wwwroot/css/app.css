@@ -265,10 +265,8 @@
 }
 
 .sidebar:not(.expand) .nav-link {
-    text-align-last: justify;
     padding: 0.75rem;
     text-align: center;
-    width: 90px;
     min-width: 90px;
 }
 
@@ -629,6 +627,10 @@ input[type="checkbox"]:checked:disabled::after {
 .form-control:disabled, .form-select:disabled {
     opacity: 0.6;
     color: var(--cor-texto-principal);
+    background-color: var(--cor-fundo);
+}
+
+.dropdown-menu-dark{
     background-color: var(--cor-fundo);
 }
 
