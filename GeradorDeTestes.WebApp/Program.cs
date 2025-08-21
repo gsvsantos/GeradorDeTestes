@@ -1,3 +1,4 @@
+using GeradorDeTestes.Aplicacao.ModuloAutenticacao;
 using GeradorDeTestes.Aplicacao.ModuloDisciplina;
 using GeradorDeTestes.Aplicacao.ModuloMateria;
 using GeradorDeTestes.Aplicacao.ModuloQuestao;
@@ -33,11 +34,16 @@ public class Program
         builder.Services.AddScoped<IRepositorioMateria, RepositorioMateriaORM>();
         builder.Services.AddScoped<IRepositorioQuestao, RepositorioQuestaoORM>();
         builder.Services.AddScoped<IRepositorioTeste, RepositorioTesteORM>();
+
+        builder.Services.AddScoped<AutenticacaoAppService>();
         builder.Services.AddScoped<DisciplinaAppService>();
         builder.Services.AddScoped<MateriaAppService>();
         builder.Services.AddScoped<QuestaoAppService>();
         builder.Services.AddScoped<TesteAppService>();
+
         builder.Services.AddEntityFrameworkConfig(builder.Configuration);
+        builder.Services.AddIndentityProviderConfig();
+        builder.Services.AddCookieAuthenticationConfig();
         builder.Services.AddSerilogConfig(builder.Logging, builder.Configuration);
         builder.Services.AddQuestPDFConfig();
         builder.Services.AddGeminiChatConfig();
@@ -62,13 +68,15 @@ public class Program
             app.UseDeveloperExceptionPage();
         }
 
+        app.MapHealthChecks("/health");
+        app.MapDefaultControllerRoute();
+
         app.UseAntiforgery();
         app.UseHttpsRedirection();
         app.UseStaticFiles();
-
         app.UseRouting();
-        app.MapDefaultControllerRoute();
-        app.MapHealthChecks("/health");
+        app.UseAuthentication();
+        app.UseAuthorization();
 
         app.Run();
     }

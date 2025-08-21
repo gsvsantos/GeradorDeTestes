@@ -1,0 +1,14 @@
+﻿﻿@if (!ViewData.ModelState.IsValid)
+{
+    var primeiroErro = ViewData.ModelState.Values
+        .SelectMany(v => v.Errors)
+        .FirstOrDefault();
+
+    if (primeiroErro is not null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @primeiroErro.ErrorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+}

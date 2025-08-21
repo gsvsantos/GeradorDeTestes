@@ -212,7 +212,7 @@ public class SegundaEtapaGerarQuestoesViewModel
             .ToList();
     }
 
-    public static List<Questao> ObterQuestoesGeradas(SegundaEtapaGerarQuestoesViewModel segundaEtapaVm, Materia materiaSelecionada)
+    public static List<Questao> ObterQuestoesGeradas(SegundaEtapaGerarQuestoesViewModel segundaEtapaVm, Materia materiaSelecionada, Guid? usuarioId)
     {
         List<Questao> questoes = new List<Questao>();
 
@@ -221,6 +221,7 @@ public class SegundaEtapaGerarQuestoesViewModel
             Questao questao = new()
             {
                 Id = Guid.NewGuid(),
+                UsuarioId = usuarioId ?? Guid.Empty,
                 Enunciado = questaoVm.Enunciado,
                 Materia = materiaSelecionada
             };
@@ -229,6 +230,7 @@ public class SegundaEtapaGerarQuestoesViewModel
                 questao.AderirAlternativa(new()
                 {
                     Id = Guid.NewGuid(),
+                    UsuarioId = usuarioId ?? Guid.Empty,
                     Texto = alternativaVm.Resposta,
                     EstaCorreta = alternativaVm.Correta
                 });

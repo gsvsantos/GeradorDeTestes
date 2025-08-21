@@ -1,6 +1,7 @@
 ﻿using FluentResults;
 using GeradorDeTestes.Aplicacao.Compartilhado;
 using GeradorDeTestes.Dominio.Compartilhado;
+using GeradorDeTestes.Dominio.ModuloAutenticacao;
 using GeradorDeTestes.Dominio.ModuloMateria;
 using GeradorDeTestes.Dominio.ModuloQuestao;
 using GeradorDeTestes.Dominio.ModuloTeste;
@@ -9,16 +10,18 @@ using Microsoft.Extensions.Logging;
 namespace GeradorDeTestes.Aplicacao.ModuloTeste;
 public class TesteAppService
 {
+    private readonly ITenantProvider tenantProvider;
     private readonly IUnitOfWork unitOfWork;
     private readonly IRepositorioMateria repositorioMateria;
     private readonly IRepositorioQuestao repositorioQuestao;
     private readonly IRepositorioTeste repositorioTeste;
     private readonly ILogger<TesteAppService> logger;
 
-    public TesteAppService(IUnitOfWork unitOfWork, IRepositorioMateria repositorioMateria,
-        IRepositorioQuestao repositorioQuestao, IRepositorioTeste repositorioTeste,
-        ILogger<TesteAppService> logger)
+    public TesteAppService(ITenantProvider tenantProvider, IUnitOfWork unitOfWork,
+        IRepositorioMateria repositorioMateria, IRepositorioQuestao repositorioQuestao,
+        IRepositorioTeste repositorioTeste, ILogger<TesteAppService> logger)
     {
+        this.tenantProvider = tenantProvider;
         this.unitOfWork = unitOfWork;
         this.repositorioMateria = repositorioMateria;
         this.repositorioQuestao = repositorioQuestao;
@@ -61,6 +64,8 @@ public class TesteAppService
 
         try
         {
+            novoTeste.UsuarioId = tenantProvider.UsuarioId.GetValueOrDefault();
+
             repositorioTeste.CadastrarRegistro(novoTeste);
 
             unitOfWork.Commit();
@@ -97,7 +102,7 @@ public class TesteAppService
 
             Teste testeOriginal = repositorioTeste.SelecionarRegistroPorId(id)!;
 
-            Teste novoTeste = new Teste()
+            Teste novoTeste = new()
             {
                 Id = Guid.NewGuid(),
                 Titulo = novoTitulo,
@@ -111,6 +116,7 @@ public class TesteAppService
                 .Select(qpm => new TesteMateriaQuantidade
                 {
                     Id = Guid.NewGuid(),
+                    UsuarioId = tenantProvider.UsuarioId.GetValueOrDefault(),
                     Materia = qpm.Materia,
                     QuantidadeQuestoes = qpm.QuantidadeQuestoes
                 }).ToList()
@@ -287,6 +293,7 @@ public class TesteAppService
                 objComQuantidade = new()
                 {
                     Id = Guid.NewGuid(),
+                    UsuarioId = tenantProvider.UsuarioId.GetValueOrDefault(),
                     Materia = materiaSelecionada,
                     QuantidadeQuestoes = novaQuantidade
                 };

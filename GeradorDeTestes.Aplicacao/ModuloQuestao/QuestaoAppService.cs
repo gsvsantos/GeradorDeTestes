@@ -1,6 +1,7 @@
 ﻿using FluentResults;
 using GeradorDeTestes.Aplicacao.Compartilhado;
 using GeradorDeTestes.Dominio.Compartilhado;
+using GeradorDeTestes.Dominio.ModuloAutenticacao;
 using GeradorDeTestes.Dominio.ModuloMateria;
 using GeradorDeTestes.Dominio.ModuloQuestao;
 using GeradorDeTestes.Dominio.ModuloTeste;
@@ -9,16 +10,18 @@ using Microsoft.Extensions.Logging;
 namespace GeradorDeTestes.Aplicacao.ModuloQuestao;
 public class QuestaoAppService
 {
+    private readonly ITenantProvider tenantProvider;
     private readonly IGeradorQuestoes geradorQuestoes;
     private readonly IUnitOfWork unitOfWork;
     private readonly IRepositorioQuestao repositorioQuestao;
     private readonly IRepositorioTeste repositorioTeste;
     private readonly ILogger<QuestaoAppService> logger;
 
-    public QuestaoAppService(IGeradorQuestoes geradorQuestoes, IUnitOfWork unitOfWork,
-        IRepositorioQuestao repositorioQuestao, IRepositorioTeste repositorioTeste,
-        ILogger<QuestaoAppService> logger)
+    public QuestaoAppService(ITenantProvider tenantProvider, IGeradorQuestoes geradorQuestoes,
+        IUnitOfWork unitOfWork, IRepositorioQuestao repositorioQuestao,
+        IRepositorioTeste repositorioTeste, ILogger<QuestaoAppService> logger)
     {
+        this.tenantProvider = tenantProvider;
         this.geradorQuestoes = geradorQuestoes;
         this.unitOfWork = unitOfWork;
         this.repositorioQuestao = repositorioQuestao;
@@ -41,6 +44,8 @@ public class QuestaoAppService
 
         try
         {
+            novaQuestao.UsuarioId = tenantProvider.UsuarioId.GetValueOrDefault();
+
             repositorioQuestao.CadastrarRegistro(novaQuestao);
 
             unitOfWork.Commit();
@@ -274,7 +279,10 @@ public class QuestaoAppService
                 return Result.Fail(erro);
             }
 
-            Alternativa novaAlternativa = new(textoAlternativa, questaoSelecionada);
+            Alternativa novaAlternativa = new(textoAlternativa, questaoSelecionada)
+            {
+                UsuarioId = tenantProvider.UsuarioId.GetValueOrDefault()
+            };
 
             questaoSelecionada.AderirAlternativa(novaAlternativa);
 
@@ -429,6 +437,8 @@ public class QuestaoAppService
         try
         {
             List<Questao> questoes = await geradorQuestoes.GerarQuestoesAsync(materiaSelecionada, quantidadeQuestoes);
+
+            unitOfWork.Commit();
 
             return Result.Ok(questoes);
         }

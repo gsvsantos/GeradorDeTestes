@@ -5,6 +5,7 @@ namespace GeradorDeTestes.Dominio.ModuloTeste;
 public class TesteMateriaQuantidade
 {
     public Guid Id { get; set; }
+    public Guid UsuarioId { get; set; }
     public Guid MateriaId { get; set; }
     public Materia Materia { get; set; }
     public Guid TesteId { get; set; }

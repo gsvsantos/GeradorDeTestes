@@ -1,6 +1,7 @@
 ﻿using FluentResults;
 using GeradorDeTestes.Aplicacao.Compartilhado;
 using GeradorDeTestes.Dominio.Compartilhado;
+using GeradorDeTestes.Dominio.ModuloAutenticacao;
 using GeradorDeTestes.Dominio.ModuloMateria;
 using GeradorDeTestes.Dominio.ModuloQuestao;
 using Microsoft.Extensions.Logging;
@@ -8,14 +9,17 @@ using Microsoft.Extensions.Logging;
 namespace GeradorDeTestes.Aplicacao.ModuloMateria;
 public class MateriaAppService
 {
+    private readonly ITenantProvider tenantProvider;
     private readonly IUnitOfWork unitOfWork;
     private readonly IRepositorioMateria repositorioMateria;
     private readonly IRepositorioQuestao repositorioQuestao;
     private readonly ILogger<MateriaAppService> logger;
 
-    public MateriaAppService(IUnitOfWork unitOfWork, IRepositorioMateria repositorioMateria,
-        IRepositorioQuestao repositorioQuestao, ILogger<MateriaAppService> logger)
+    public MateriaAppService(ITenantProvider tenantProvider, IUnitOfWork unitOfWork,
+        IRepositorioMateria repositorioMateria, IRepositorioQuestao repositorioQuestao,
+        ILogger<MateriaAppService> logger)
     {
+        this.tenantProvider = tenantProvider;
         this.unitOfWork = unitOfWork;
         this.repositorioMateria = repositorioMateria;
         this.repositorioQuestao = repositorioQuestao;
@@ -37,6 +41,8 @@ public class MateriaAppService
 
         try
         {
+            novaMateria.UsuarioId = tenantProvider.UsuarioId.GetValueOrDefault();
+
             repositorioMateria.CadastrarRegistro(novaMateria);
 
             unitOfWork.Commit();

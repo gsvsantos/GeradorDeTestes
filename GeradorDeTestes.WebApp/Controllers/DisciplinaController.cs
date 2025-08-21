@@ -2,12 +2,14 @@
 using GeradorDeTestes.Aplicacao.ModuloDisciplina;
 using GeradorDeTestes.Dominio.ModuloDisciplina;
 using GeradorDeTestes.WebApp.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 
 namespace GeradorDeTestes.WebApp.Controllers;
 
 [Route("disciplinas")]
+[Authorize(Roles = "Cliente,Empresa")]
 public class DisciplinaController : Controller
 {
     private readonly DisciplinaAppService disciplinaAppService;

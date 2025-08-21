@@ -105,4 +105,17 @@
             </ul>
         </li>
     </ul>
+    <div class="dropdown">
+        <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-person-circle-fill"></i>
+            @User.Identity?.Name
+        </button>
+        <ul class="dropdown-menu">
+            <li>
+                <form asp-controller="Autenticacao" asp-action="Logout" method="post">
+                    <button class="dropdown-item" type="submit">Logout</button>
+                </form>
+            </li>
+        </ul>
+    </div>
 </aside>

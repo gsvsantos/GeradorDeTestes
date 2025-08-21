@@ -5,12 +5,14 @@ using GeradorDeTestes.Dominio.ModuloMateria;
 using GeradorDeTestes.Dominio.ModuloQuestao;
 using GeradorDeTestes.WebApp.Extensions;
 using GeradorDeTestes.WebApp.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 
 namespace GeradorDeTestes.WebApp.Controllers;
 
 [Route("questoes")]
+[Authorize(Roles = "Cliente,Empresa")]
 public class QuestaoController : Controller
 {
     private readonly QuestaoAppService questaoAppService;
@@ -498,7 +500,12 @@ public class QuestaoController : Controller
 
         Materia materiaSelecionada = materiaAppService.SelecionarRegistroPorId(segundaEtapaVM.MateriaId).ValueOrDefault;
 
-        List<Questao> questoesGeradas = SegundaEtapaGerarQuestoesViewModel.ObterQuestoesGeradas(segundaEtapaVM, materiaSelecionada);
+        Guid? usuarioId = User.PegarIdUsuario();
+
+        if (usuarioId is null)
+            return Unauthorized();
+
+        List<Questao> questoesGeradas = SegundaEtapaGerarQuestoesViewModel.ObterQuestoesGeradas(segundaEtapaVM, materiaSelecionada, usuarioId);
 
         Result resultadoCadastroQuestoes = questaoAppService.CadastrarQuestoesGeradas(questoesGeradas);
 

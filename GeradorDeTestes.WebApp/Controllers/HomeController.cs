@@ -1,9 +1,12 @@
 ﻿using GeradorDeTestes.Dominio.ModuloTeste;
 using GeradorDeTestes.WebApp.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace GeradorDeTestes.WebApp.Controllers;
 
+[Authorize(Roles = "Cliente,Empresa")]
 public class HomeController : Controller
 {
     private readonly IRepositorioTeste repositorioTeste;
@@ -25,6 +28,15 @@ public class HomeController : Controller
     [HttpGet("erro")]
     public IActionResult Erro()
     {
+        bool existeNotificacao = TempData.TryGetValue(nameof(NotificacaoViewModel), out object? valor);
+
+        if (existeNotificacao && valor is string jsonString)
+        {
+            NotificacaoViewModel? notificacaoVm = JsonSerializer.Deserialize<NotificacaoViewModel>(jsonString);
+
+            ViewData.Add(nameof(NotificacaoViewModel), notificacaoVm);
+        }
+
         return View();
     }
 }

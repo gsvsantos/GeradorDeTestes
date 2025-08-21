@@ -3,6 +3,20 @@
 namespace GeradorDeTestes.Aplicacao.Compartilhado;
 public abstract class ResultadosErro
 {
+    public static Error RequisicaoInvalidaErro(string erro)
+    {
+        return new Error("Requisição inválida")
+            .CausedBy(erro)
+            .WithMetadata("TipoErro", "RequisicaoInvalida");
+    }
+
+    public static Error RequisicaoInvalidaErro(List<string> erros)
+    {
+        return new Error("Requisição inválida")
+            .CausedBy(erros)
+            .WithMetadata("TipoErro", "RequisicaoInvalida");
+    }
+
     public static Error RegistroDuplicadoErro(string mensagemErro)
     {
         return new Error("Registro Duplicado")

@@ -1,4 +1,5 @@
-﻿using GeradorDeTestes.Dominio.ModuloMateria;
+﻿using GeradorDeTestes.Dominio.ModuloAutenticacao;
+using GeradorDeTestes.Dominio.ModuloMateria;
 using GeradorDeTestes.Dominio.ModuloQuestao;
 using GeradorDeTestes.Infraestrutura.IA.Gemini.ModuloQuestao.DTOs;
 using Microsoft.Extensions.Configuration;
@@ -13,8 +14,9 @@ public class GeradorQuestoesGemini : IGeradorQuestoes
     private readonly string _geminiEndpoint;
 
     private readonly JsonSerializerOptions _jsonSerializerOptions = new() { PropertyNameCaseInsensitive = true };
+    private readonly ITenantProvider tenantProvider;
 
-    public GeradorQuestoesGemini(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+    public GeradorQuestoesGemini(ITenantProvider tenantProvider, IHttpClientFactory httpClientFactory, IConfiguration configuration)
     {
         string? geminiKey = configuration["GEMINI_API_KEY"];
 
@@ -25,6 +27,8 @@ public class GeradorQuestoesGemini : IGeradorQuestoes
 
         _geminiEndpoint = string.Concat("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=",
             geminiKey);
+
+        this.tenantProvider = tenantProvider;
     }
 
     public async Task<List<Questao>> GerarQuestoesAsync(Materia materia, int quantidade)
@@ -62,7 +66,7 @@ public class GeradorQuestoesGemini : IGeradorQuestoes
             }
         };
 
-        StringContent content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+        StringContent content = new(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
 
         HttpResponseMessage response = await _httpClient.PostAsync(_geminiEndpoint, content);
 
@@ -86,16 +90,17 @@ public class GeradorQuestoesGemini : IGeradorQuestoes
 
         List<QuestaoDto> questoes = JsonSerializer.Deserialize<List<QuestaoDto>>(text, _jsonSerializerOptions) ?? [];
 
-        List<Questao> resultado = new List<Questao>();
+        List<Questao> resultado = new();
 
         foreach (QuestaoDto dto in questoes)
         {
-            Questao questao = new Questao(dto.Enunciado, materia);
+            Questao questao = new(dto.Enunciado, materia);
 
             foreach (AlternativaDto alt in dto.Alternativas)
             {
                 questao.AderirAlternativa(new()
                 {
+                    Id = Guid.NewGuid(),
                     Texto = alt.Resposta,
                     EstaCorreta = alt.Correta
                 });

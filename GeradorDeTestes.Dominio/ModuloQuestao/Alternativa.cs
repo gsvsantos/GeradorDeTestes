@@ -3,6 +3,7 @@
 public class Alternativa
 {
     public Guid Id { get; set; }
+    public Guid UsuarioId { get; set; }
     public string Texto { get; set; }
     public Questao Questao { get; set; }
     public bool EstaCorreta { get; set; }

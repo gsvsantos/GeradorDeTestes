@@ -1,6 +1,7 @@
 ﻿using FluentResults;
 using GeradorDeTestes.Aplicacao.Compartilhado;
 using GeradorDeTestes.Dominio.Compartilhado;
+using GeradorDeTestes.Dominio.ModuloAutenticacao;
 using GeradorDeTestes.Dominio.ModuloDisciplina;
 using GeradorDeTestes.Dominio.ModuloMateria;
 using GeradorDeTestes.Dominio.ModuloTeste;
@@ -10,6 +11,7 @@ namespace GeradorDeTestes.Aplicacao.ModuloDisciplina;
 
 public class DisciplinaAppService
 {
+    private readonly ITenantProvider tenantProvider;
     private readonly IGeradorDisciplinas geradorDisciplinas;
     private readonly IUnitOfWork unitOfWork;
     private readonly IRepositorioDisciplina repositorioDisciplina;
@@ -17,10 +19,12 @@ public class DisciplinaAppService
     private readonly IRepositorioTeste repositorioTeste;
     private readonly ILogger<DisciplinaAppService> logger;
 
-    public DisciplinaAppService(IGeradorDisciplinas geradorDisciplinas, IUnitOfWork unitOfWork,
-        IRepositorioDisciplina repositorioDisciplina, IRepositorioMateria repositorioMateria,
-        IRepositorioTeste repositorioTeste, ILogger<DisciplinaAppService> logger)
+    public DisciplinaAppService(ITenantProvider tenantProvider, IGeradorDisciplinas geradorDisciplinas,
+        IUnitOfWork unitOfWork, IRepositorioDisciplina repositorioDisciplina,
+        IRepositorioMateria repositorioMateria, IRepositorioTeste repositorioTeste,
+        ILogger<DisciplinaAppService> logger)
     {
+        this.tenantProvider = tenantProvider;
         this.geradorDisciplinas = geradorDisciplinas;
         this.unitOfWork = unitOfWork;
         this.repositorioDisciplina = repositorioDisciplina;
@@ -43,6 +47,8 @@ public class DisciplinaAppService
 
         try
         {
+            novaDisciplina.UsuarioId = tenantProvider.UsuarioId.GetValueOrDefault();
+
             repositorioDisciplina.CadastrarRegistro(novaDisciplina);
 
             unitOfWork.Commit();

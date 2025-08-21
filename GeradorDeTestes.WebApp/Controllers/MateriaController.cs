@@ -5,6 +5,7 @@ using GeradorDeTestes.Dominio.ModuloDisciplina;
 using GeradorDeTestes.Dominio.ModuloMateria;
 using GeradorDeTestes.WebApp.Extensions;
 using GeradorDeTestes.WebApp.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Text.Json;
@@ -12,6 +13,7 @@ using System.Text.Json;
 namespace GeradorDeTestes.WebApp.Controllers;
 
 [Route("materias")]
+[Authorize(Roles = "Cliente,Empresa")]
 public class MateriaController : Controller
 {
     private readonly DisciplinaAppService disciplinaAppService;
