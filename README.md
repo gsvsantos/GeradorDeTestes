@@ -7,7 +7,9 @@ Teste, Logo Avalia é um sistema modular para criação, gerenciamento e distrib
 
 > Porque em tempos de ensino moderno... se pode testar, pode avaliar.
 
-***
+---
+
+[![wakatime](https://wakatime.com/badge/user/d66fe803-196c-4729-b330-f8a026db44ec/project/c565349c-ae0e-4b2e-805d-feb9c913754d.svg)](https://wakatime.com/badge/user/d66fe803-196c-4729-b330-f8a026db44ec/project/c565349c-ae0e-4b2e-805d-feb9c913754d)
 
 ## 🧩 Módulos e Funcionalidades
 
